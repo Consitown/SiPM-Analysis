@@ -11,4 +11,4 @@ the original wavecatcher-analysis: https://github.com/cscharf-hub/wavecatcher-an
 Since the wavecatcher-analysis's main Script, the "ReadRun.cc", gets updated constantly (and I contribute to that), I will try to keep it up to date here. More important are the Macros i used to analyse the data.
 
 ## General infos
-(I am copying parts and bits from before mentioned repositories for this)
+(I am copying bits and pieces from before mentioned repositories for this)
