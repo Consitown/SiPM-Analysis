@@ -1,5 +1,5 @@
 # SiPM-Analysis
 
-##RootReader
+## RootReader
 
-##wavecatcher-analysis (analysis-programm)
+## wavecatcher-analysis (analysis-programm)
