@@ -12,6 +12,7 @@ the original wavecatcher-analysis: https://github.com/cscharf-hub/wavecatcher-an
 Since the wavecatcher-analysis's main Script, the "ReadRun.cc", gets updated constantly (and I contribute to that), I will try to keep it up to date here. More important are the Macros I used to analyse the data.
 
 ## General infos
+More details of the two pieces of software will be given after this section. \
 (I am copying bits and pieces from before mentioned repositories for this, but also give some infos myself) \
 If I speak of a Macro, I mean a file that one executes in the terminal. \
 If I speak of a Scripts, I mean a file that is used by a macro (all Scripts are .cpp or .cc or .C - files).
