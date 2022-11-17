@@ -1,0 +1,63 @@
+EventNumber = -999
+should maybe count events, but doesnt? reads from input files
+
+SamplingPeriod =-999
+obsolete constant
+
+EpochTime = -999
+read from bin file 
+
+Year, Month, Day, Hour, Minute, Millisecond
+read from bin files
+
+trigT
+point of time where signal on dedicated triggerChannel is at Minimum
+
+tSUMp
+obsolete
+
+tSUMm 
+obsolete
+
+runPosition
+(deprecated) certain file naming format had location in name
+
+runEnergy
+(deprecated) constant
+
+runAngle
+(deprecated) constant
+
+runNumber
+number at the beginning of data directory used to call in RootReader
+
+runChannelNumberWC = 32;
+wavecatcher (maximum) number of channels
+
+integrationWindowRun
+run number for/from which integrationWindow data will be made/taken
+
+nCh
+number of stored Channels (eventwise)
+
+WOMID
+0=A, 1=B, 2=C, 3=D
+in WC files in order 3, 2, 0, 1 a 8 channels
+
+ch
+something read from input file
+
+Amplitude
+"__ Get Amplitude ________________________________________
+using a constant fit over a 0.5 ns range around the maximum.
+Value is basline-corrected and converted to units of p.e."
+too many values in COSMICS runs because runChannelNumberWC is on 32 not 16
+
+max
+maximum in histogramm per event and channel
+
+min
+minimum in histogramm per event and channel
+
+Integral
+

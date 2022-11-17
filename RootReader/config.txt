@@ -1,0 +1,11 @@
+/mnt/d/Work_SHK_Bachelor/RootReader/data
+/mnt/d/Work_SHK_Bachelor/RootReader/runs
+6
+21
+a
+0
+0
+0
+false
+true
+true
