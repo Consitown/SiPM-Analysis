@@ -42,7 +42,7 @@
 #include <tuple>
 #include <map>
 
-#include "/home/alex/Dokumente/Studium/RootReader/src/meanAngleFuncs.h"
+#include "/mnt/d/Work_SHK_Bachelor/RootReader/src/meanAngleFuncs.h"
 
 
 using namespace std;
@@ -52,21 +52,19 @@ int main(int argc, char *argv[]) {
 
     //defining the directories
 
-    string pos = "2";
+    string pos = "0";
     
-    //string runName = "1000_12to18_day";
-    //string runName = "1222_02to12_day";
     string runName = "1333_1307to0408_day";
-    string in_file_path = "/home/alex/Dokumente/Studium/RootReader/runs/";
+    string in_file_path = "/mnt/d/Work_SHK_Bachelor/RootReader/runs/";
     string in_filename = in_file_path + "Sicherung_" + pos + "/" + runName + ".root";
 
-    string couplingCorrection_path = "/home/alex/Dokumente/Studium/RootReader/RootAnalysis/couplingCorrection/";
+    string couplingCorrection_path = "/mnt/d/Work_SHK_Bachelor/RootReader/RootAnalysis/couplingCorrection/";
 
     string lyc0_filename = couplingCorrection_path + "lyc0.txt";
     string out_filename = couplingCorrection_path + runName + ".root";
 
     //for the x-&y-plots
-    string plot_path = "/home/alex/Dokumente/Studium/RootReader/RootAnalysis/integralAnalysis/" + runName + "/";
+    string plot_path = "/mnt/d/Work_SHK_Bachelor/RootReader/RootAnalysis/integralAnalysis/" + runName + "/";
     string xy_plot_filename = plot_path + "x-y-plot.pdf";
     string new_xy_plot_filename = plot_path + "new_x-y-plot.pdf";
     string ly_plot_filename = plot_path + "normalized_ly_plot.pdf";
