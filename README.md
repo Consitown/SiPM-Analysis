@@ -33,3 +33,7 @@ Each Root File contains the information that you want it to contain. In this wor
 
 ### Whats the reason?
 The size of the .bin files is usually large, because all the raw data is included. For the analysis, however, you only need specific informations like the amplitude, integral, start point etc. So, the idea is to convert the large amounts of data into single condensed .root files. In this way, the analysis is faster and only relies on some "small" .root files. This method is also more user friendly as it allows a central debugging of the reading process.
+
+### Main difference of wc-catcher-analysis and RootReader
+The RootReader uses scripts to analyse the generated .root files that are dispersed into different files/directories (see RootReader/RootAnalysis/). In contrast, the wavecatcher-analysis uses one big unified script where every function resides in (the name is ReadRun.cc). While this makes the wc-analysis easy to use (just write one Macro for every thing you want to do, e.g. calibration, lightyield, dark count), it also contains a lot of dead code which one usually not uses. \
+On the other hand, the RootReader sometimes needs you to move your .root files (and others, e.g. .txt files) around manually and is a more complicated piece of software aka you need more insight into it if you want to use the RootReader effeciently.
