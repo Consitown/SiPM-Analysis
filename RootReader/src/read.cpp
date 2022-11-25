@@ -114,7 +114,7 @@ Int_t runPosition = -999;
 Float_t runEnergy = -999;
 Int_t runAngle = -999;
 Int_t runNumber = -999;
-Int_t runChannelNumberWC = 14; //ANDREA
+Int_t runChannelNumberWC = 12; //ANDREA
 /*Declare & define the variables that are to be saved in the root-tree or that are used during the analysis.*/
 Int_t EventNumber = -999;
 Int_t LastEventNumber = -999;
@@ -151,7 +151,7 @@ bool useConstCalibValues = false; //IF the calibration values are correct, other
 float integralStart = 100;        //Testbeam: 100, 125 charge, Calib Nobember 2019: 165+25ns, Calib LED: 150  -> Very important: Integrationsstart and Time Window -> Determines the gain, slight changes result in big gain differences
 float integralEnd = integralStart + 100;
 
-int triggerChannel = 8; //starting from 0 -> Calib: 8?, Testbeam '18: 15, Important for timing tSipm,...
+int triggerChannel = 10; //starting from 0 -> Calib: 8?, Testbeam '18: 15, Important for timing tSipm,...
 // cosmics: [10, 13] as coincidence trigger channels
 
 int plotGrid = 3;
@@ -316,7 +316,7 @@ void read(map<string, string> readParameters)
   string calib_path_bl = workingDir + baseline_file;
   string integrationWindowFile = workingDir + integrationWindowPath;
   string correctionValueFile = workingDir + correctionFactorPath;
-  cout << "correctionvaluefile" << correctionValueFile << endl;
+  cout << "BL_path" << calib_path_bl << endl;
 
   if (useConstCalibValues)
   {
@@ -1776,9 +1776,9 @@ void read(map<string, string> readParameters)
   rootFile->Close();
 
   // andrea
-  FILE* cut_log = fopen("/mnt/d/Programme/RootReader/RootReader-master/runlogs/cut_log.txt", "a");
+  FILE* cut_log = fopen("/mnt/d/Work_SHK_Bachelor/RootReader/runlogs/cut_log.txt", "a");
 
-  FILE* weirdEventCounter = fopen("/mnt/d/Programme/RootReader/RootReader-master/runlogs/weirdEvents.txt", "a");
+  FILE* weirdEventCounter = fopen("/mnt/d/Work_SHK_Bachelor/RootReader/runlogs/weirdEvents.txt", "a");
 
   fprintf(cut_log, "\n#Run log of timing cuts \n");
   fprintf(cut_log, "#Runname: \n");

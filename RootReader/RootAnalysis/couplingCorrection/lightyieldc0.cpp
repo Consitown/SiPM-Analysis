@@ -48,7 +48,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
     //defining the directories
-    string runName = "1333_1307to0408_day";
+    string runName = "22_cosmics_pcbj_everyothergroup_vb42_PSmid";
     string in_file_path = "/mnt/d/Work_SHK_Bachelor/RootReader/runs/";
     string in_filename = in_file_path + "Sicherung_0/" + runName + ".root"; //check the naming of the files -- really important!!!
 

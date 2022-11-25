@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 
 		// gauss fit around histogram mean
 		float h_mean = h_vec[i + 8]->GetMean();
-		float fit_range = 1.0;
+		float fit_range = 1.0; //this may be changed due to low statistics (e.g. in cosmic setup) --> check with fit histogramms
 
 		fit_BL_vec[i] = new TF1(g_fit, "gaus", h_mean - fit_range, h_mean + fit_range);
 		h_vec[i + 8]->Fit(g_fit, "RQ");

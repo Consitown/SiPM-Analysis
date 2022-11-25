@@ -33,7 +33,7 @@
 
 using namespace std;
 
-//line 699 are startig values for landau*gauss fit
+//line 699 are startig values for landau*gauss fit; line 341 for the ranges and stuff
 
 
 
@@ -338,10 +338,10 @@ int main(int argc, char *argv[]){
 
 
 
-	int Xmin = -10, Xmax = 400; // histogram range
-	double range_lo = 3, range_hi = 140; // landau fit range
+	int Xmin = -10, Xmax = 14000; // histogram range
+	double range_lo = 100, range_hi = 14000; // landau fit range
 	float frac_l=0.5,frac_u=0.5; // gauss fit range, threshold fraction
-	int n_bins = 1000;
+	int n_bins = 400;
 	double bin_error = (Xmax - Xmin) / n_bins;
 	
 	
@@ -492,7 +492,7 @@ int main(int argc, char *argv[]){
 		h_title1.Form("%s, ch%d",run_name.c_str(),i);
 
 		draw_cmnd1.Form("Integral[%d]>>h%d",i,i);
-		cut_cmnd1.Form("");
+		cut_cmnd1.Form(""); 	//this is fishy
 
 		gPad->SetRightMargin(0.00);
 		gPad->SetLeftMargin(.12);
@@ -691,12 +691,12 @@ int main(int argc, char *argv[]){
 			Double_t fp[4], fpe[4]; // the final fit parameters and their errors are saved here
 
 			pllo[0]=0.5; pllo[1]=2.0; pllo[2]=0.5; pllo[3]=0.4; // lower parameter limits
-			plhi[0]=50.; plhi[1]=90.0; plhi[2]=1000000.0; plhi[3]=50.0; // upper parameter limits
+			plhi[0]=4000.; plhi[1]=5000.0; plhi[2]=1000000.0; plhi[3]=4000.0; // upper parameter limits
 			//   par[0]=Width (scale) parameter of Landau density
 			//   par[1]=Most Probable (MP, location) parameter of Landau density
 			//   par[2]=Total area (integral -inf to inf, normalization constant)
 			//   par[3]=Width (sigma) of convoluted Gaussian function
-			sv[0]=40; sv[1]=40.0; sv[2]=1000.0; sv[3]=25.; // starting values for the fit
+			sv[0]=25; sv[1]=1500.0; sv[2]=20000.0; sv[3]=1000.; // starting values for the fit
 
 			fitsnr = langaufit(h_vec[i], fr, sv, pllo, plhi, fp, fpe, &chisqr_lg, &ndf_lg);
 
@@ -822,10 +822,10 @@ int main(int argc, char *argv[]){
 		h_lan_leg->AddEntry(ln_vec[i],Form("Dist. max. = %1.1f #pm %1.1f",amp_max[i], bin_error),"l");
 		h_lan_leg->AddEntry((TObject*)0,Form("Dist. mean = %1.2f #pm %1.2f", h_mean, h_mean_err),"");
 		h_lan_leg->AddEntry((TObject*)0,Form("Dist. trunc. mean = %1.2f #pm %1.2f", h_trunc_mean, h_trunc_mean_err),"");
-		h_lan_leg->AddEntry(ln_median,Form("Dist. median: %1.1f #pm %1.1f",median_x, bin_error),"l");
+		h_lan_leg->AddEntry(ln_median,Form("Dist. median: %1.1f #pm %1.1f", median_x, bin_error),"l");
 		if (fit_function == 1){ //for Poisson
 			h_lan_leg->AddEntry(fit_vec_p[i],Form("Poisson fit"),"l");
-			h_lan_leg->AddEntry((TObject*)0,Form("Poisson #chi^{2}/ndf = %1.1f",rchi2_p),"");
+			h_lan_leg->AddEntry((TObject*)0,Form("Poisson #chi^{2}/ndf = %1.1f", rchi2_p),""); //for some reason the compiler thinks that rchi2_p is a double* (but it isnt, see line 795)
 			h_lan_leg->AddEntry(poisson_max,Form("Poisson exp. value = %1.2f #pm %1.2f", expect_p[i], expect_err_p[i]),"l");
 		}
 
@@ -988,17 +988,17 @@ int main(int argc, char *argv[]){
 	{
 		cout << "\n\n" << endl;
 		// set all the parameters for the fit
-		Double_t fr[2] {6, 141}; //fit range
+		Double_t fr[2] {0, 12000}; //fit range
 		Double_t sv[4], pllo[4], plhi[4];
 		Double_t fp[4], fpe[4]; // the final fit parameters and their errors are saved here
 
 		pllo[0]=0.5; pllo[1]=2.0; pllo[2]=0.5; pllo[3]=0.4; // lower parameter limits
-		plhi[0]=50.; plhi[1]=50.0; plhi[2]=1000000.0; plhi[3]=75.0; // upper parameter limits
-		//   par[0]=Width (scale) parameter of Landau density
-		//   par[1]=Most Probable (MP, location) parameter of Landau density
-		//   par[2]=Total area (integral -inf to inf, normalization constant)
-		//   par[3]=Width (sigma) of convoluted Gaussian function
-		sv[0]=40; sv[1]=20.0; sv[2]=63000.0; sv[3]=25.; // starting values for the fit
+			plhi[0]=4000.; plhi[1]=5000.0; plhi[2]=1000000.0; plhi[3]=4000.0; // upper parameter limits
+			//   par[0]=Width (scale) parameter of Landau density
+			//   par[1]=Most Probable (MP, location) parameter of Landau density
+			//   par[2]=Total area (integral -inf to inf, normalization constant)
+			//   par[3]=Width (sigma) of convoluted Gaussian function
+			sv[0]=25; sv[1]=1500.0; sv[2]=20000.0; sv[3]=1000.; // starting values for the fit
 
 		Double_t chisqr_lg;
 		Int_t    ndf_lg;
