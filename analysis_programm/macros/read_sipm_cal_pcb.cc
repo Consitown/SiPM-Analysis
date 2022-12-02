@@ -72,7 +72,7 @@ void read_sipm_cal_pcb(int which) // main
 	// initialize class
 	ReadRun mymeas(0);
 
-	// Syntax:...(string path, bool changesignofPMTs, int change_sign_from_ch_num, string out_file_name, bool save_all_waveforms, bool debug)
+	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cal_results.root") for an explizit output file
 	mymeas.ReadFile(path, false, 0, path + "/cal_results.root");
 

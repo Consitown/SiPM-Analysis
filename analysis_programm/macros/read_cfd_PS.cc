@@ -32,6 +32,7 @@ void read_cfd_PS(int which = 0) // main
 	// initialize class
 	ReadRun mymeas(0);
 
+	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cfd_results.root") for an explizit output file
 	mymeas.ReadFile(path, true, 0, path + "/cfd_results.root");
 

@@ -28,7 +28,11 @@ void read_everyother_group(int which) // main
 		break;
 	}
 	case(2): {
-		path += "/"; // 
+		path += "23cosmics_pcbj_everyothergroup_vb42_PSright/"; // PS positions are left (closer to door), mid, right (farther to door)
+		break;
+	}
+	case(3): {
+		path += "24cosmics_pcbj_everyothergroup_vb42_PSleft_new/"; // PS positions are left (closer to door), mid, right (farther to door)
 		break;
 	}
 	default: {
@@ -40,9 +44,9 @@ void read_everyother_group(int which) // main
 	// initialize class
 	ReadRun mymeas(0);
 
-	// Syntax:...(string path, bool changesignofPMTs, int change_sign_from_ch_num, string out_file_name, bool save_all_waveforms, bool debug)
+	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cal_results.root") for an explizit output file
-	mymeas.ReadFile(path, false, 0, path + "/everyother_results.root");
+	mymeas.ReadFile(path, false, 0, path + "everyother_results.root");
 
 	// only plot channels specified below. Leaving it empty will plot all channels
 	mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
@@ -54,8 +58,28 @@ void read_everyother_group(int which) // main
 	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
-	//float cfd_x = .3;
-	//mymeas.GetTimingCFD(cfd_x, 110, 140, 0);
+	float cfd_x = .3;
+	// Sytax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, false); // this creates the timing_results matrix
+
+	// create histogram of delta t: average cfd-time upper PMT's - average cfd-time lower PMT's
+	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
+	// but waveforms of PMT come directly after wf's of SiPM's --> wf 0 - channel 0; wf 1 - ch 1; ... ; wf 8 - ch 10; wf 9 - ch 11; ...
+	gStyle->SetOptStat("nemr");
+	TString his_name(Form("delta_t at %0.2f", cfd_x));
+	TString his_title(Form("Average time diff lower to upper PMT's at cfd of %0.2f", cfd_x));
+	TH1* his = new TH1F(his_name, his_title, 100, -50, 50);
+	TCanvas* hisc = new TCanvas(his_name, his_title, 1600, 1000);
+	int counter;
+	for(int i=0 ; i < mymeas.nwf; i += mymeas.nchannels){
+		float delta_t = ((mymeas.timing_results[i+10][1] + mymeas.timing_results[i+11][1])/2) - ((mymeas.timing_results[i+9][1] + mymeas.timing_results[i+8][1])/2); // average cfd-delta_t
+		his->Fill(delta_t);
+	}
+	his->GetXaxis()->SetTitle("time [ns]");
+	his->GetYaxis()->SetTitle("#Entries");
+	his->Draw();
+	hisc->Update();
+	mymeas.root_out->WriteObject(his, "delta_t");
 
 	// apply cut for time difference between two channels
 	//mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);
@@ -69,32 +93,32 @@ void read_everyother_group(int which) // main
 
 	// plot sums of all events per channel --> get parameters
 	// Syntax: ...(float ystart, float yend, bool doaverage, bool normalize, double shift, double sigma, bool doconv)
-	mymeas.PlotChannelSums(-1e4, 2.7e5, false);
+	//mymeas.PlotChannelSums(-1e4, 3.6e5, false);
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
-	float intwindowminus = 1.;	// lower integration window in ns rel. to max
-	float intwindowplus = 1.;	// upper integration window in ns rel. to max
+	float intwindowminus = 30.;	// lower integration window in ns rel. to max
+	float intwindowplus = 100.;	// upper integration window in ns rel. to max
 	float findmaxfrom = 100.;	// assume pulse after trigger arrives between here ...
 	float findmaxto = 130.;		// ... and here (depends on trigger delay setting etc., for dark counts the signal is random so we look at the whole recorded time range)
-	float plotrangestart = 0; // decide on the
-	float plotrangeend = 35;	// plotrange of x-axis
-	float fitstart = 0;			// start of the fit (x-axis)
-	float fitend = 35;			// end of the fit
-	int channels_to_fit = 1; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
-	int which_fit = 3;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
+	float plotrangestart = 0; 	// decide on the
+	float plotrangeend = 12000;	// plotrange of x-axis
+	float fitstart = 25;		// start of the fit (x-axis)
+	float fitend = 350;			// end of the fit
+	int channels_to_fit = 0; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
+	int which_fit = 1;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
 								// 1 - landau gauss convolution for large number of photons
 								// 2 - biased: if pedestal is biased because of peak finder algorithm
 								// 3 - SiPM fit function with exponential delayed afterpulsing
 								// 4 - ideal PMT fit function (5 is similar)
 								// 6 - PMT fit function with biased pedestal
 	
-	// old timing histogramm (should not use for cfd)
+	// old timing histogramm (should not use for cfd, so cfd_x should be 1)
 	//mymeas.PrintTimeDist(110, 140, 105, 145, 200, 1, cfd_x);
 
 	// plot results between t=110 ns and t=140 ns and fit gauss (thats what the 1 is for)
 	//mymeas.Print_GetTimingCFD(110, 140, 1);
 
-	//plot constant fration descrimination
+	//plot constant fration descrimination (old)
 	// mymeas.PlotConstantFrationDescrimination(100, 150);
 
 	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
@@ -125,5 +149,4 @@ void read_everyother_group(int which) // main
 		mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, i, ymin, ymax);
 	}
 	gROOT->SetBatch(kFALSE);
-
 }
