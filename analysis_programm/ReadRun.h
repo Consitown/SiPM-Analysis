@@ -122,7 +122,7 @@ private:
 public:
 
 	// plots amplValuessum
-	void PlotChannelSums(float = -1e4, float = 1e6, bool = true, bool = false, double = 0., double = 4., bool = false);
+	void PlotChannelSums(bool = true, bool = false, double = 0., double = 4., bool = false);
 
 	// baseline correction (shifts all waveforms individually)
 	void CorrectBaseline(float, float = -999);
@@ -144,8 +144,9 @@ public:
 
 	// functions for charge spectrum
 	int* GetIntWindow(TH1F*, float, float, float, float, int);
+	float GetPeakIntegral(TH1F*, float, float, float, float, int = 0);
 	void PrintChargeSpectrumWF(float, float, float = 0, float = 300, int = 1, float = 0., float = 0.);
-	TH1F* ChargeSpectrum(int, float, float, float = 0, float = 300, float = -50, float = 600, int = 750, string = "width");
+	TH1F* ChargeSpectrum(int, float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
 	void PrintChargeSpectrum(float, float, float = 0, float = 300, float = -50, float = 600, int = 750, float = 0., float = 0., int = 8, int = 0);
 	/// @brief Starting values of the fit parameters for PrintChargeSpectrum()
 	vector<float> PrintChargeSpectrum_pars;
@@ -165,7 +166,8 @@ public:
 
 	TH1F* His_GetTimingCFD(int, float, float);
 	void Print_GetTimingCFD(float = 100, float = 140, int = 0);
-
+	TH1F* His_GetTimingCFD_diff(int, int, float, float);
+	void Print_GetTimingCFD_diff(int, int, float = 100, float = 140, int = 0);
 
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
@@ -177,7 +179,8 @@ public:
 	double* gety(int, int);								// y values for waveform(ch, event)
 	double* gety(TH1F*);								// y values for histogram
 	double* gety(TH1F*, int, int);						// y values for dedicated y range of a histogram 
-
+	int rcolor(int);									// useful root colors
+	
 	float LinearInterpolation(float, float, float, float, float); // linear interpolation
 
 	int GetEventIndex(int);										// get index of a triggered event (finds the correct event if files are not read sequentially)
@@ -256,7 +259,7 @@ public:
 	int skip_event_threshold_nch; 
 
 	void SkipEventsPerChannel(vector<double>, double = 0, double = 0, bool = false);  // in case you want to have indiviual thresholds in individual channels
-	void IntegralFilter(vector<double>, vector<bool>, float = 100., float = 200., bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
+	void IntegralFilter(vector<double>, vector<bool>, float, float, float = 50, float = 250, bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
 	void PrintSkippedEvents();
 
 	/// @brief Stores baseline correction results for CorrectBaseline() and related functions
@@ -315,7 +318,9 @@ public:
 	/// @return Function value
 	double operator() (double* x, double* p) {
 		double sum = 0;
-		for (int kint = 0; kint <= 50; kint++) {
+		int kmax = static_cast<int>(ceil(p[1])) * 10;
+
+		for (int kint = 0; kint <= kmax; kint++) {
 			double mu = p[1];
 			double lambda = p[2];
 
@@ -341,7 +346,7 @@ public:
 	/// @brief Default fit function for SiPMs with after-pulses missing dark counts
 	/// 
 	/// Still missing dark counts in integration window (3.3 in paper). \n 
-	/// Please check for possible bugs. \n \n 
+	/// Seems to be working now, but please check for possible bugs. \n \n 
 	/// 
 	/// See https://arxiv.org/abs/1609.01181 for explanation of fit function. \n 
 	/// See https://root.cern/manual/fitting/ for ROOT fitting.
@@ -359,7 +364,9 @@ public:
 	/// @return Function value
 	double operator() (double* x, double* p) {
 		double sum = 0;
-		for (int kint = 0; kint <= 10; kint++) {
+		int kmax = static_cast<int>(ceil(p[1])) * 10;
+
+		for (int kint = 0; kint <= kmax; kint++) {
 			double mu = p[1];
 			double lambda = p[2];
 
@@ -376,15 +383,15 @@ public:
 			double k = static_cast<double>(kint);
 			//pulse width
 			double sigmaK = sqrt(sigma0 * sigma0 + k * sigma1 * sigma1);
-			double gausnormsigmak = 1 / (sqrt(2. * TMath::Pi()) * sigmaK);
-			//generalized poisson envelope
-			double gp = mu * TMath::Power((mu + k * lambda), k - 1) * TMath::Exp(-(mu + k * lambda)) / TMath::Factorial(kint);
+			double gausnormsigmak = 1. / (sqrt(2. * TMath::Pi()) * sigmaK);
 			//gauss peak
 			double gauss = gausnormsigmak * TMath::Exp(-1. * TMath::Power(x[0] - (k * G + B), 2.) / (sigmaK * sigmaK * 2.));
 
+			//generalized poisson envelope
+			double gp = p[0] * mu * TMath::Power((mu + k * lambda), k - 1) * TMath::Exp(-(mu + k * lambda)) / TMath::Factorial(kint);
 
 			if (kint == 0) {
-				sum += p[0] * gp * gauss;
+				sum += (gp * gauss);
 			}
 			else {
 				//after-pulse + delayed cross talk
@@ -393,16 +400,17 @@ public:
 				double pk1 = TMath::Exp(-1. * (x[0] - (k * G + B)) / beta) * gausnormsigmak / beta * sigmaK * sqrt(TMath::Pi() / 2) * (TMath::Erf((x[0] - (k * G + B)) / (sqrt(2) * sigmaK)) + 1.);
 
 
-				if (kint == 1) sum += p[0] * gp * (bk0 * gauss + bk1 * pk1);
+				if (kint == 1) sum += gp * (bk0 * gauss + bk1 * pk1);
 				else {
 					double api2k = 0.;
 					for (int ii = 2; ii < kint; ii++) {
 						double iid = static_cast<double>(ii);
 						double bkialpha = TMath::Factorial(kint) / (TMath::Factorial(ii) * TMath::Factorial(kint - ii)) * TMath::Power(alpha, iid) * TMath::Power((1. - alpha), (k - iid));
-						double dpkidph = TMath::Power((x[0] - (k * G + B)), (iid - 1.)) / (TMath::Factorial(ii - 1) * TMath::Power(beta, iid)) * TMath::Exp(-1. * (x[0] - (k * G + B)) / beta);
+						double dpkidph = 0;
+						if (x[0] > (k * G + B)) dpkidph = TMath::Power((x[0] - (k * G + B)), (iid - 1.)) / (TMath::Factorial(ii - 1) * TMath::Power(beta, iid)) * TMath::Exp(-1. * (x[0] - (k * G + B)) / beta);
 						api2k += bkialpha * dpkidph;
 					}
-					sum += p[0] * gp * (bk0 * gauss + bk1 * pk1 + api2k);
+					sum += gp * (bk0 * gauss + bk1 * pk1 + api2k);
 				}
 			}
 		}
@@ -431,7 +439,9 @@ public:
 	/// @return Func value
 	double operator() (double* x, double* p) {
 		double sum = 0;
-		for (int kint = 0; kint <= 50; kint++) {
+		int kmax = static_cast<int>(ceil(p[1])) * 10;
+
+		for (int kint = 0; kint <= kmax; kint++) {
 			double mu = p[1];
 			double lambda = p[2];
 
@@ -479,8 +489,9 @@ public:
 	/// @return Func value
 	double operator() (double* x, double* p) {
 		double pmt_charge_spectrum = 0.;
+		int kmax = static_cast<int>(ceil(p[5])) * 10;
 
-		for (int kint = 0; kint <= 25; kint++) {
+		for (int kint = 0; kint <= kmax; kint++) {
 			double k = static_cast<double>(kint);
 
 			double poiss = TMath::Power(p[5], k) * TMath::Exp(-p[5]) / TMath::Factorial(kint);
@@ -528,8 +539,9 @@ public:
 	/// @return Func value
 	double operator() (double* x, double* p) {
 		double pmt_charge_spectrum = 0.;
+		int kmax = static_cast<int>(ceil(p[5])) * 10;
 
-		for (int kint = 0; kint <= 25; kint++) {
+		for (int kint = 0; kint <= kmax; kint++) {
 			double k = static_cast<double>(kint);
 
 			double poiss = TMath::Power(p[5], k) * TMath::Exp(-p[5]) / TMath::Factorial(kint);
@@ -577,7 +589,9 @@ public:
 	double operator() (double* x, double* p) {
 		double pmt_charge_spectrum = 0.;
 
-		for (int kint = 1; kint <= 25; kint++) {
+		int kmax = static_cast<int>(ceil(p[1])) * 10;
+
+		for (int kint = 1; kint <= kmax; kint++) {
 			double k = static_cast<double>(kint);
 
 			double poiss = TMath::Power(p[1], k) * TMath::Exp(-1. * p[1]) / TMath::Factorial(kint);
@@ -655,9 +669,10 @@ public:
 
 class Fitf_plus_DC {
 public:
-	/// @brief Fit function for SiPMs missing after-pulses and dark counts including additional dark count spectrum
+	/// @brief Fit function for SiPMs missing after-pulses and dark counts but including additional dark count spectrum
 	/// 
-	///  Sum of two spectra for event spectrum + dark count (background trigger) spectrum.
+	/// Sum of two spectra for event spectrum + dark count (background trigger) spectrum. 
+	/// To be used if the trigger and filter selections are not perfect and there are still empty events.
 	/// 
 	/// @param x 
 	/// @param p
@@ -672,7 +687,9 @@ public:
 	/// @return 
 	double operator() (double* x, double* p) {
 		double sum = 0;
-		for (int kint = 0; kint <= 50; kint++) {
+		int kmax = static_cast<int>(ceil(p[1])) * 10;
+
+		for (int kint = 0; kint <= kmax; kint++) {
 			double mu = p[1];
 			double lambda = p[2];
 

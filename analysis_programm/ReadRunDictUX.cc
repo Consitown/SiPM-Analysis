@@ -89,7 +89,7 @@ namespace ROOT {
       ::Fitf *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf", "ReadRun.h", 300,
+         instance("Fitf", "ReadRun.h", 303,
                   typeid(::Fitf), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf) );
@@ -134,7 +134,7 @@ namespace ROOT {
       ::Fitf_biased *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf_biased));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf_biased", "ReadRun.h", 413,
+         instance("Fitf_biased", "ReadRun.h", 421,
                   typeid(::Fitf_biased), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_biased_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf_biased) );
@@ -179,7 +179,7 @@ namespace ROOT {
       ::Fitf_PMT *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf_PMT));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf_PMT", "ReadRun.h", 463,
+         instance("Fitf_PMT", "ReadRun.h", 473,
                   typeid(::Fitf_PMT), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_PMT_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf_PMT) );
@@ -224,7 +224,7 @@ namespace ROOT {
       ::Fitf_PMT_pedestal *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf_PMT_pedestal));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf_PMT_pedestal", "ReadRun.h", 510,
+         instance("Fitf_PMT_pedestal", "ReadRun.h", 521,
                   typeid(::Fitf_PMT_pedestal), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_PMT_pedestal_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf_PMT_pedestal) );
@@ -269,7 +269,7 @@ namespace ROOT {
       ::Fitf_PMT_ideal *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf_PMT_ideal));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf_PMT_ideal", "ReadRun.h", 560,
+         instance("Fitf_PMT_ideal", "ReadRun.h", 572,
                   typeid(::Fitf_PMT_ideal), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_PMT_ideal_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf_PMT_ideal) );
@@ -314,7 +314,7 @@ namespace ROOT {
       ::Fitf_langaus *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Fitf_langaus));
       static ::ROOT::TGenericClassInfo 
-         instance("Fitf_langaus", "ReadRun.h", 595,
+         instance("Fitf_langaus", "ReadRun.h", 609,
                   typeid(::Fitf_langaus), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Fitf_langaus_Dictionary, isa_proxy, 4,
                   sizeof(::Fitf_langaus) );

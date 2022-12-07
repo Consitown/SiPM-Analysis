@@ -16,23 +16,28 @@ void read_everyother_group(int which) // main
 
 	// edit for your work-directory
 	path = "/mnt/d/Work_SHK_Bachelor/analysis_programm/measurements/";
+	int run = 0;
 
 	// WARNING: the name of the folder where the .bin-files are stored must be the same as the name of the bin files
 	switch (which) { //specify folders to run below, ALL bin files in this folder will be used.
 	case(0): {
 		path += "19cosmics_pcbj_everyothergroup_vb42_PSleft/"; // only every other group of the SiPM's
+		run = 19;
         break;
 	}
 	case(1): {
-		path += "22cosmics_pcbj_everyothergroup_vb42_PSmid/"; // has optical coupling
+		path += "22cosmics_pcbj_everyothergroup_vb42_PSmid/"; // has optical coupling; apparently, channel 11 is empty
+		run = 22;
 		break;
 	}
 	case(2): {
-		path += "23cosmics_pcbj_everyothergroup_vb42_PSright/"; // PS positions are left (closer to door), mid, right (farther to door)
+		path += "23cosmics_pcbj_everyothergroup_vb42_PSright/"; // PS positions are left (closer to door), mid, right (farther to door); apparently, channel 11 is empty
+		run = 23;
 		break;
 	}
 	case(3): {
-		path += "24cosmics_pcbj_everyothergroup_vb42_PSleft_new/"; // PS positions are left (closer to door), mid, right (farther to door)
+		path += "24cosmics_pcbj_everyothergroup_vb42_PSleft_new/"; // PS positions are left (closer to door), mid, right (farther to door); apparently, channel 11 is empty
+		run = 24;
 		break;
 	}
 	default: {
@@ -46,10 +51,10 @@ void read_everyother_group(int which) // main
 
 	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cal_results.root") for an explizit output file
-	mymeas.ReadFile(path, false, 0, path + "everyother_results.root");
+	mymeas.ReadFile(path, true, 10, path + "everyother_results.root");
 
 	// only plot channels specified below. Leaving it empty will plot all channels
-	mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
+	mymeas.plot_active_channels={10,11,12,13};
 
 	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
 	mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
@@ -58,31 +63,45 @@ void read_everyother_group(int which) // main
 	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
-	float cfd_x = .3;
+	float cfd_x = .4;
 	// Sytax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
-	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, false); // this creates the timing_results matrix
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, true); // this creates the timing_results matrix
 
 	// create histogram of delta t: average cfd-time upper PMT's - average cfd-time lower PMT's
 	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
 	// but waveforms of PMT come directly after wf's of SiPM's --> wf 0 - channel 0; wf 1 - ch 1; ... ; wf 8 - ch 10; wf 9 - ch 11; ...
-	gStyle->SetOptStat("nemr");
+	// match channel number to channel index
+	int fir_ch = 0; int sec_ch = 0; int thi_ch = 0; int for_ch = 0;
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == 10) fir_ch = i;
+		if (mymeas.active_channels[i] == 11) sec_ch = i;
+		if (mymeas.active_channels[i] == 12) thi_ch = i;
+		if (mymeas.active_channels[i] == 13) for_ch = i;
+	}
+	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
 	TString his_name(Form("delta_t at %0.2f", cfd_x));
 	TString his_title(Form("Average time diff lower to upper PMT's at cfd of %0.2f", cfd_x));
-	TH1* his = new TH1F(his_name, his_title, 100, -50, 50);
+	TH1* his = new TH1F(his_name, his_title, 168, -10, 11);
 	TCanvas* hisc = new TCanvas(his_name, his_title, 1600, 1000);
-	int counter;
-	for(int i=0 ; i < mymeas.nwf; i += mymeas.nchannels){
-		float delta_t = ((mymeas.timing_results[i+10][1] + mymeas.timing_results[i+11][1])/2) - ((mymeas.timing_results[i+9][1] + mymeas.timing_results[i+8][1])/2); // average cfd-delta_t
+	for(int i=0 ; i < mymeas.nwf; i += mymeas.nchannels){ //loop through all the events
+		float delta_t = ((mymeas.timing_results[i+thi_ch][1] + mymeas.timing_results[i+for_ch][1])/2) - ((mymeas.timing_results[i+fir_ch][1] + mymeas.timing_results[i+sec_ch][1])/2); // average cfd-delta_t
 		his->Fill(delta_t);
 	}
+	his->Fit("gaus", "L","same"); //Gaussian fit
 	his->GetXaxis()->SetTitle("time [ns]");
 	his->GetYaxis()->SetTitle("#Entries");
-	his->Draw();
-	hisc->Update();
-	mymeas.root_out->WriteObject(his, "delta_t");
+	his->Draw(); //don't know if this is really necessary or only for the graphic output
+	hisc->Update(); //put the histogram on the canvas
+	mymeas.root_out->WriteObject(his, "delta_t"); //save the histogram in a .root-file
+	TString pdf_filename(Form("delta_t_%2.0f_normal_run%2d.pdf", 100*cfd_x, run));
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
+	gErrorIgnoreLevel = kUnset;
+	//todo for inclusion in ReadRun: include the skip_events array, make the 4 PMT-channel a parameter array (inlcude christians function for finding right ch-number)
+	//make the plotrange + bin number a parameter, include checking whether GetTimingCFD was done prior
 
 	// apply cut for time difference between two channels
-	//mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);
+	// mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);
 
 	// print events above a threshold to identify interesting events
 	// mymeas.FractionEventsAboveThreshold(4, true, true, 100, 150);
@@ -92,8 +111,8 @@ void read_everyother_group(int which) // main
 	//**********//
 
 	// plot sums of all events per channel --> get parameters
-	// Syntax: ...(float ystart, float yend, bool doaverage, bool normalize, double shift, double sigma, bool doconv)
-	//mymeas.PlotChannelSums(-1e4, 3.6e5, false);
+	// Syntax: ...(bool doaverage, bool normalize, double shift, double sigma, bool doconv)
+	//mymeas.PlotChannelSums(false);
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
 	float intwindowminus = 30.;	// lower integration window in ns rel. to max

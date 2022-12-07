@@ -100,8 +100,8 @@ void read_sipm_cal_pcb(int which) // main
 	//**********//
 
 	// plot sums of all events per channel --> get parameters
-	// Syntax: ...(float ystart, float yend, bool doaverage, bool normalize, double shift, double sigma, bool doconv)
-	//mymeas.PlotChannelSums(-1e4, 1.1e5, false);
+	// Syntax: ...(bool doaverage, bool normalize, double shift, double sigma, bool doconv)
+	//mymeas.PlotChannelSums(false);
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
 	float intwindowminus = 1.;	// lower integration window in ns rel. to max
