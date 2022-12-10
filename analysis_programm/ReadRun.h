@@ -164,10 +164,10 @@ public:
 	TGraph2D* MaxDist(int, float = 0, float = 300);
 	void PrintMaxDist(float = 0, float = 300);
 
-	TH1F* His_GetTimingCFD(int, float, float);
-	void Print_GetTimingCFD(float = 100, float = 140, int = 0);
-	TH1F* His_GetTimingCFD_diff(int, int, float, float);
-	void Print_GetTimingCFD_diff(int, int, float = 100, float = 140, int = 0);
+	TH1F* His_GetTimingCFD(int, float, float, int = -999);
+	void Print_GetTimingCFD(float = 100, float = 140, int = 0, int = -999);
+	TH1* His_GetTimingCFD_diff(int*, float, float, int = -999, int = 0);
+	void Print_GetTimingCFD_diff(int*, float = 100, float = 140, int = 0, int = -999, int = 0);
 
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
@@ -179,7 +179,7 @@ public:
 	double* gety(int, int);								// y values for waveform(ch, event)
 	double* gety(TH1F*);								// y values for histogram
 	double* gety(TH1F*, int, int);						// y values for dedicated y range of a histogram 
-	int rcolor(int);									// useful root colors
+	int rcolor(unsigned int);							// useful root colors
 	
 	float LinearInterpolation(float, float, float, float, float); // linear interpolation
 

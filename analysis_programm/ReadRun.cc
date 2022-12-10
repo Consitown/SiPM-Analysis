@@ -418,8 +418,8 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 	}
 	delete[] xv;
 
-	TCanvas* sumc = new TCanvas("Sums", "", 1600, 1000);
-	mgsums->Draw("APL");
+	TCanvas* sumc = new TCanvas("Sums", "", 600, 400);
+	mgsums->Draw("AL");
 	mgsums->GetYaxis()->SetRangeUser(-1e4, 1e6);
 	if (normalize) mgsums->GetYaxis()->SetRangeUser(-0.2, 1);
 	sumc->BuildLegend(0.85, 0.70, .99, .95);
@@ -658,7 +658,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 	}
 	delete[] slope;
 
-	//TCanvas* sumc = new TCanvas("sumc", "sumc", 1600, 1000);
+	//TCanvas* sumc = new TCanvas("sumc", "sumc", 600, 400);
 	//TH1F* hiss = new TH1F("sum", "sum", 1e4, -2, 2);
 	//TH1F* hiss0 = new TH1F("sum0", "sum0", 1e4, -2, 2);
 	//TH1F* hisssq = new TH1F("sqsum", "sqsum", 1e4, -2, 2);
@@ -811,7 +811,7 @@ void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double 
 
 		timing_results.push_back(vector<float>());
 		timing_results[j].push_back(interpol_bin); // return the bin we looked for
-		timing_results[j].push_back(static_cast<float>(interpol_bin + static_cast<float>(start_at)) * SP); // return the cfd-time we looked for
+		timing_results[j].push_back((interpol_bin + static_cast<float>(start_at)) * SP); // return the cfd-time we looked for
 		timing_results[j].push_back(static_cast<float>(start_at) * SP); // return starting time
 		timing_results[j].push_back(static_cast<float>(end_at) * SP); // return the end time
 		delete[] yvals;
@@ -974,7 +974,7 @@ void ReadRun::SkipEventsPerChannel(vector<double> thresholds, double rangestart,
 /// 
 /// Please note that the old version was missing start and end, so please add these parameters to older scripts if they throw errors.
 /// 
-/// @param thresholds Vector should contain a threshold for each active channel saved in the data, in ascending order (ch0, ch1 ...). Negative thresholds mean events below threshold will be cut.
+/// @param thresholds Vector should contain a threshold for each active channel saved in the data, in ascending order (ch0, ch1 ...). Negative thresholds mean events below threshold will be cut. A threshold of 0 means the channel will not be evaluated.
 /// @param highlow  Vector should contain a bool for each active channel. True means events with integrals above threshold will be cut, false means below threshold.
 /// @param windowlow Integration time left to the maximum of the peak.
 /// @param windowhi Integration time right to the maximum of the peak.
@@ -1116,7 +1116,7 @@ void ReadRun::PrintChargeSpectrumWF(float windowlow, float windowhi, float start
 	gStyle->SetOptStat(0);
 
 	TString name(Form("waveforms_event__%05d", eventnr));
-	TCanvas* intwinc = new TCanvas(name.Data(), name.Data(), 1600, 1000);
+	TCanvas* intwinc = new TCanvas(name.Data(), name.Data(), 600, 400);
 	SplitCanvas(intwinc);
 	int event_index = GetEventIndex(eventnr);
 
@@ -1232,7 +1232,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 	if (fitrangeend == 0.) fitrangeend = rangeend;
 
 	string ctitle("\"charge\" spectra" + to_string(PrintChargeSpectrum_cnt));
-	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 1600, 1000);
+	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 600, 400);
 	SplitCanvas(chargec);
 
 	cout << "\n\nThere is data recorded in " << active_channels.size() << " channels \n\n\n";
@@ -1453,7 +1453,7 @@ void ReadRun::PrintChargeSpectrumPMT(float windowlow, float windowhi, float star
 	PrintChargeSpectrumPMT_cnt++;
 
 	string ctitle("charge spectra PMT" + to_string(PrintChargeSpectrumPMT_cnt));
-	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 1600, 1000);
+	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 600, 400);
 	SplitCanvas(chargec);
 
 	int current_canvas = 0;
@@ -1548,7 +1548,7 @@ void ReadRun::PrintChargeSpectrumPMTthreshold(float windowlow, float windowhi, f
 		title = "integral in mV#timesns";
 	}
 	string ctitle("charge spectra PMT threshold" + to_string(PrintChargeSpectrumPMTthreshold_cnt));
-	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 1600, 1000);
+	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 600, 400);
 	SplitCanvas(chargec);
 
 	int current_canvas = 0;
@@ -1775,7 +1775,7 @@ TGraph2D* ReadRun::MaxDist(int channel_index, float from, float to) {
 /// @param to To 
 void ReadRun::PrintMaxDist(float from, float to) {
 
-	TCanvas* max_dist_c = new TCanvas("wf grouped by maximum", "wf grouped by maximum", 1600, 1000);
+	TCanvas* max_dist_c = new TCanvas("wf grouped by maximum", "wf grouped by maximum", 600, 400);
 	SplitCanvas(max_dist_c);
 
 	int current_canvas = 0;
@@ -1797,9 +1797,9 @@ void ReadRun::PrintMaxDist(float from, float to) {
 /// See Print_GetTimingCFD() for parameters.
 /// 
 /// @return Timing histogram for one channel
-TH1F* ReadRun::His_GetTimingCFD(int channel_index, float rangestart, float rangeend) {
+TH1F* ReadRun::His_GetTimingCFD(int channel_index, float rangestart, float rangeend, int nbins) {
 
-	int nbins = static_cast<int>((rangeend - rangestart) / SP);
+	if (nbins == -999) nbins = static_cast<int>((rangeend - rangestart) / SP);
 
 	TString name(Form("GetTimingCFD_ch%02d", active_channels[channel_index]));
 	auto h1 = new TH1F(name.Data(), name.Data(), nbins, rangestart, rangeend);
@@ -1812,8 +1812,9 @@ TH1F* ReadRun::His_GetTimingCFD(int channel_index, float rangestart, float range
 /// @param rangeend End of x range for plot in ns.
 /// @param do_fit If 1 fits a gaussian. \n
 /// Else do not fit. \n 
-/// Fit results per channel are stored in ReadRun::timing_fit_results
-void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit) {
+/// Fit results per channel are stored in ReadRun::timing_fit_results.
+/// @param nbins Number of bins for histogram.
+void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit, int nbins) {
 
 	// call GetTimingCFD() in case it was not initialized
 	if (timing_results.size() == 0) GetTimingCFD();
@@ -1831,7 +1832,7 @@ void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit) {
 			timing_cfd_c->cd(current_canvas);
 
 			TH1F* his;
-			his = His_GetTimingCFD(i, rangestart, rangeend);
+			his = His_GetTimingCFD(i, rangestart, rangeend, nbins);
 			his->GetYaxis()->SetTitle("#Entries");
 			his->GetXaxis()->SetTitle("time [ns]");
 			his->Draw();
@@ -1855,23 +1856,37 @@ void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit) {
 /// See Print_GetTimingCFD_diff() for parameters.
 /// 
 /// @return Histogram with event-wise timing differences between two channels
-TH1F* ReadRun::His_GetTimingCFD_diff(int channel1, int channel2, float rangestart, float rangeend) {
+TH1* ReadRun::His_GetTimingCFD_diff(int ch_to_plot[4], float rangestart, float rangeend, int nbins, int mode) {
 
-	int nbins = static_cast<int>((rangeend - rangestart) / SP);
+	if (nbins == -999) nbins = static_cast<int>((rangeend - rangestart) / SP);
 
-	auto chin1 = find(active_channels.begin(), active_channels.end(), channel1);
-	int channel_index1;
-	if (chin1 != active_channels.end())	channel_index1 = chin1 - active_channels.begin();
-	else cout << "\n\n ERROR: channel1 does not exist in data. Check parameters for Print_GetTimingCFD_diff()\n\n";
+	// match channel number to channel index
+	int fir_ch = 0; int sec_ch = 0; int thi_ch = 0; int for_ch = 0;
+	for (int i = 0; i < active_channels.size(); i++) {
+		if (active_channels[i] == ch_to_plot[0]) fir_ch = i;
+		if (active_channels[i] == ch_to_plot[1]) sec_ch = i;
+		if (active_channels[i] == ch_to_plot[2]) thi_ch = i;
+		if (active_channels[i] == ch_to_plot[3]) for_ch = i;
+	}
 
-	auto chin2 = find(active_channels.begin(), active_channels.end(), channel2);
-	int channel_index2;
-	if (chin2 != active_channels.end())	channel_index2 = chin2 - active_channels.begin();
-	else cout << "\n\n ERROR: channel2 does not exist in data. Check parameters for Print_GetTimingCFD_diff()\n\n";
+	TString his_name(Form("timing of cfd diff")); //the name of the histogram
+	TString his_title(Form("Timing_cfd_diff_in_mode_%1d", mode)); //title of the histogram
+	TH1* h1 = new TH1F(his_name, his_title, nbins, rangestart, rangeend); //new Histogram
 
-	TString name(Form("GetTimingCFD_diff_ch%02d_ch%02d", channel1, channel2));
-	auto h1 = new TH1F(name.Data(), name.Data(), nbins, rangestart, rangeend);
-	for (int j = 0; j < nevents; j++) if (!skip_event[j]) h1->Fill(timing_results[j * nchannels + channel_index2][1] - timing_results[j * nchannels + channel_index1][1]);
+	if (mode == 0) {
+		for (int i=0 ; i < nevents ; i++){ //loop through all the events
+			if (!skip_event[i]) {
+				h1->Fill(((timing_results[i*nchannels+thi_ch][1] + timing_results[i*nchannels+for_ch][1])/2) - ((timing_results[i*nchannels+fir_ch][1] + timing_results[i*nchannels+sec_ch][1])/2)); // average cfd-delta_t
+			}
+		}
+	}
+	else {
+		for (int i=0 ; i < nevents ; i++){ //loop through all the events
+			if (!skip_event[i]) {
+				h1->Fill(timing_results[i*nchannels+sec_ch][1] - timing_results[i*nchannels+fir_ch][1]); //cfd-delta_t
+			}
+		}
+	}
 	return h1;
 }
 
@@ -1879,24 +1894,27 @@ TH1F* ReadRun::His_GetTimingCFD_diff(int channel1, int channel2, float rangestar
 /// 
 /// Plots the difference between the peak times between two channels for each event. It does \f$\Delta t = t_{second} - t_{first}\f$. 
 /// 
-/// @param channel1 First channel number (wavecatcher channel number). 
-/// @param channel2 Second channel number to compare. 
+/// @param ch_to_plot Array of the 4 wavecatcher channels. \n
+/// Should be either [upper_PMT1,upper_PMT2,lower_PMT1,lower_PMT2] or [PMT1,PMT2,X,X] (X=any int) depending on mode.
 /// @param rangestart Start of x range for plot in ns.
 /// @param rangeend End of x range for plot in ns.
 /// @param do_fit If 1 fits a gaussian. \n
 /// Else do not fit. \n 
-void ReadRun::Print_GetTimingCFD_diff(int channel1, int channel2, float rangestart, float rangeend, int do_fit) {
+/// @param nbins Number of bins for histogram.
+/// @param mode If 0 does average between upper and lower PMT's. \n
+/// Else does channel 2 - channel 1
+void ReadRun::Print_GetTimingCFD_diff(int ch_to_plot[4], float rangestart, float rangeend, int do_fit, int nbins, int mode) {
 
 	// call GetTimingCFD() in case it was not initialized
 	if (timing_results.size() == 0) GetTimingCFD();
 
-	gStyle->SetOptStat(1111); 
-	gStyle->SetOptFit(111);
+	gStyle->SetOptStat("ner"); //draws a box with some histogram parameters
+	gStyle->SetOptFit(111); //for fit parameters
 
 	TCanvas* timing_cfd_d_c = new TCanvas("timing of cfd diff", "timing of cfd diff", 600, 400);
 
-	TH1F* his;
-	his = His_GetTimingCFD_diff(channel1, channel2, rangestart, rangeend);
+	TH1* his;
+	his = His_GetTimingCFD_diff(ch_to_plot, rangestart, rangeend, nbins, mode);
 	his->GetYaxis()->SetTitle("#Entries");
 	his->GetXaxis()->SetTitle("time [ns]");
 	his->Draw();
@@ -1906,7 +1924,7 @@ void ReadRun::Print_GetTimingCFD_diff(int channel1, int channel2, float rangesta
 		timing_fit_results.push_back(fresults);
 	}
 
-	TString name_save(Form("Timing_cfd_diff_channel_%02d_channel_%02d", channel1, channel2));
+	TString name_save(Form("Timing_cfd_diff_in_mode_%1d", mode));
 	root_out->WriteObject(his, name_save.Data());
 
 	timing_cfd_d_c->Update();
@@ -2016,7 +2034,7 @@ double* ReadRun::gety(TH1F* his, int start_at, int end_at) {
 /// @brief Translate a random number into a useful root color https://root.cern.ch/doc/master/classTColor.html
 /// @param i Index of your plotting loop that is to be translated into a useful ROOT color index
 /// @return ROOT color index
-int ReadRun::rcolor(int i) {
+int ReadRun::rcolor(unsigned int i) {
 	int nclrs = 16;
 	int rclrs[nclrs] = { 1, 2, 3, 4, 5, 6, 7, 13, 28, 30, 34, 38, 40, 31, 46, 49 };
 	return rclrs[i - static_cast<int>(floor(i / nclrs)) * nclrs];
@@ -2170,11 +2188,11 @@ void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, bool doconv) {
 void ReadRun::PrintFFTWF(int eventnr, float xmin, float xmax, int multiplier) {
 	// plot waveforms of all channels for a given event number eventnr and add the determined integration windwos to the plot
 	TString name(Form("fft_waveforms_event__%04d", eventnr));
-	TCanvas* fftc = new TCanvas(name.Data(), name.Data(), 1600, 1000);
+	TCanvas* fftc = new TCanvas(name.Data(), name.Data(), 600, 400);
 	SplitCanvas(fftc);
 
 	TString imname(Form("fft_im_waveforms_event__%04d", eventnr));
-	TCanvas* imfftc = new TCanvas(imname.Data(), imname.Data(), 1600, 1000);
+	TCanvas* imfftc = new TCanvas(imname.Data(), imname.Data(), 600, 400);
 	SplitCanvas(imfftc);
 
 	int size = 1024 * multiplier;
