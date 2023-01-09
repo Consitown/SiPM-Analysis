@@ -1,0 +1,36 @@
+// match channel number to channel index
+	int channel1 = 12; int channel2 = 13; int ch_index1, ch_index2 = 0;
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == channel1) ch_index1 = i;
+		if (mymeas.active_channels[i] == channel2) ch_index2 = i;
+	}
+	TCanvas* combi = new TCanvas("combi", "different filters", 600, 400); //canvas for everything to be combined onto
+	gStyle->SetOptStat(1111); //stats are only in the way
+	TString his_name(Form("ch%2d-ch%2d_at_cfd_%0.2f", channel2, channel1, cfd_x));
+	TH1* his1 = new TH1F("all_events", "Combined_his_"+his_name, 200, -15, 15); //initiate all 3 histograms
+	TH1* his2 = new TH1F("ortho_skipped", "Combined_his_"+his_name, 200, -15, 15);
+	TH1* his3 = new TH1F("ortho_only", "Combined_his_"+his_name, 200, -15, 15);
+	for (int i = 0 ; i < mymeas.nevents ; i++){ //loop through all the events
+		his1->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //his with all events
+		if (!mymeas.skip_event[i]) {
+			his2->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //his without ortho events
+		}
+		else {
+			his3->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //his with only ortho events
+		}
+	}
+	his1->GetYaxis()->SetTitle("#Entries"); his1->GetXaxis()->SetTitle("time [ns]");
+	his1->Draw(); // draw the first histogram (not on canvas yet)
+	his2->SetLineColor(kRed);
+	his2->Draw("sames"); gPad->Update(); // draw the second histogram on canvas // force the update, so stat box gets drawn
+	TPaveStats* s = (TPaveStats*)his2->FindObject("stats"); // find the stats, only works if the stat-box is drawn in first place
+	s->SetY1NDC(.575); s->SetY2NDC(.75); // new y start position // new y end position
+	his3->SetLineColor(kOrange);
+	his3->Draw("sames"); gPad->Update(); // draw the third histogram on canvas // force the update, so stat box gets drawn
+	TPaveStats *t = (TPaveStats*)his3->GetListOfFunctions()->FindObject("stats"); // find the stats, only works if the stat-box is drawn in first place
+	t->SetY1NDC(.38); t->SetY2NDC(.56); // new x start position // new x end position
+	combi->Update(); // put everything on the canvas
+	TString pdf_name(Form("run%2d_%2d-%2d_combined.pdf", run, channel2, channel1));
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	combi->Print(pdf_name); //write the combined histograms to a .pdf-file
+	gErrorIgnoreLevel = kUnset;

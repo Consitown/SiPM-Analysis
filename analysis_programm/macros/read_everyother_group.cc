@@ -57,48 +57,23 @@ void read_everyother_group(int which) // main
 	mymeas.plot_active_channels={10,11,12,13};
 
 	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
-	mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
+	//mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
 
 	//mymeas.CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
-	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
+	mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
-	float cfd_x = .4;
-	// Sytax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
-	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, true); // this creates the timing_results matrix
-
-	// create histogram of delta t: average cfd-time upper PMT's - average cfd-time lower PMT's
+	float cfd_x = .3;
+	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
+	bool modus = true;
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, modus); // this creates the timing_results matrix
+	
 	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
-	// but waveforms of PMT come directly after wf's of SiPM's --> wf 0 - channel 0; wf 1 - ch 1; ... ; wf 8 - ch 10; wf 9 - ch 11; ...
-	// match channel number to channel index
-	int fir_ch = 0; int sec_ch = 0; int thi_ch = 0; int for_ch = 0;
-	for (int i = 0; i < mymeas.active_channels.size(); i++) {
-		if (mymeas.active_channels[i] == 10) fir_ch = i;
-		if (mymeas.active_channels[i] == 11) sec_ch = i;
-		if (mymeas.active_channels[i] == 12) thi_ch = i;
-		if (mymeas.active_channels[i] == 13) for_ch = i;
-	}
-	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
-	TString his_name(Form("delta_t at %0.2f", cfd_x));
-	TString his_title(Form("Average time diff lower to upper PMT's at cfd of %0.2f", cfd_x));
-	TH1* his = new TH1F(his_name, his_title, 168, -10, 11);
-	TCanvas* hisc = new TCanvas(his_name, his_title, 1600, 1000);
-	for(int i=0 ; i < mymeas.nwf; i += mymeas.nchannels){ //loop through all the events
-		float delta_t = ((mymeas.timing_results[i+thi_ch][1] + mymeas.timing_results[i+for_ch][1])/2) - ((mymeas.timing_results[i+fir_ch][1] + mymeas.timing_results[i+sec_ch][1])/2); // average cfd-delta_t
-		his->Fill(delta_t);
-	}
-	his->Fit("gaus", "L","same"); //Gaussian fit
-	his->GetXaxis()->SetTitle("time [ns]");
-	his->GetYaxis()->SetTitle("#Entries");
-	his->Draw(); //don't know if this is really necessary or only for the graphic output
-	hisc->Update(); //put the histogram on the canvas
-	mymeas.root_out->WriteObject(his, "delta_t"); //save the histogram in a .root-file
-	TString pdf_filename(Form("delta_t_%2.0f_normal_run%2d.pdf", 100*cfd_x, run));
-	gErrorIgnoreLevel = kError; //suppress root terminal output
-	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
-	gErrorIgnoreLevel = kUnset;
-	//todo for inclusion in ReadRun: include the skip_events array, make the 4 PMT-channel a parameter array (inlcude christians function for finding right ch-number)
-	//make the plotrange + bin number a parameter, include checking whether GetTimingCFD was done prior
+	// Syntax: (ch_to_plot[4], float rangestart, float rangeend, int do_fit, int nbins, int mode)
+	// mode 0: average upper lower, mode 1: second - first channel
+	//int ch_to_plot[4] = {10,12,12,13};
+	//mymeas.Print_GetTimingCFD_diff(ch_to_plot, -10, 15, 1, 200, 1);
+	mymeas.Print_GetTimingCFD(110,140,1,200);
 
 	// apply cut for time difference between two channels
 	// mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void read_cfd_PS(int which = 0) // main
+void read_cfd_PS(int which) // main
 {
 	string path;
 
@@ -23,6 +23,26 @@ void read_cfd_PS(int which = 0) // main
 	case(0): {
 		path += "5time_testrun_PS_better/"; // PS run with the right trigger settings for CFD
 		run = 5;
+		break;
+	}
+	case(1): {
+		path += "25_ortho_PS_test/"; // test run with orthogonal PS
+		run = 25;
+		break;
+	}
+	case(2): {
+		path += "26_normal_PS_coinc_with_ortho_PS/"; // test run with orthogonal PS and normal PS; combined: C0 position; also blanket around lower PS, cable swicth of 11/13
+		run = 26;
+		break;
+	}
+	case(3): {
+		path += "27_normal_PS_coinc_with_ortho_PS_C1/"; //as run 26, but orthogonal PS at C1 position
+		run = 27;
+		break;
+	}
+	case(4): {
+		path += "28_normal_PS_coinc_with_ortho_PS_C2/"; //as run 26, but orthogonal PS at C2 position
+		run = 28;
 		break;
 	}
 	default: {
@@ -38,61 +58,52 @@ void read_cfd_PS(int which = 0) // main
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cfd_results.root") for an explizit output file
 	mymeas.ReadFile(path, true, 0, path + "/cfd_results.root");
 
-	// only plot channels specified below. Leaving it empty will plot all channels
+	// only plot channels specified below. Leaving it empty or commenting it will plot all channels
 	//mymeas.plot_active_channels={};
 
-	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
-	//mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
+	//use SmoothAll() for general smoothing of waveforms --> find good parameters; then use the internal smoothig of GetTimingCFD
+	//mymeas.SmoothAll(3, false); //Syntax: ...(double sigma, bool doconv) ; doconv - If false use running average (default). If true use gaussian smoothing (slower).
 
-	//mymeas.CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
-	mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9); //smoothing improves the result significantly
+	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
+	mymeas.CorrectBaseline(0., 50.); // use mean from 0 ns to 50 ns
+
+	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
+	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9);
+
+	// Syntax: ...(vector<double> thresholds, double rangestart, double rangeend, bool verbose)
+	//std::vector<double> thresholds = {0, 0, -7, -7, -7, -7}; //for identifying out burst events (high frequency oscillations), if run5: erase the 0's
+	vector<double> thresholds2 = {4, 0}; //skip all events where ch8 fires
+	mymeas.SkipEventsPerChannel(thresholds2, 110, 150, false);
+	vector<bool> first_ch_skip = mymeas.skip_event; //save the info
+	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = false; //reset the vector
+	vector<double> thresholds3 = {0, 4}; //skip all events where ch9 fires
+	mymeas.SkipEventsPerChannel(thresholds3, 110, 150, false);
+	vector<bool> second_ch_skip = mymeas.skip_event; //save the info
+	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = second_ch_skip[i] && first_ch_skip[i]; //skip all events where ch8 AND ch9 fires --> skip all orthogonal events
+	int counter = 0;
+	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging
+	cout << "Number of orthogonal events: " << counter << endl;
+	mymeas.skip_event.flip();
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
-	// Sytax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
-	bool modus = true;
-	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, modus); // this creates the timing_results matrix
-	//if(modus){TString pdf_name(Form("normal"));}else{TString pdf_name(Form("inverse"));}
+	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
 
-	// create histogram of delta t: average cfd-time upper PMT's - average cfd-time lower PMT's
-	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
-	// but waveforms of PMT come directly after wf's of SiPM's --> wf 0 - channel 0; wf 1 - ch 1; ... ; wf 8 - ch 10; wf 9 - ch 11; ...
-	// match channel number to channel index
-	int ch_to_plot[4] = {10,11,12,13};
-	int fir_ch = 0; int sec_ch = 0; int thi_ch = 0; int for_ch = 0;
-	for (int i = 0; i < mymeas.active_channels.size(); i++) {
-		if (mymeas.active_channels[i] == ch_to_plot[0]) fir_ch = i;
-		if (mymeas.active_channels[i] == ch_to_plot[1]) sec_ch = i;
-		if (mymeas.active_channels[i] == ch_to_plot[2]) thi_ch = i;
-		if (mymeas.active_channels[i] == ch_to_plot[3]) for_ch = i;
-	}
-	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
-	TString his_name(Form("delta_t at %0.2f", cfd_x)); //the name of the histogram
-	TString his_title(Form("Average time diff lower to upper PMT's at cfd of %0.2f", cfd_x)); //the title of the histogram
-	TH1* his = new TH1F(his_name, his_title, 200, -10, 15); //new Histogram
-	TCanvas* hisc = new TCanvas(his_name, his_title, 1600, 1000); //new canvas to save the histogram on
-	for(int i=0 ; i < mymeas.nwf; i += mymeas.nchannels){ //loop through all the events
-		float delta_t = ((mymeas.timing_results[i+thi_ch][1] + mymeas.timing_results[i+for_ch][1])/2) - ((mymeas.timing_results[i+fir_ch][1] + mymeas.timing_results[i+sec_ch][1])/2); // average cfd-delta_t
-		his->Fill(delta_t); //fill the data into the histogram
-	}
-	his->Fit("gaus", "L","same"); //Gaussian fit
-	his->GetXaxis()->SetTitle("time [ns]"); //naming the axes
-	his->GetYaxis()->SetTitle("#Entries");
-	his->Draw(); //don't know if this is really necessary or only for the graphic output
-	hisc->Update(); //put the histogram on the canvas
-	mymeas.root_out->WriteObject(his, "delta_t"); //save the histogram in a .root-file
-	TString pdf_filename(Form("delta_t_%2.0f_normal_run%1d.pdf", 100*cfd_x, run));
-	gErrorIgnoreLevel = kError; //suppress root terminal output
-	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
-	gErrorIgnoreLevel = kUnset;
-	//todo for inclusion in ReadRun: include the skip_events array, make the 4 PMT-channel a parameter array
-	//make the plotrange + bin number a parameter, include checking whether GetTimingCFD was done prior
+	// Positioncuts (trial)
+	//mymeas.SkipEventsTimeDiffCut(10, 11, -2.5, 2.5, false);
+	//mymeas.SkipEventsTimeDiffCut(12, 13, -2.5, 2.5, false);
 
-	// apply cut for time difference between two channels
-	//mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);
+	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption)
+	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
+	mymeas.Print_GetTimingCFD_diff({10,11}, {12,13}, -15, 15, 0, 200, -8, 8, "RS");
 
-	// print events above a threshold to identify interesting events
-	// mymeas.FractionEventsAboveThreshold(4, true, true, 100, 150);
+	// Syntax: ... (float rangestart, float rangeend, int do_fit, int nbins, string fitoption)
+	//mymeas.Print_GetTimingCFD(110,140,1,200,"S"); //for channelwise cfd
+
+	// prints some stats for events above a threshold into the terminal to identify interesting events
+	// Syntax: ...(float threshold, bool max, bool greater, double from, double to, bool verbose)
+	//mymeas.FractionEventsAboveThreshold(5, true, true, 200, 250, false);
 
 	//**********//
 	// Plotting
@@ -111,12 +122,6 @@ void read_cfd_PS(int which = 0) // main
 	// old timing histogramm (should not use for cfd)
 	//mymeas.PrintTimeDist(110, 140, 105, 145, 200, 1, cfd_x);
 
-	// plot results between t=110 ns and t=140 ns and fit gauss (thats what the 1 is for)
-	//mymeas.Print_GetTimingCFD(110, 140, 1);
-
-	//plot constant fration descrimination
-	// mymeas.PlotConstantFrationDescrimination(100, 150);
-
 	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
 	//mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, -10, 350, 300, 0, 0, 0, 0);
@@ -125,11 +130,8 @@ void read_cfd_PS(int which = 0) // main
 	// PrintChargeSpectrumPMT will apply a fit automatically from rangestart to rangeend (which are also the boundaries for the plot)
 	//mymeas.PrintChargeSpectrumPMT(intwindowminus, intwindowplus, findmaxfrom, findmaxto, 5, 300, 202);
 
-	// suppress graphic output
-	gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)
-
 	// plot waveforms of individual events
-	//int event1 = 68;
+	//int event1 = 2257;
 	//int event2 = 79;
 
 	//plot range for individual waveforms
@@ -140,6 +142,8 @@ void read_cfd_PS(int which = 0) // main
 	//mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, event1, ymin, ymax);
 	//mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, event2, ymin, ymax);
 
+	// suppress graphic output
+	gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)
 
 	// plot individual waveforms for some events for debugging
 	for (int i = 1; i < mymeas.nevents; i += static_cast<int>(mymeas.nevents / 10)) {

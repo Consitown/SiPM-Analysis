@@ -1,0 +1,41 @@
+//plotting waveforms of low cfd-time events
+	int channel = 12; int channel2 = 13; float low_time = 122.5;
+	// match channel number to channel index
+	int ch_index = 0; int ch_index2 = 0;
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == channel) ch_index = i;
+		if (mymeas.active_channels[i] == channel2) ch_index2 = i;
+	}
+
+	vector<int> interesting_events; int cnt = 0;
+	for (int i=0 ; i < mymeas.nevents ; i++){
+		if (mymeas.timing_results[i*mymeas.nchannels+ch_index][1] < low_time){
+			interesting_events.push_back(i);
+			cnt+=1;
+		}
+	}
+	cout << "found " << cnt << " low-time events" << endl;
+
+	gStyle->SetOptStat(1111); //draws a box with some histogram parameters
+	gStyle->SetOptFit(111); 
+
+	TString his_name_title(Form("cfd-time diff (%2d-%2d) at %0.2f for events in %2d under %3.1f ns", channel2, channel, cfd_x, channel, low_time));
+	int nbins = 200; int min = -15; int max = 15;
+	TH1* his = new TH1F(his_name_title, his_name_title, nbins, min, max);
+	TCanvas* hisc = new TCanvas(his_name_title, his_name_title, 1200, 800);
+
+	for (int i=0 ; i < interesting_events.size() ; i++){ //loop through all the interesting events
+		his->Fill(mymeas.timing_results[interesting_events[i]*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[interesting_events[i]*mymeas.nchannels+ch_index][1]); //the data
+	}
+
+	his->GetXaxis()->SetTitle("cfd-time [ns]");
+	his->GetYaxis()->SetTitle("#Entries");
+	his->Draw();
+	hisc->Update();
+	
+	mymeas.root_out->WriteObject(his, "low_time-events");
+	mymeas.root_out->WriteObject(hisc, "low_time-events_c");
+	TString pdf_filename(Form("low_time-event_time_diff_%2d-%2d_time_cut_%3.1f.pdf", channel2, channel, low_time));
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
+	gErrorIgnoreLevel = kUnset;
