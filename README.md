@@ -16,9 +16,10 @@ More details of the two pieces of software will be given after this section. \
 (I am copying bits and pieces from before mentioned repositories for this, but also give some infos myself) \
 If I speak of a Macro, I mean a file that one executes in the terminal. \
 If I speak of a Script, I mean a file that is used by a macro (all Scripts are .cpp or .cc or .C - files). \
-For my analysis, I used the wavecatcher-analysis (thats why I renamed the directory). There were 2 main reasons for this: \
-  + The Baseline correction of the RootReader is weird and does not necessarily work. \
-  + It is really hard to understand how the RootReader works and altering the code is therefore very difficult. \
+For my analysis, I used the wavecatcher-analysis (thats why I renamed the directory). There were 2 main reasons for this: 
+  + The Baseline correction of the RootReader is weird and does not necessarily work. 
+  + It is really hard to understand how the RootReader works and altering the code is therefore very difficult. 
+
 I give more detailed instruction on how to install CERN Root and use the wavecatcher-analysis here: https://github.com/Consitown/SiPM-Analysis/wiki/Introduction
 
 ### Some background for context
