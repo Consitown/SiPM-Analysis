@@ -1,32 +1,36 @@
 //plotting amplitude spectrum; mymeas.timimng_results[waveform][2] contains amplitude
-int channel = 13;
-// match channel number to channel index
-int ch_index = 0;
-for (int i = 0; i < mymeas.active_channels.size(); i++) {
-	if (mymeas.active_channels[i] == channel) ch_index = i;
-}
-
-gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
-
-TString his_name_title(Form("Amplitude-spectrum in ch %2d", channel));
-int nbins = 150; int min = 0; int max = 150;
-TH1* his = new TH1F(his_name_title, his_name_title, nbins, min, max);
-TCanvas* hisc = new TCanvas(his_name_title, his_name_title, 1200, 800);
-
-for (int i=0 ; i < mymeas.nevents ; i++){ //loop through all the events
-	if (!mymeas.skip_event[i]) {
-		his->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index][2]); //the data
+	int channel = 10;
+	// match channel number to channel index
+	int ch_index = 0;
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == channel) ch_index = i;
 	}
-}
 
-his->GetXaxis()->SetTitle("Amplitude [mV]");
-his->GetYaxis()->SetTitle("#Entries");
-his->Draw();
-hisc->Update();
+	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
+
+	TString his_name(Form("ch%2d_at_cfd_%0.2f", channel, cfd_x));
+	TCanvas* hisc = new TCanvas("combi", "different filters", 600, 400);
+	int nbins = 150; int min = 0; int max = 150;
+	TH1* his1 = new TH1F("all_events", "ampl_spec_combined"+his_name, nbins, min, max);
+	TH1* his2 = new TH1F("ortho_events", "ampl_spec_combined"+his_name, nbins, min, max);
+
+	for (int i=0 ; i < mymeas.nevents ; i++){ //loop through all the events
+		his1->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index][2]); //all events
+		if (mymeas.skip_event[i]) {
+			his2->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index][2]); //ortho events
+		}
+	}
+
+	his1->GetXaxis()->SetTitle("Amplitude [mV]");
+	his1->GetYaxis()->SetTitle("#Entries");
+	his1->Draw();
+	his2->SetLineColor(kRed);
+	his2->Draw("sames"); gPad->Update(); // draw the second histogram on canvas // force the update, so stat box gets drawn
+	TPaveStats* s = (TPaveStats*)his2->FindObject("stats"); // find the stats, only works if the stat-box is drawn in first place
+	s->SetY1NDC(.575); s->SetY2NDC(.75); // new y start position // new y end position
+	hisc->Update();
 	
-mymeas.root_out->WriteObject(his, "ampl_spectrum");
-mymeas.root_out->WriteObject(hisc, "ampl_spectrum_c");
-TString pdf_filename(Form("ampl_spectrum_in_%2d.pdf", channel));
-gErrorIgnoreLevel = kError; //suppress root terminal output
-hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
-gErrorIgnoreLevel = kUnset;
+	TString pdf_filename(Form("ampl_spec_in_%2d_combined.pdf", channel));
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
+	gErrorIgnoreLevel = kUnset;

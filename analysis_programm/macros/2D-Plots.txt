@@ -1,4 +1,4 @@
-//plotting (cfd-time, wf-maximum) in 2D histogram for one channel; mymeas.timimng_results[waveform][2] contains amplitude
+//plotting (cfd-time, wf-maximum/amplitude) in 2D histogram for one channel; mymeas.timing_results[waveform][2] contains amplitude
 	int channel = 10; int channel2 = 11;
 	// match channel number to channel index
 	int ch_index = 0;

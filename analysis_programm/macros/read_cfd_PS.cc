@@ -45,6 +45,11 @@ void read_cfd_PS(int which) // main
 		run = 28;
 		break;
 	}
+	case(5): {
+		path += "29_normal_PS_coinc_with_ortho_PS_C1_20k/"; //as run 26, but orthogonal PS at C2 position
+		run = 29;
+		break;
+	}
 	default: {
 		cout << "\nerror: path to data not specified" << endl; // default
 		break;
@@ -83,7 +88,7 @@ void read_cfd_PS(int which) // main
 	int counter = 0;
 	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging
 	cout << "Number of orthogonal events: " << counter << endl;
-	mymeas.skip_event.flip();
+	//mymeas.skip_event.flip();
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
@@ -96,7 +101,50 @@ void read_cfd_PS(int which) // main
 
 	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption)
 	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
-	mymeas.Print_GetTimingCFD_diff({10,11}, {12,13}, -15, 15, 0, 200, -8, 8, "RS");
+	//mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 0, 200, -8, 8, "RS");
+
+	//plotting amplitude spectrum; mymeas.timimng_results[waveform][2] contains amplitude
+	int channel = 10;
+	// match channel number to channel index
+	int ch_index = 0;
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == channel) ch_index = i;
+	}
+
+	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
+
+	TString his_name(Form("ch%2d_at_cfd_%0.2f", channel, cfd_x));
+	TCanvas* hisc = new TCanvas("combi", "different filters", 600, 400);
+	int nbins = 150; int min = 0; int max = 150;
+	TH1* his1 = new TH1F("all_events", "ampl_spec_combined_"+his_name, nbins, min, max);
+	TH1* his2 = new TH1F("ortho_events", "ampl_spec_combined_"+his_name, nbins, min, max);
+
+	for (int i=0 ; i < mymeas.nevents ; i++){ //loop through all the events
+		his1->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index][2]); //all events
+		if (mymeas.skip_event[i]) {
+			his2->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index][2]); //ortho events
+		}
+	}
+
+	his2->GetXaxis()->SetTitle("Amplitude [mV]");
+	his2->GetYaxis()->SetTitle("#Entries");
+	float rightmax = 1.1*his2->GetMaximum();
+    his2->Scale(1.1*his1->GetMaximum()/rightmax); //scale his2 to the pad coordinates
+	his2->SetLineColor(kRed);
+	his2->Draw("HIST"); gPad->Update(); // draw the second histogram on canvas // force the update, so stat box gets drawn
+	TPaveStats* t = (TPaveStats*)his2->FindObject("stats"); // find the stats, only works if the stat-box is drawn in first place
+	t->SetY1NDC(.575); t->SetY2NDC(.75); t->SetX1NDC(.65); t->SetX2NDC(.85); // new y start position // new y end position
+	his1->Draw("sames"); gPad->Update(); // draw the second histogram on canvas // force the update, so stat box gets drawn
+	TPaveStats* s = (TPaveStats*)his1->FindObject("stats"); // find the stats, only works if the stat-box is drawn in first place
+	s->SetY1NDC(.755); s->SetY2NDC(.935); s->SetX1NDC(.65); s->SetX2NDC(.85); // new y start position // new y end position
+	TGaxis* axis = new TGaxis(gPad->GetUxmax(),gPad->GetUymin(), gPad->GetUxmax(),gPad->GetUymax(), 0, rightmax, 510,"+L");
+    axis->SetLineColor(kRed); axis->SetLabelColor(kRed); axis->Draw();
+	hisc->Update(); //put everything on the canvas
+	
+	TString pdf_filename(Form("ampl_spec_in_%2d_combined.pdf", channel));
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
+	gErrorIgnoreLevel = kUnset;
 
 	// Syntax: ... (float rangestart, float rangeend, int do_fit, int nbins, string fitoption)
 	//mymeas.Print_GetTimingCFD(110,140,1,200,"S"); //for channelwise cfd
