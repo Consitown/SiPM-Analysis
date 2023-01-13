@@ -156,6 +156,9 @@ public:
 	vector<float> PrintChargeSpectrumPMT_pars;
 	void PrintChargeSpectrumPMTthreshold(float = 0, float = 0, float = 0, float = 300, int = 750, double = 4, bool = false);
 
+	float* ChargeList(int, float = 20, float = 80, float = 0, float = 300);
+	void SaveChargeLists(float = 20, float = 80, float = 0, float = 300);
+
 	// SiPM specific
 	void PrintDCR(float = 15, float = 85, float = 0, float = 300, double = 3); // based on PrintChargeSpectrumPMTthreshold()
 
@@ -166,9 +169,9 @@ public:
 	void PrintMaxDist(float = 0, float = 300);
 
 	TH1F* His_GetTimingCFD(int, float, float, int = -999);
-	void Print_GetTimingCFD(float = 100, float = 140, int = 0, int = -999, string = "S");
+	void Print_GetTimingCFD(float = 100, float = 140, int = 0, int = -999, string = "S", bool = true);
 	TH1F* His_GetTimingCFD_diff(vector<int>, vector<int>, float, float, int = -999);
-	void Print_GetTimingCFD_diff(vector<int>, vector<int>, float = 100, float = 140, int = 0, int = -999, float = -999, float = -999, string = "RS");
+	void Print_GetTimingCFD_diff(vector<int>, vector<int>, float = 100, float = 140, int = 0, int = -999, float = -999, float = -999, string = "RS", bool= true);
 
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
