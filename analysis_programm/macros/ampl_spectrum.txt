@@ -30,7 +30,7 @@
 	s->SetY1NDC(.575); s->SetY2NDC(.75); // new y start position // new y end position
 	hisc->Update();
 	
-	TString pdf_filename(Form("ampl_spec_in_%2d_combined.pdf", channel));
+	TString pdf_filename(Form("run%2d_ampl_spec_in_%2d_combined.pdf", run, channel));
 	gErrorIgnoreLevel = kError; //suppress root terminal output
 	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
 	gErrorIgnoreLevel = kUnset;

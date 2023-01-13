@@ -141,7 +141,7 @@ void read_cfd_PS(int which) // main
     axis->SetLineColor(kRed); axis->SetLabelColor(kRed); axis->Draw();
 	hisc->Update(); //put everything on the canvas
 	
-	TString pdf_filename(Form("ampl_spec_in_%2d_combined.pdf", channel));
+	TString pdf_filename(Form("run%2d_ampl_spec_in_%2d_combined.pdf", run, channel));
 	gErrorIgnoreLevel = kError; //suppress root terminal output
 	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
 	gErrorIgnoreLevel = kUnset;
