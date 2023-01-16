@@ -40,6 +40,11 @@ void read_everyother_group(int which) // main
 		run = 24;
 		break;
 	}
+	case(4): {
+		path += "30_nor_PS_coinc_w_ort_PS+SiPMs_C0/"; // PS positions are left (closer to door), mid, right (farther to door); apparently, channel 11 is empty
+		run = 30;
+		break;
+	}
 	default: {
 		cout << "\nerror: path to data not specified" << endl; // default
 		break;
@@ -51,29 +56,45 @@ void read_everyother_group(int which) // main
 
 	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "/cal_results.root") for an explizit output file
-	mymeas.ReadFile(path, true, 10, path + "everyother_results.root");
+	mymeas.ReadFile(path, true, 8, path + "everyother_results.root");
 
 	// only plot channels specified below. Leaving it empty will plot all channels
-	mymeas.plot_active_channels={10,11,12,13};
+	mymeas.plot_active_channels={};
+
+	//use SmoothAll() for general smoothing of waveforms --> find good parameters; then use the internal smoothig of GetTimingCFD
+	//mymeas.SmoothAll(3, false); //Syntax: ...(double sigma, bool doconv) ; doconv - If false use running average (default). If true use gaussian smoothing (slower).
 
 	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
-	//mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
+	mymeas.CorrectBaseline(0., 50.); // use mean from 0 ns to 50 ns
 
-	//mymeas.CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
-	mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
+	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
+	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9);
+
+	// Syntax: ...(vector<double> thresholds, double rangestart, double rangeend, bool verbose)
+	// -7 mV for identifying out burst events (high frequency oscillations) in large PS
+	vector<double> thresholds2 = {0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0}; //skip all events where ch8 fires
+	mymeas.SkipEventsPerChannel(thresholds2, 110, 150, false);
+	vector<bool> first_ch_skip = mymeas.skip_event; //save the info
+	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = false; //reset the vector
+	vector<double> thresholds2 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0}; //skip all events where ch9 fires
+	mymeas.SkipEventsPerChannel(thresholds3, 110, 150, false);
+	vector<bool> second_ch_skip = mymeas.skip_event; //save the info
+	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = second_ch_skip[i] && first_ch_skip[i]; //skip all events where ch8 AND ch9 fires --> skip all orthogonal events
+	int counter = 0;
+	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging
+	cout << "Number of orthogonal events: " << counter << endl;
+	mymeas.skip_event.flip(); //all non ortho events get skipped --> only ortho events get plotted
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
-	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start) --> last argument is selecting inverse/normal cfd: true results in normal cfd
-	bool modus = true;
-	mymeas.GetTimingCFD(cfd_x, 110, 150, 0, modus); // this creates the timing_results matrix
-	
+	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
+
 	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
-	// Syntax: (ch_to_plot[4], float rangestart, float rangeend, int do_fit, int nbins, int mode)
-	// mode 0: average upper lower, mode 1: second - first channel
-	//int ch_to_plot[4] = {10,12,12,13};
-	//mymeas.Print_GetTimingCFD_diff(ch_to_plot, -10, 15, 1, 200, 1);
-	mymeas.Print_GetTimingCFD(110,140,1,200);
+	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption, bool set_errors)
+	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
+	mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 0, 200, -8, 8, "RS", false);
+	//mymeas.Print_GetTimingCFD(110,140,1,200);
 
 	// apply cut for time difference between two channels
 	// mymeas.SkipEventsTimeDiffCut(10, 13, 1, 6, false);
