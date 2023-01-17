@@ -36,13 +36,12 @@
 #include <TFitResultPtr.h>
 #include <TFitResult.h>
 #include <TSpline.h> 
-#include <TSpectrum.h>   // peakfinder
-#include <TPolyMarker.h> // peakfinder
+//#include <TSpectrum.h>   // peakfinder
+//#include <TPolyMarker.h> // peakfinder
 #include <TError.h>      // root verbosity level
-#include <TSystem.h>     // root verbosity level
-#include <TLatex.h>      // root verbosity level
+#include <TSystem.h>
+#include <TLatex.h>
 
-//#include <sys/resource.h>
 //C, C++
 #include <stdio.h>
 #include <assert.h>
@@ -51,9 +50,6 @@
 #include <vector>
 #include <stdlib.h>
 #include <sstream>
-#include <numeric>
-#include <tuple>
-#include <map>
 
 using namespace std;
 
@@ -252,6 +248,7 @@ public:
 	/// 
 	/// To identify events to be filtered use functions IntegralFilter(), SkipEventsPerChannel(), and SkipEventsTimeDiffCut().
 	vector<bool> skip_event;
+	int Nevents_good();
 
 	/// @brief Special parameter for HU cosmics setup
 	/// 
@@ -349,8 +346,7 @@ class Fitf_full {
 public:
 	/// @brief Default fit function for SiPMs with after-pulses missing dark counts
 	/// 
-	/// Still missing dark counts in integration window (3.3 in paper). \n 
-	/// Seems to be working now, but please check for possible bugs. \n \n 
+	/// Still missing dark counts in integration window (3.3 in paper). \n \n
 	/// 
 	/// See https://arxiv.org/abs/1609.01181 for explanation of fit function. \n 
 	/// See https://root.cern/manual/fitting/ for ROOT fitting.
