@@ -398,6 +398,8 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 	TMultiGraph* mgsums = new TMultiGraph();
 	mgsums->SetTitle("channel sums; t [ns]; amplitude [arb.]");
 
+	double max = 0., min = 0.;
+
 	for (int i = 0; i < nchannels; i++) {
 		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
 			double* yv = amplValuessum[i];
@@ -405,7 +407,12 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 
 			TGraph* gr = new TGraph(binNumber, xv, yv);
 			delete[] yv;
-			if (normalize) gr->Scale(1. / TMath::MaxElement(gr->GetN(), gr->GetY()));
+
+			double tmp_min = TMath::MinElement(gr->GetN(), gr->GetY());
+			if (tmp_min < min) min = tmp_min;
+			double tmp_max = TMath::MaxElement(gr->GetN(), gr->GetY());
+			if (tmp_max > max) max = tmp_max;
+			if (normalize) gr->Scale(1. / tmp_max);
 
 			TString name(Form("channel_%02d", active_channels[i]));
 			TString title(Form("Channel %d", active_channels[i]));
@@ -420,8 +427,8 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 
 	TCanvas* sumc = new TCanvas("Sums", "", 600, 400);
 	mgsums->Draw("AL");
-	mgsums->GetYaxis()->SetRangeUser(-1e4, 1e6);
 	if (normalize) mgsums->GetYaxis()->SetRangeUser(-0.2, 1);
+	else mgsums->GetYaxis()->SetRangeUser(min, max);
 	sumc->BuildLegend(0.85, 0.70, .99, .95);
 	root_out->WriteObject(mgsums, "channelsums");
 	root_out->WriteObject(sumc, "channelsums_c");
@@ -866,14 +873,8 @@ void ReadRun::SkipEventsTimeDiffCut(int first_channel_abs, int second_channel_ab
 
 	printf("\n\n Removing events if the event-wise time difference between the main peaks in ch%d and ch%d is <%.2f ns or >%.2f ns\n\n", first_channel_abs, second_channel_abs, time_diff_min, time_diff_max);
 	int counter = 0;
-
-	// match channel number to channel index
-	int first_channel = 0;
-	int second_channel = 0;
-	for (int i = 0; i < static_cast<int>(active_channels.size()); i++) {
-		if (active_channels[i] == first_channel_abs) first_channel = i;
-		if (active_channels[i] == second_channel_abs) second_channel = i;
-	}
+	int first_channel = GetChannelIndex(first_channel_abs);
+	int second_channel = GetChannelIndex(second_channel_abs);
 
 	// call GetTimingCFD() in case it was not initialized
 	if (static_cast<int>(timing_results.size()) == 0) GetTimingCFD();
@@ -1246,7 +1247,6 @@ float* ReadRun::ChargeList(int channel_index, float windowlow, float windowhi, f
 /// @param windowhi ...to "windowhi" ns from max.
 /// @param start Find max from "start" in ns...
 /// @param end ...to "end" in ns.
-/// @todo make correlation function for amplitudes of two channels
 void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, float end) {
 	float* event_list = new float[nevents];
 	for (int i = 0; i < nevents; i++) event_list[i] = static_cast<float>(i);
@@ -1277,6 +1277,47 @@ void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, floa
 	}
 	root_out->WriteObject(charge_list_mg, "all_charge_lists");
 	delete[] event_list;
+}
+
+/// @brief Plot correlation of integrals/amplitudes between two channels
+/// 
+/// See GetIntWindow() and PrintChargeSpectrum().
+/// 
+/// @param windowlow Integrate from "windowlow" ns from max...
+/// @param windowhi ...to "windowhi" ns from max.
+/// @param start Find max from "start" in ns...
+/// @param end ...to "end" in ns. 
+/// @param rangestart Plot x & y range start
+/// @param rangeend Plot x & y range end
+/// @param nbins Number of x & y bins of the histogram
+/// @param channel1 First channel number to compare
+/// @param channel2 second channel number to compare
+/// @param ingnore_skipped_events Set true to plot only events which passed filtering, else all events will be plotted
+void ReadRun::ChargeCorrelation(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, int channel1, int channel2, bool ingnore_skipped_events) {
+	gStyle->SetOptStat(1111);
+	stringstream name; 
+	name << "charge_correlation_ch" << channel1 << "_ch" << channel2;
+	stringstream title;
+	if (windowlow + windowhi > 0.) title << ";integral ch" << channel1 << " in mV#timesns;integral ch" << channel2 << " in mV#timesns;Entries";
+	else title << ";amplitude ch" << channel1 << " in mV;amplitude ch" << channel2 << " in mV;Entries";
+	
+	auto charge_corr_canvas = new TCanvas(name.str().c_str(), "canvas", 600, 400);
+	charge_corr_canvas->SetRightMargin(0.15);
+	
+	float* charge1 = ChargeList(GetChannelIndex(channel1), windowlow, windowhi, start, end);
+	float* charge2 = ChargeList(GetChannelIndex(channel2), windowlow, windowhi, start, end);
+	
+	auto charge_corr = new TH2F(name.str().c_str(), title.str().c_str(), nbins, rangestart, rangeend, nbins, rangestart, rangeend);
+	for (int i = 0; i < nevents; i++) {
+		if (!ingnore_skipped_events || !skip_event[i]) charge_corr->Fill(charge1[i], charge2[i]);
+	}
+	charge_corr->Draw("colz");
+	root_out->WriteObject(charge_corr, name.str().c_str());
+	
+	// move stat box out of the way
+	gPad->Update(); TPaveStats* stat_box = (TPaveStats*)charge_corr->FindObject("stats"); stat_box->SetX1NDC(0.6); stat_box->SetX2NDC(.85);
+	name << "_canvas";
+	root_out->WriteObject(charge_corr_canvas, name.str().c_str());
 }
 
 /// @brief Histogram of the "charge" spectrum for one channel
@@ -1316,6 +1357,7 @@ TH1F* ReadRun::ChargeSpectrum(int channel_index, float windowlow, float windowhi
 /// @param fitrangeend Fit range end
 /// @param max_channel_nr_to_fit Fit only channels with index < "max_channel_nr_to_fit". Set to -1 to skip fitting.
 /// @param which_fitf Choose fit function: \n 
+/// 0 - do not fit \n
 /// 1 - landau gauss convolution for large number of photons \n 
 /// 2 - if pedestal is biased because of peak finder algorithm \n 
 /// 3 - SiPM fit function with exponential delayed afterpulsing \n 
@@ -1356,17 +1398,19 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 
 			chargec->cd(current_canvas);
 
-			//do the fit
-			if (which_fitf == 1) { // landau gauss convolution for large number of photons
+			//fitting
+			if (which_fitf == 0) {}
+			else if (which_fitf == 1) { // landau gauss convolution for large number of photons
 				Fitf_langaus fitf;
-				TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, 4); f->SetLineColor(3);
+				int n_par = 4;
+				TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "Width");				f->SetParameter(0, 35);
 				f->SetParName(1, "MPV");				f->SetParameter(1, 1000);
 				f->SetParName(2, "Area");			    f->SetParameter(2, 10000);
 				f->SetParName(3, "#sigma_{Gauss}");		f->SetParameter(3, 100);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(4, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1376,7 +1420,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 2) { // if pedestal is biased because of peak finder algorithm
 				Fitf_biased fitf;
-				TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, 9); f->SetLineColor(3);
+				int n_par = 9;
+				TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1388,7 +1433,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(7, "norm_{0}");			f->SetParameter(7, 0.7);
 				f->SetParName(8, "x_{0}");				f->SetParameter(8, 5.);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1404,7 +1449,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 3) { // SiPM fit function with exponential delayed afterpulsing
 				Fitf_full fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 9); f->SetLineColor(3);
+				int n_par = 9;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1416,7 +1462,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(7, "#alpha");				f->SetParameter(7, .1); //f->FixParameter(7, .2);
 				f->SetParName(8, "#beta");				f->SetParameter(8, 80.); //f->FixParameter(8, 80);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1426,7 +1472,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 4) { // ideal PMT fit function
 				Fitf_PMT_ideal fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 4); f->SetLineColor(3);
+				int n_par = 4;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 1.);
@@ -1436,7 +1483,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetLineColor(2);
 				f->SetNpx(1000);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1446,7 +1493,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 5) { // PMT fit function
 				Fitf_PMT fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 8); f->SetLineColor(3);
+				int n_par = 8;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-99, 4.e-1); //probability for type II BG
@@ -1460,7 +1508,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetLineColor(2);
 				f->SetNpx(1000);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1470,7 +1518,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 6) { // PMT fit function with biased pedestal
 				Fitf_PMT_pedestal fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 9); f->SetLineColor(3);
+				int n_par = 9;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
@@ -1485,7 +1534,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetLineColor(2);
 				f->SetNpx(1000);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1495,7 +1544,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else if (which_fitf == 7) { // default SiPM fit function + dark count spectrum (for lots of false triggers)
 				Fitf_plus_DC fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 9); f->SetLineColor(3);
+				int n_par = 9;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
@@ -1510,7 +1560,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetLineColor(2);
 				f->SetNpx(1000);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1520,7 +1570,8 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			}
 			else { // default SiPM fit function
 				Fitf fitf;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, 7); f->SetLineColor(3);
+				int n_par = 7;
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1530,7 +1581,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 40.);
 				f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < static_cast<int>(PrintChargeSpectrum_pars.size()); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
 				if (i < max_channel_nr_to_fit) {
 					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
@@ -1589,10 +1640,10 @@ void ReadRun::PrintChargeSpectrumPMT(float windowlow, float windowhi, float star
 			two_gauss->SetParameters(fres_est->Parameter(0) * .95, fres_est->Parameter(1) * .95, fres_est->Parameter(2) * .95, fres_est->Parameter(0) * .3, fres_est->Parameter(1) * 1.05, fres_est->Parameter(2) * .85); // factors are pretty much random
 			two_gauss->SetParName(0, "A_{pedestal}");
 			two_gauss->SetParName(1, "#mu_{pedestal}");
-			two_gauss->SetParName(2, "#sigma_{pedestal}");
+			two_gauss->SetParName(2, "#sigma_{pedestal}");	two_gauss->SetParLimits(2, 1e-9, 1e3);
 			two_gauss->SetParName(3, "A_{SPE}");
 			two_gauss->SetParName(4, "#mu_{SPE}");
-			two_gauss->SetParName(5, "#sigma_{SPE}");
+			two_gauss->SetParName(5, "#sigma_{SPE}");		two_gauss->SetParLimits(5, 1e-9, 1e3);
 
 			if (!PrintChargeSpectrumPMT_pars.empty()) {
 				for (int j = 0; j < static_cast<int>(PrintChargeSpectrumPMT_pars.size()); j++) two_gauss->SetParameter(j, PrintChargeSpectrumPMT_pars[j]);
@@ -2116,8 +2167,8 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 		two_gauss->SetTitle("Sum of two gauss");
 		float posmax = his->GetXaxis()->GetBinCenter(his->GetMaximumBin());
 		two_gauss->SetParameters(his->Integral("width"), posmax, 0.35, his->Integral("width")/30, posmax, 2);
-		two_gauss->SetParName(0, "norm_{peak}");		two_gauss->SetParName(1, "#mu_{peak}");			two_gauss->SetParName(2, "#sigma_{peak}");
-		two_gauss->SetParName(3, "norm_{background}");	two_gauss->SetParName(4, "#mu_{background}");	two_gauss->SetParName(5, "#sigma_{background}");
+		two_gauss->SetParName(0, "norm_{peak}");		two_gauss->SetParName(1, "#mu_{peak}");			two_gauss->SetParName(2, "#sigma_{peak}");			two_gauss->SetParLimits(2, 1e-9, 1e2);
+		two_gauss->SetParName(3, "norm_{background}");	two_gauss->SetParName(4, "#mu_{background}");	two_gauss->SetParName(5, "#sigma_{background}");	two_gauss->SetParLimits(5, 1e-9, 1e2);
 		TFitResultPtr fresults = his->Fit(two_gauss, fitoption.c_str(), "same", fitrangestart, fitrangeend);
 		timing_fit_results.push_back(fresults);
 	}
@@ -2246,6 +2297,21 @@ int ReadRun::GetEventIndex(int eventnr) {
 	if (eventnr <= 0) eventnr = 1; // first event is 1
 	if (eventnr > nevents) eventnr = nevents;
 	return distance(eventnr_storage.begin(), find(eventnr_storage.begin(), eventnr_storage.end(), eventnr));
+}
+
+/// @brief  Match channel number (wavecatcher input channel) to channel index
+/// @param channel_number Number of the channel as defined in the wavecatcher software
+/// @return Corresponding index for this channel
+int ReadRun::GetChannelIndex(int channel_number) {
+	int channel_index = -1;
+	for (int i = 0; i < static_cast<int>(active_channels.size()); i++) {
+		if (active_channels[i] == channel_number) channel_index = i;
+	}
+	if (channel_index == -1) {
+		cout << "\n\n\tERROR: channel " << channel_number << " does not exist in data. Will continue with first channel\n\n";
+		channel_index = 0;
+	}
+	return channel_index;
 }
 
 /// @brief Helper to split canvas accordind to the number of channels to be plotted

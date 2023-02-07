@@ -1,0 +1,22 @@
+//get the index of each PMT-channel
+	int channel1 = 10; int channel2 = 11; int channel3 = 12; int channel4 = 13; int ch_index1, ch_index2, ch_index3, ch_index4 = 0;
+	// match channel number to channel index
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		if (mymeas.active_channels[i] == channel1) ch_index1 = i;
+		if (mymeas.active_channels[i] == channel2) ch_index2 = i;
+		if (mymeas.active_channels[i] == channel3) ch_index3 = i;
+		if (mymeas.active_channels[i] == channel4) ch_index4 = i;
+	}
+	//open the .txt-files; edit for your directory
+	ofstream myfile11; ofstream myfile13;
+	string directory1 = "/mnt/d/Work_SHK_Bachelor/analysis_programm/mathematica/run" + to_string(run) + "_11-10_cfd_times_ortho_only.txt";
+	string directory2 = "/mnt/d/Work_SHK_Bachelor/analysis_programm/mathematica/run" + to_string(run) + "_13-12_cfd_times_ortho_only.txt";
+	myfile11.open(directory1.c_str());
+	myfile13.open(directory2.c_str());
+	myfile11 << "Delta t of cfd-times for channel 11-10\n"; myfile13 << "Delta t of cfd-times for channel 13-12\n";
+	for (int i = 0; i < mymeas.nevents; i++) {
+		if (!mymeas.skip_event[i]) {
+			myfile11 << mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1] << "\n";
+			myfile13 << mymeas.timing_results[i*mymeas.nchannels+ch_index4][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index3][1] << "\n";
+		}
+	}

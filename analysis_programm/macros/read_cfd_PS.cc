@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream> //for opening and edidting .txt-files
 #include <cmath>
 #include <string.h>
 #include <stdio.h>
@@ -46,8 +47,33 @@ void read_cfd_PS(int which) // main
 		break;
 	}
 	case(5): {
-		path += "29_normal_PS_coinc_with_ortho_PS_C1_20k/"; //as run 26, but orthogonal PS at C2 position
+		path += "29_normal_PS_coinc_with_ortho_PS_C1_20k/";
 		run = 29;
+		break;
+	}
+	case(6): {
+		path += "32_nor_PS_coinc_w_ort_PS_at_7toC1/";
+		run = 32;
+		break;
+	}
+	case(7): {
+		path += "33_nor_PS_coinc_w_ort_PS_at_7toC2/";
+		run = 33;
+		break;
+	}
+	case(8): {
+		path += "34_nor_PS_coinc_w_ort_PS_at_205toC2/";
+		run = 34;
+		break;
+	}
+	case(9): {
+		path += "35_nor_PS_coinc_w_ort_PS_at_1925toleft/";
+		run = 35;
+		break;
+	}
+	case(10): {
+		path += "36_normal_PS_coinc_with_ortho_PS_C0/";
+		run = 36;
 		break;
 	}
 	default: {
@@ -85,26 +111,22 @@ void read_cfd_PS(int which) // main
 	mymeas.SkipEventsPerChannel(thresholds3, 110, 150, false);
 	vector<bool> second_ch_skip = mymeas.skip_event; //save the info
 	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = second_ch_skip[i] && first_ch_skip[i]; //skip all events where ch8 AND ch9 fires --> skip all orthogonal events
-	int counter = 0;
-	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging
-	cout << "Number of orthogonal events: " << counter << endl;
-	//mymeas.skip_event.flip();
+	int counter_ortho = 0;
+	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter_ortho;} //a bit debugging
+	cout << "Number of orthogonal events: " << counter_ortho << endl;
+	mymeas.skip_event.flip();
+
+	//skip weird events: -5 mV for identifying out burst/weird events (high frequency oscillations) in large PS (-7 only if signals inverted)
+	vector<double> thresholds_weird = {-5, -5, -5, -5, -5, -5};
+	mymeas.SkipEventsPerChannel(thresholds_weird, 100, 200, false);
 
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
 	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
 	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
 
-	// Positioncuts (trial)
-	//mymeas.SkipEventsTimeDiffCut(10, 11, -2.5, 2.5, false);
-	//mymeas.SkipEventsTimeDiffCut(12, 13, -2.5, 2.5, false);
-
-	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption, bool set_errors)
-	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
-	//mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 0, 200, -8, 8, "RS", false);
-
 	//plotting amplitude spectrum; mymeas.timimng_results[waveform][1] contains cfd-time
-	int channel1 = 10; int channel2 = 11;
+	int channel1 = 12; int channel2 = 13;
 	// match channel number to channel index
 	int ch_index1, ch_index2 = 0;
 	for (int i = 0; i < mymeas.active_channels.size(); i++) {
@@ -123,7 +145,7 @@ void read_cfd_PS(int which) // main
 
 	for (int i=0 ; i < mymeas.nevents ; i++){ //loop through all the events
 		his1->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //all events
-		if (!mymeas.skip_event[i]) {
+		if (mymeas.skip_event[i]) {
 			his2->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //ortho events skipped
 		}
 		else {
@@ -149,10 +171,12 @@ void read_cfd_PS(int which) // main
 	TString pdf_filename(Form("run%2d_%2d-%2d_combined.pdf", run, channel2, channel1));
 	gErrorIgnoreLevel = kError; //suppress root terminal output
 	combi->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
-	gErrorIgnoreLevel = kUnset;
+	gErrorIgnoreLevel = kUnset;	
 
-	// Syntax: ... (float rangestart, float rangeend, int do_fit, int nbins, string fitoption)
-	//mymeas.Print_GetTimingCFD(110,140,1,200,"S"); //for channelwise cfd
+	// Positioncuts (trial)
+	//mymeas.SkipEventsTimeDiffCut(10, 11, -2.5, 2.5, false);
+	//mymeas.SkipEventsTimeDiffCut(12, 13, -2.5, 2.5, false);
+
 
 	// prints some stats for events above a threshold into the terminal to identify interesting events
 	// Syntax: ...(float threshold, bool max, bool greater, double from, double to, bool verbose)
@@ -165,6 +189,13 @@ void read_cfd_PS(int which) // main
 	// plot sums of all events per channel --> get parameters
 	// Syntax: ...(bool doaverage, bool normalize, double shift, double sigma, bool doconv)
 	//mymeas.PlotChannelSums(false);
+
+	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption, bool set_errors)
+	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
+	//mymeas.Print_GetTimingCFD_diff({12}, {13}, -15, 15, 0, 200, -8, 8, "RS", false);
+
+	// Syntax: ... (float rangestart, float rangeend, int do_fit, int nbins, string fitoption)
+	//mymeas.Print_GetTimingCFD(110,140,1,200,"S"); //for channelwise cfd
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
 	float intwindowminus = 3.;	// lower integration window in ns rel. to max

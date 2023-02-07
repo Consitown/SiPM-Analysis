@@ -18,7 +18,7 @@
 
 	for (int i=0 ; i < mymeas.nevents ; i++){ //loop through all the events
 		his1->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //all events
-		if (!mymeas.skip_event[i]) {
+		if (mymeas.skip_event[i]) {
 			his2->Fill(mymeas.timing_results[i*mymeas.nchannels+ch_index2][1]-mymeas.timing_results[i*mymeas.nchannels+ch_index1][1]); //ortho events skipped
 		}
 		else {
