@@ -1,0 +1,33 @@
+//plotting uncorrected phi_ew - spectra ; first: map the phi_i to the channels, like Alex did, but with new channel positions
+	int sipmnum = 8; // number of SiPM-channels
+	int phi_chx[sipmnum] = {225, 270, 315, 0, 45, 90, 135, 180}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's
+	// match channel number to channel index
+	int ch_index[sipmnum] = {0, 0, 0, 0, 0, 0, 0, 0};
+	for (int i = 0; i < mymeas.active_channels.size(); i++) {
+		for (int j = 0; j < sipmnum; j++) {if (mymeas.active_channels[i] == j) ch_index[j] = i;}
+	}
+	// initialize canvas + histogramms
+	gStyle->SetOptStat("nemr"); //draws a box with some histogram parameters
+	TString his_name(Form("uncorrected phi_ew for run %2d", run));
+	TCanvas* hisc = new TCanvas(his_name, "ortho_only", 600, 400);
+	int nbins = 400; int min = -200; int max = 200;
+	TH1* his = new TH1F(his_name, "ortho_only", nbins, min, max);
+	// go through all events and compute phi_ew
+	double lightyield, anglevaluex, anglevaluey, phi_ew = 0;
+	for (int i = 0 ; i < mymeas.nevents ; i++){ //loop through all the events
+		for (int j = 0; j < sipmnum; j++){ //loop through all SiPM-channels
+			TH1F* hisly = ((TH1F*)rundata->At(i*mymeas.nchannels+ch_index[j])); // use Clone() to not change ranges of original histogram
+			lightyield = static_cast<double>(mymeas.GetPeakIntegral(hisly, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 0)); //lightyield as the integral around maximum
+			anglevaluex += cos(phi_chx[j]* PI/180)*lightyield; //x part of vectorial addition
+			anglevaluey += sin(phi_chx[j]* PI/180)*lightyield; //y part of vectorial addition
+		}
+		his->Fill(phi_ew = atan2(anglevaluey, anglevaluex)*180/PI); //vectorial addition
+	}
+	//make histogram fancy
+	his->GetXAxis()->SetTitle("phi_ew (deg.)");
+	his->GetYAxis()->SetTitle("#Entries");
+	his->Draw(); hisc->Update();
+	TString pdf_filename(Form("phi_ew_spectrum_run_%2d", run)); //write to a pdf-file
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
+	gErrorIgnoreLevel = kUnset;

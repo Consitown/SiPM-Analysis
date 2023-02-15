@@ -174,6 +174,9 @@ public:
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
 
+	// Cosmics specific
+	void Print_Phi_ew(vector<int>, vector<double>, vector<int>, float = 1, float = 1, float = 100, float = 140, int = 400, bool = true, bool = false);
+
 	// helper functions
 	stringstream list_files(const char*, const char*);	// find data files
 	TH1F* Getwf(int, int, int = 1);						// channel, eventnr, color

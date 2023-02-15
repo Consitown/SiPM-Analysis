@@ -50,6 +50,11 @@ void read_everyother_group(int which) // main
 		run = 31;
 		break;
 	}
+	case(6): {
+		path += "37_nor_PS_coinc_w_ort_PS+SiPMs_C0_120k/";
+		run = 37;
+		break;
+	}
 	default: {
 		cout << "\nerror: path to data not specified" << endl; // default
 		break;
@@ -64,7 +69,7 @@ void read_everyother_group(int which) // main
 	mymeas.ReadFile(path, true, 8, path + "everyother_results.root");
 
 	// only plot channels specified below. Leaving it empty will plot all channels
-	mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
+	//mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
 	//mymeas.plot_active_channels={8,9,10,11,12,13};
 
 	//use SmoothAll() for general smoothing of waveforms --> find good parameters; then use the internal smoothig of GetTimingCFD
@@ -75,7 +80,8 @@ void read_everyother_group(int which) // main
 
 	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
 	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9);
-/*
+
+	// filter out events where all PMT's have fired. small PS are channel 12 and 13
 	// Syntax: ...(vector<double> thresholds, double rangestart, double rangeend, bool verbose)
 	vector<double> thresholds2 = {0, 0, 0, 0, 0, 0, 0, 0, 4, 0}; //skip all events where ch8 fires
 	mymeas.SkipEventsPerChannel(thresholds2, 110, 150, false);
@@ -86,24 +92,24 @@ void read_everyother_group(int which) // main
 	vector<bool> second_ch_skip = mymeas.skip_event; //save the info
 	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = second_ch_skip[i] && first_ch_skip[i]; //skip all events where ch8 AND ch9 fires --> skip all orthogonal events
 	int counter = 0;
-	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging
+	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging; necessary for event number computation
 	cout << "Number of orthogonal events: " << counter << endl;
 	mymeas.skip_event.flip(); //all non ortho events get skipped --> only ortho events get plotted
-*/
+
 	//skip weird events: -5 mV for identifying out burst/weird events (high frequency oscillations) in large PS (-7 only if signals inverted)
 	vector<double> thresholds_weird = {0, 0, 0, 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5};
 	mymeas.SkipEventsPerChannel(thresholds_weird, 100, 200, false);
-
+/*
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
 	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
 	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
 
 	// apply cut for time difference between two channels
-	//mymeas.SkipEventsTimeDiffCut(10, 11, -1, 2, false); //skip all events which time diff is not of interest to us
-	//mymeas.SkipEventsTimeDiffCut(12, 13, -1, 2, false); //skip all events which time diff is not of interest to us
+	mymeas.SkipEventsTimeDiffCut(10, 11, -1, 1, false); //skip all events which time diff is not of interest to us
+	mymeas.SkipEventsTimeDiffCut(12, 13, -0.5, 1.5, false); //skip all events which time diff is not of interest to us
 	//mymeas.skip_event.flip();
-
+*/
 	//**********//
 	// Plotting + Fitting
 	//**********//
@@ -128,7 +134,7 @@ void read_everyother_group(int which) // main
 	float findmaxto = 150.;		// ... and here (depends on trigger delay setting etc., for dark counts the signal is random so we look at the whole recorded time range)
 	float plotrangestart = 0; 	// decide on the
 	float plotrangeend = 400;	// plotrange of x-axis
-	float fitstart = 18;		// start of the fit (x-axis)
+	float fitstart = 15;		// start of the fit (x-axis)
 	float fitend = 400;		// end of the fit
 	int channels_to_fit = 8; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
 	int which_fit = 1;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
@@ -138,6 +144,15 @@ void read_everyother_group(int which) // main
 								// 4 - ideal PMT fit function (5 is similar)
 								// 6 - PMT fit function with biased pedestal
 	
+	// Plotting the phi_ew spectrum
+	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss)
+	vector<int> phi_chx = {225, 270, 315, 0, 45, 90, 135, 180}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's
+	vector<double> ly_C0 = {97.81, 50.42, 94.02, 47.14, 95.07, 52.62, 99.02, 47.95}; //mean lightyields from PrintChargeSpectrum
+	//vector<int> phi_chx_even = {225, 315, 45, 135}; vector<double> ly_C0_even = {97.81, 94.02, 95.07, 99.02}; vector<int> phi_chx_odd = {270, 0, 90, 180}; vector<double> ly_C0_odd = {50.42, 47.14, 52.62, 47.95}; 
+	vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
+	//vector<int> SiPMchannels = {0, 2, 4, 6};
+	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
+
 	// old timing histogramm (should not use for cfd, so cfd_x should be 1)
 	//mymeas.PrintTimeDist(110, 140, 105, 145, 200, 1, cfd_x);
 
@@ -145,8 +160,9 @@ void read_everyother_group(int which) // main
 	//mymeas.Print_GetTimingCFD(110, 140, 1);
 
 	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
+	// for getting average lightyield, do which_fit=0 and look at the histogramms in the .root-file and manually extract the means
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
-	mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, plotrangestart, plotrangeend, 200, fitstart, fitend, channels_to_fit, which_fit);
+	//mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, plotrangestart, plotrangeend, 200, fitstart, fitend, channels_to_fit, which_fit);
 
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins)
 	// PrintChargeSpectrumPMT will apply a fit automatically from rangestart to rangeend (which are also the boundaries for the plot)

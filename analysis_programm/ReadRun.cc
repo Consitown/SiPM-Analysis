@@ -2181,6 +2181,79 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 	gErrorIgnoreLevel = kUnset;
 }
 
+/// @brief Plot distribution of the event-dependent angle phi_ew in a histogram. \n 
+/// The angle is calculated using vectorial addition and the lightyield of each channel in each event. \n
+/// For more info, see master thesis of Alexander Vagts. \n
+/// @param phi_chx Vector of the associated angles of each channel. Order is important. Angle of the first channel first. \n
+/// E.g. if channel 0 is used, the first angle would be from channel 0
+/// @param ly_C0 Vector of the lightyield of all channels at C0 position for the corretion. Order must be the same as in phi_chx
+/// @param SiPMchannels all SiPM channels which should be included in analysis, e.g. {0, 2, 4, 6}
+/// @param windowmin left edge of integration window for lightyield
+/// @param windowmax right edge of integration window for lightyield
+/// @param maxfrom searches for peak from this to
+/// @param maxto this
+/// @param nbins Number of bins in histogramm
+/// @param corr selection bool for corrected or uncorrected spectra \n
+/// If true - corrected spectra \n
+/// If false - uncorrected spectra
+/// @param triple_gauss If true, will print all phi_ew shifted by +/- 360° (so normal phi_ew distri * 3) and fit a triple gauss to it
+/// @return Phi_ew spectrum
+void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<double> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss) {
+	// plotting uncorrected/corected phi_ew - spectra ; first: map the phi_i to the channels, like Alex did, but with new channel positions
+	// match channel number to channel index (still very specific)
+	int sipmnum = SiPMchannels.size();
+	vector<int> ch_index; for (int i = 0; i < sipmnum; i++) ch_index.push_back(0); // initialze the ch_index vector
+	for (int i = 0; i < active_channels.size(); i++) {
+		for (int j = 0; j < sipmnum; j++) {if (active_channels[i] == SiPMchannels[j]) ch_index[j] = i;}
+	}
+	// compute correction factor
+	vector<double> ly_corr;
+	if (corr) {
+		double ly_av = 0; for (int i = 0; i < sipmnum; i++) ly_av += ly_C0[i]; // average lightyield of all channels * sipmnum
+		for (int i = 0; i < sipmnum; i++) ly_corr.push_back(sipmnum*ly_C0[i]/ly_av); // divide ly of one channel by (1/sipmnum)*sipmnum*average ly of all channels
+	}
+	else for (int i = 0; i < sipmnum; i++) ly_corr.push_back(1); // if no correction, then all factors are 1
+	// print out correction factors
+	for (int i = 0; i < sipmnum; i++) cout << "Correction factor for channel " << SiPMchannels[i] << ":" << ly_corr[i] << endl;
+	// initialize canvas + histogramms
+	gStyle->SetOptStat("nemr"); gStyle->SetOptFit(1111); //draws a box with some histogram parameters
+	TString his_name(Form("#phi_ew-spectrum_from_ch%2d_to_ch%2d", SiPMchannels.front(), SiPMchannels.back()));
+	TCanvas* hisc = new TCanvas(his_name, his_name, 600, 400);
+	int min, max;
+	if (triple_gauss) {min = -600; max = 600;} else {min = -200; max = 200;} // choose the according plotrange
+	TH1* his = new TH1F(his_name, his_name, nbins, min, max);
+	// go through all events and compute phi_ew
+	double lightyield, anglevaluex, anglevaluey, phi_ew = 0;
+	for (int i = 0 ; i < nevents ; i++){ //loop through all the events
+		if (!skip_event[i]) {
+			for (int j = 0; j < sipmnum; j++){ //loop through all SiPM-channels
+				TH1F* hisly = ((TH1F*)rundata->At(i*nchannels+ch_index[j])); 
+				lightyield = static_cast<double>(GetPeakIntegral(hisly, windowmin, windowmax, maxfrom, maxto, 0)); //lightyield as the integral around maximum
+				anglevaluex += cos(phi_chx[j]* TMath::Pi()/180)*(lightyield/ly_corr[j]); //x part of vectorial addition
+				anglevaluey += sin(phi_chx[j]* TMath::Pi()/180)*(lightyield/ly_corr[j]); //y part of vectorial addition
+				//if (i%50==0) cout << lightyield << " " << cos(phi_chx[j]* TMath::Pi()/180) << endl;
+			}
+			phi_ew = atan2(anglevaluey, anglevaluex)*180/TMath::Pi(); // vectorial addition for phi_ew --> fill in histo
+			//if (i%50==0) cout << anglevaluex << " " << anglevaluey << " " << lightyield << endl;
+			if (triple_gauss) {
+				his->Fill(phi_ew); his->Fill(phi_ew+static_cast<double>(360)); his->Fill(phi_ew-static_cast<double>(360));
+			}
+			else his->Fill(phi_ew);
+			anglevaluex = 0, anglevaluey = 0; //reset the x and y parts
+		}
+	}
+	if (triple_gauss) {
+		/*triple gauss fit, which still needs to be implemented*/
+	}
+	//make histogram fancy + printing
+	his->GetXaxis()->SetTitle("#phi_ew (deg.)"); his->GetYaxis()->SetTitle("#Entries"); //titeling of axes
+	his->Draw(); hisc->Update(); //put stuff on canvas
+	TString pdf_filename(Form("phi_ew_spectrum.pdf")); //write to a pdf-file
+	gErrorIgnoreLevel = kError; //suppress root terminal output
+	hisc->Print(pdf_filename); //write the histogram to a .pdf-file
+	gErrorIgnoreLevel = kUnset;
+}
+
 // helper functions
 
 /// @brief Helper. Creates a list of .bin data files in data folder to be read in

@@ -126,7 +126,7 @@ void read_cfd_PS(int which) // main
 	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
 
 	//plotting amplitude spectrum; mymeas.timimng_results[waveform][1] contains cfd-time
-	int channel1 = 12; int channel2 = 13;
+	int channel1 = 10; int channel2 = 13;
 	// match channel number to channel index
 	int ch_index1, ch_index2 = 0;
 	for (int i = 0; i < mymeas.active_channels.size(); i++) {
