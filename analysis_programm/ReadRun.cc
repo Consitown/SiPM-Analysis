@@ -100,7 +100,8 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 	maxSumBin = new int[nChannelsWC];
 
 	//Start reading the raw data from .bin files.
-	stringstream inFileList = list_files(path.c_str(), ".bin"); //all *.bin* files in folder path
+	stringstream inFileList;
+	inFileList << list_files(path.c_str(), ".bin"); //all *.bin* files in folder path
 	int nitem = 1;
 	string fileName;
 	int file_counter = 0;
@@ -121,7 +122,8 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 			printf("*** failed to open '%s'\n", fileName.c_str());
 			continue;
 		}
-		printf("+++ reading '%s' ...\n", fileName.c_str());
+
+		if (file_counter < 10 || file_counter % 10 == 0 || debug) printf("+++ reading '%s' ...\n", fileName.c_str());
 
 		// Header
 		string header_line;
@@ -389,10 +391,11 @@ ReadRun::~ReadRun() {
 /// Do not use without very good reason as it biases the results.
 /// @param normalize If true will normalize the maximum to 1.
 /// @param shift Shift histogram by "shift" ns
-/// @param sigma Number of bins for running average/gauss sigma in ns for convolution.
-/// @param doconv If false use running average (default). \n 
-/// If true use gaussian smoothing (slower).
-void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, double sigma, bool doconv) {
+/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
+/// @param smooth_method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks! Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
+void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, double sigma, int smooth_method) {
 
 	double* xv = getx(shift);
 	TMultiGraph* mgsums = new TMultiGraph();
@@ -403,7 +406,7 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 	for (int i = 0; i < nchannels; i++) {
 		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
 			double* yv = amplValuessum[i];
-			if (doaverage) SmoothArray(yv, binNumber, sigma, doconv);
+			if (doaverage) SmoothArray(yv, binNumber, sigma, smooth_method);
 
 			TGraph* gr = new TGraph(binNumber, xv, yv);
 			delete[] yv;
@@ -412,7 +415,9 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 			if (tmp_min < min) min = tmp_min;
 			double tmp_max = TMath::MaxElement(gr->GetN(), gr->GetY());
 			if (tmp_max > max) max = tmp_max;
-			if (normalize) gr->Scale(1. / tmp_max);
+			if (normalize) {
+				for (int j = 0; j < gr->GetN(); j++) gr->SetPointY(j, gr->GetPointY(j) / tmp_max);
+			}
 
 			TString name(Form("channel_%02d", active_channels[i]));
 			TString title(Form("Channel %d", active_channels[i]));
@@ -435,21 +440,22 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 }
 
 /// @brief Smoothing all waveforms which are not skipped (for testing, do not use for analysis!)
-/// @param sigma Number of bins for running average (box) or gauss sigma in ns for convolution.
-/// @param doconv If false use running average (default). \n 
-/// If true use gaussian smoothing (slower).
-void ReadRun::SmoothAll(double sigma, bool doconv) { //deprecated since it can be done with baseline correction??
+/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
+/// @param method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
+void ReadRun::SmoothAll(double sigma, int method) {
 	// just for testing, not very efficient
 	cout << "\nsmoothing wfs";
 	for (int j = 0; j < nwf; j++) {
 		if (!skip_event[j]) {
 			TH1F* his = ((TH1F*)rundata->At(j));
 			double* yvals = gety(his);
-			SmoothArray(yvals, binNumber, sigma, doconv);
+			SmoothArray(yvals, binNumber, sigma, method);
 			for (int i = 1; i < his->GetNbinsX(); i++) his->SetBinContent(i, yvals[i]);
 			delete[] yvals;
-			if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 		}
+		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 	}
 }
 
@@ -548,15 +554,16 @@ void ReadRun::CorrectBaseline_function(TH1F* his, float tCut, float tCutEnd, int
 /// 
 /// @param nIntegrationWindow Number of bins of integration window
 /// @param doaverage If true will use averaging for more reliable slope. Use with care!
-/// @param sigma Number of bins for running average/gauss sigma in ns for convolution. Use with care!
+/// @param sigma NNumber of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution. Use with care!
 /// @param max_bin_for_baseline Maximum bin for search window.
 /// @param start_at Minimum bin for search window.
 /// @param search_min Experimental, use with care.
-/// @param convolution If false use running average (default). \n 
-/// If true use gaussian smoothing (slower).
+/// @param smooth_method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
 /// @param skip_channel Skip a channel
 /// @todo Work on "skip_channel" and remove "search_min"
-void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel) {
+void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, int smooth_method, int skip_channel) {
 
 	const int binNumberSlope = binNumber - 1;
 	double* slope = new double[binNumberSlope];
@@ -600,7 +607,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 		if (j == 0 || j != skip_channel - 1 || j % skip_channel != 0) { //eventnr * nchannels + i
 			TH1F* his = ((TH1F*)rundata->At(j));
 			double* yvals = gety(his); //find faster way
-			SmoothArray(yvals, binNumber, sigma, convolution); // smoothing important to suppress variations in slope due to noise so the method is more sensitve to excluding peaks
+			if (sigma > 0) SmoothArray(yvals, binNumber, sigma, smooth_method); // smoothing important to suppress variations in slope due to noise so the method is more sensitve to excluding peaks
 
 			//calculate slope
 			for (int i = 0; i < binNumberSlope; i++) slope[i] = yvals[i + 1] - yvals[i];
@@ -651,7 +658,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 				if (!doaverage) his->SetBinContent(i, his->GetBinContent(i) - corr);
 				else his->SetBinContent(i, yvals[i] - corr);
 			}
-			delete[] yvals; //delete slow
+			delete[] yvals; 
 		}
 
 		baseline_correction_result.push_back(vector<float>());
@@ -666,18 +673,6 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 	}
 	delete[] slope;
-
-	//TCanvas* sumc = new TCanvas("sumc", "sumc", 600, 400);
-	//TH1F* hiss = new TH1F("sum", "sum", 1e4, -2, 2);
-	//TH1F* hiss0 = new TH1F("sum0", "sum0", 1e4, -2, 2);
-	//TH1F* hisssq = new TH1F("sqsum", "sqsum", 1e4, -2, 2);
-	//for (int i = 0; i < nwf; i++) {
-	//	hiss->Fill(baseline_correction_result[i][4]);
-	//	hiss0->Fill(baseline_correction_result[i][5]);
-	//	hisssq->Fill(baseline_correction_result[i][6]);
-	//}
-	//hiss0->SetLineColor(2); hisssq->SetLineColor(1);
-	//hiss->Draw(); hiss0->Draw("same"); hisssq->Draw("same");
 }
 
 /// @brief Baseline correction using minimum mean in range for correction 
@@ -692,7 +687,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 /// Results will be visualized for each event in PrintChargeSpectrumWF(). \n 
 /// For parameters see CorrectBaselineMinSlopeRMS() 
 /// 
-void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool convolution, int skip_channel) {
+void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, int smooth_method, int skip_channel) {
 
 	int binNumberSlope = binNumber - 1;
 	skip_channel += 1;
@@ -717,7 +712,7 @@ void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double 
 		if (j == 0 || j != skip_channel - 1 || j % skip_channel != 0) { //eventnr * nchannels + i
 			TH1F* his = ((TH1F*)rundata->At(j));
 			double* yvals = gety(his); //find faster way
-			SmoothArray(yvals, binNumber, sigma, convolution); // smoothing
+			if (sigma > 0) SmoothArray(yvals, binNumber, sigma, smooth_method); // smoothing
 
 			if (max_bin_for_baseline != 0 && max_bin_for_baseline > nIntegrationWindow) {
 				search_before = max_bin_for_baseline - nIntegrationWindow - 1;
@@ -776,17 +771,17 @@ void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double 
 /// @param cf_r Fraction of maximum for CFD.
 /// @param start_at_t Time in ns to start searching.
 /// @param end_at_t Time in ns to end searching.
-/// @param sigma Smoothing width. Should be set to 0. \n 
-/// Number of bins for running average/gauss sigma in ns for convolution\n
+/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
 /// This will bias the results! Do not use (or use very carefully, only for noisy data)!
 /// @param find_CF_from_start If true will start search from "start_at_t" \n 
 /// If false searches backwards from time of maximum (default setting).
-/// @param doconv If false use running average (default). \n 
-/// If true use gaussian smoothing (slower).
+/// @param smooth_method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
 /// @param use_spline If false will use linear interpolation between the two bins closest to cf_r. \n
-/// If true will use a 5th order spline for interpolation. This method is a bit slower but performs a bit better in terms of chi^2. 
+/// If true will use a 5th order spline for interpolation. Performs a bit better in terms of chi^2. 
 /// However, the fit parameters do not seem to depend much on the interpolation method.
-void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) {
+void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, int smooth_method, bool use_spline) {
 
 	int start_at = static_cast<int>(floor(start_at_t / SP));
 	int end_at = static_cast<int>(ceil(end_at_t / SP));
@@ -799,7 +794,7 @@ void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double 
 		TH1F* his = ((TH1F*)rundata->At(j));
 		double* yvals = gety(his, start_at, end_at); // get range where to search for CFD for timing
 
-		if (sigma > 0.) SmoothArray(yvals, n_range, sigma, doconv); // smoothing to suppress noise, will also change timing so use with care!
+		if (sigma > 0.) SmoothArray(yvals, n_range, sigma, smooth_method); // smoothing to suppress noise, will also change timing so use with care!
 
 		float max = 0.;
 		int n_max = 0;
@@ -834,14 +829,14 @@ void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double 
 			TSpline5* wfspl = 0;
 			wfspl = new TSpline5("wf_spline", xvals, yvals, n_range, "b1e1b2e2", 0., 0., 0., 0.);
 
-			double fbin = 0.;
-			for (fbin = xvals[i - 1]; fbin < xvals[i + 1]; fbin += .01) {
+			float fbin = 0.;
+			for (fbin = xvals[i - 1]; fbin <= xvals[i + 1]; fbin += .01) {
 				if (wfspl->Eval(fbin) > cf) {
-					fbin -= .01;
+					interpol_bin = fbin - .01;
 					break;
 				}
 			}
-			if (fbin != 0.) interpol_bin = fbin;
+			delete wfspl;
 			delete[] xvals;
 		}
 
@@ -951,6 +946,7 @@ void ReadRun::FractionEventsAboveThreshold(float threshold, bool max, bool great
 				lastevent = currevent;
 			}
 		}
+		delete his;
 	}
 
 	if (verbose) cout << endl;
@@ -977,7 +973,7 @@ void ReadRun::SkipEventsPerChannel(vector<double> thresholds, double rangestart,
 
 	cout << "\n\n Removing events with individual amplitude threshold per channel!!!\n\n";
 	int counter = 0;
-	
+
 	for (int j = 0; j < nwf; j++) {
 		if (!skip_event[floor(j / nchannels)]) {
 			int currchannel = j - nchannels * floor(j / nchannels);
@@ -992,6 +988,7 @@ void ReadRun::SkipEventsPerChannel(vector<double> thresholds, double rangestart,
 					skip_event[floor(j / nchannels)] = true;
 					counter++;
 				}
+				delete his;
 			}
 		}
 	}
@@ -1017,32 +1014,36 @@ void ReadRun::SkipEventsPerChannel(vector<double> thresholds, double rangestart,
 /// @param verbose Set true for extra verbosity.
 void ReadRun::IntegralFilter(vector<double> thresholds, vector<bool> highlow, float windowlow, float windowhi, float start, float end, bool use_AND_condition, bool verbose) {
 
-	cout << "\n\n Removing events with individual integral threshold per channel!!!\n\n";
+	cout << "\n\nRemoving events with individual integral threshold per channel :: ";
 	int counter = 0;
 	float integral = 0;
+	int currevent_counter = 0;
+	int currchannel = 0;
+	int currevent = 0;
 
 	for (int j = 0; j < nwf; j++) {
-		int currevent_counter = floor(j / nchannels);
+		currevent_counter = floor(j / nchannels);
 
 		if (use_AND_condition || !skip_event[currevent_counter]) {
-			int currchannel = j - nchannels * currevent_counter;
+			currchannel = j - nchannels * currevent_counter;
 
 			if (currchannel < static_cast<int>(thresholds.size())) {
 				auto his = (TH1F*)((TH1F*)rundata->At(j))->Clone(); // use Clone() to not change ranges of original histogram
 				integral = GetPeakIntegral(his, windowlow, windowhi, start, end, currchannel);
 
 				if (thresholds[currchannel] != 0 && !skip_event[currevent_counter] && ((highlow[currchannel] && integral > thresholds[currchannel]) || (!highlow[currchannel] && integral < thresholds[currchannel]))) {
-					int currevent = eventnr_storage[currevent_counter];
+					currevent = eventnr_storage[currevent_counter];
 					if (verbose) cout << "\nevent:\t" << currevent << "\tchannel:\t" << active_channels[currchannel] << "\tthreshold\t" << thresholds[currchannel];
 					skip_event[currevent_counter] = true;
 					while (floor((j + 1) / nchannels) == currevent_counter) j++;
 					counter++;
 				}
 				else if (use_AND_condition && thresholds[currchannel] != 0 && skip_event[currevent_counter] && !highlow[currchannel]) {
-					int currevent = eventnr_storage[currevent_counter];
+					currevent = eventnr_storage[currevent_counter];
 					skip_event[currevent_counter] = false;
 					if (verbose) cout << "\nevent:\t" << currevent << "\tchannel:\t" << active_channels[currchannel] << "\thas been flagged good by integral";
 				}
+				delete his;
 			}
 			if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 		}
@@ -1229,11 +1230,13 @@ void ReadRun::PrintChargeSpectrumWF(float windowlow, float windowhi, float start
 /// @param windowhi ...to "windowhi" ns from max.
 /// @param start Find max from "start" in ns...
 /// @param end ...to "end" in ns.
-float* ReadRun::ChargeList(int channel_index, float windowlow, float windowhi, float start, float end) {
+/// @param negative_vals If true will save negative values. If false will set negative values to 0.
+float* ReadRun::ChargeList(int channel_index, float windowlow, float windowhi, float start, float end, bool negative_vals) {
 	float* charge_list = new float[nevents];
 	for (int j = 0; j < nevents; j++) {
 		TH1F* his = ((TH1F*)rundata->At(j * nchannels + channel_index));
 		charge_list[j] = GetPeakIntegral(his, windowlow, windowhi, start, end, channel_index);
+		if (!negative_vals && charge_list[j] < 0.) charge_list[j] = 0.;
 	}
 	return charge_list;
 }
@@ -1247,10 +1250,11 @@ float* ReadRun::ChargeList(int channel_index, float windowlow, float windowhi, f
 /// @param windowhi ...to "windowhi" ns from max.
 /// @param start Find max from "start" in ns...
 /// @param end ...to "end" in ns.
-void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, float end) {
+/// @param negative_vals If true will save negative values. If false will set negative values to 0.
+void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, float end, bool negative_vals) {
 	float* event_list = new float[nevents];
 	for (int i = 0; i < nevents; i++) event_list[i] = static_cast<float>(i);
-	
+
 	TMultiGraph* charge_list_mg = new TMultiGraph();
 	if (windowlow + windowhi > 0.) charge_list_mg->SetTitle("event-wise integrals; Event number; integral [mV#timesns]");
 	else charge_list_mg->SetTitle("event-wise amplitudes; Event number; amplitude [mV]");
@@ -1258,7 +1262,7 @@ void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, floa
 	for (int i = 0; i < nchannels; i++) {
 		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
 			TString name(Form("charge_list_ch_%02d", active_channels[i]));
-			float* charge_list = ChargeList(i, windowlow, windowhi, start, end);
+			float* charge_list = ChargeList(i, windowlow, windowhi, start, end, negative_vals);
 			TGraph* charge_list_graph = new TGraph(nevents, event_list, charge_list);
 			charge_list_graph->SetLineWidth(0);
 			charge_list_graph->SetMarkerStyle(2);
@@ -1295,25 +1299,25 @@ void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, floa
 /// @param ingnore_skipped_events Set true to plot only events which passed filtering, else all events will be plotted
 void ReadRun::ChargeCorrelation(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, int channel1, int channel2, bool ingnore_skipped_events) {
 	gStyle->SetOptStat(1111);
-	stringstream name; 
+	stringstream name;
 	name << "charge_correlation_ch" << channel1 << "_ch" << channel2;
 	stringstream title;
 	if (windowlow + windowhi > 0.) title << ";integral ch" << channel1 << " in mV#timesns;integral ch" << channel2 << " in mV#timesns;Entries";
 	else title << ";amplitude ch" << channel1 << " in mV;amplitude ch" << channel2 << " in mV;Entries";
-	
+
 	auto charge_corr_canvas = new TCanvas(name.str().c_str(), "canvas", 600, 400);
 	charge_corr_canvas->SetRightMargin(0.15);
-	
+
 	float* charge1 = ChargeList(GetChannelIndex(channel1), windowlow, windowhi, start, end);
 	float* charge2 = ChargeList(GetChannelIndex(channel2), windowlow, windowhi, start, end);
-	
+
 	auto charge_corr = new TH2F(name.str().c_str(), title.str().c_str(), nbins, rangestart, rangeend, nbins, rangestart, rangeend);
 	for (int i = 0; i < nevents; i++) {
 		if (!ingnore_skipped_events || !skip_event[i]) charge_corr->Fill(charge1[i], charge2[i]);
 	}
 	charge_corr->Draw("colz");
 	root_out->WriteObject(charge_corr, name.str().c_str());
-	
+
 	// move stat box out of the way
 	gPad->Update(); TPaveStats* stat_box = (TPaveStats*)charge_corr->FindObject("stats"); stat_box->SetX1NDC(0.6); stat_box->SetX2NDC(.85);
 	name << "_canvas";
@@ -1403,7 +1407,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 1) { // landau gauss convolution for large number of photons
 				Fitf_langaus fitf;
 				int n_par = 4;
-				TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "Width");				f->SetParameter(0, 35);
 				f->SetParName(1, "MPV");				f->SetParameter(1, 1000);
@@ -1421,7 +1425,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 2) { // if pedestal is biased because of peak finder algorithm
 				Fitf_biased fitf;
 				int n_par = 9;
-				TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1450,7 +1454,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 3) { // SiPM fit function with exponential delayed afterpulsing
 				Fitf_full fitf;
 				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1473,15 +1477,12 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 4) { // ideal PMT fit function
 				Fitf_PMT_ideal fitf;
 				int n_par = 4;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 1.);
 				f->SetParName(2, "#sigma");				f->SetParameter(2, 5.);
 				f->SetParName(3, "gain");				f->SetParameter(3, 10.);
-
-				f->SetLineColor(2);
-				f->SetNpx(1000);
 
 				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
@@ -1494,7 +1495,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 5) { // PMT fit function
 				Fitf_PMT fitf;
 				int n_par = 8;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-99, 4.e-1); //probability for type II BG
@@ -1504,9 +1505,6 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(5, "#mu");				f->SetParameter(5, 1.);
 				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
 				f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);
-
-				f->SetLineColor(2);
-				f->SetNpx(1000);
 
 				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
@@ -1519,7 +1517,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 6) { // PMT fit function with biased pedestal
 				Fitf_PMT_pedestal fitf;
 				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
@@ -1530,9 +1528,6 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
 				f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);	f->SetParLimits(7, 1.e-9, 1.e9);
 				f->SetParName(8, "A_{0}");				f->SetParameter(8, 1.);		f->SetParLimits(8, 1.e-9, 1.e1);
-
-				f->SetLineColor(2);
-				f->SetNpx(1000);
 
 				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
@@ -1545,7 +1540,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else if (which_fitf == 7) { // default SiPM fit function + dark count spectrum (for lots of false triggers)
 				Fitf_plus_DC fitf;
 				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
 				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
@@ -1556,9 +1551,6 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
 				f->SetParName(7, "#mu_darkcount");		f->SetParameter(7, .1);		f->SetParLimits(7, 1.e-9, 1.);
 				f->SetParName(8, "N_{0}_darkcount");	f->SetParameter(8, .05);	f->SetParLimits(8, 1.e-9, .3);
-
-				f->SetLineColor(2);
-				f->SetNpx(1000);
 
 				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
@@ -1571,7 +1563,7 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			else { // default SiPM fit function
 				Fitf fitf;
 				int n_par = 7;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3);
+				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
 				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
 				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
@@ -1791,6 +1783,104 @@ void ReadRun::PrintDCR(float windowlow, float windowhi, float rangestart, float 
 	}
 }
 
+/// @brief Plot distribution of the event-dependent angle phi_ew in a histogram. \n 
+/// The angle is calculated using vectorial addition and the lightyield of each channel in each event. \n
+/// For more info, see master thesis of Alexander Vagts. \n
+/// Currently uses the uncorrected formulas
+/// @param phi_chx Vector of the associated angles of each channel. Order is important. Angle of the first channel first. \n
+/// E.g. if channel 0 is used, the first angle would be from channel 0
+/// @param ly_C0 Vector of the lightyield of all channels at C0 position for the correction. Order must be the same as in phi_chx
+/// @param SiPMchannels all SiPM channels which should be included in analysis, e.g. {0, 2, 4, 6}
+/// @param windowmin left edge of integration window for lightyield
+/// @param windowmax right edge of integration window for lightyield
+/// @param maxfrom searches for peak from this to
+/// @param maxto this
+/// @param nbins Number of bins in histogram
+/// @param corr selection bool for corrected or uncorrected spectra \n
+/// If true - corrected spectra \n
+/// If false - uncorrected spectra
+/// @param periodic If true, will print all phi_ew shifted by +/- 360° (so normal phi_ew distri * 3) and fit a periodic gauss
+/// @return Phi_ew spectrum
+void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool periodic) {
+
+	// plotting uncorrected/corected phi_ew - spectra ; first: map the phi_i to the channels, like Alex did, but with new channel positions
+	// match channel number to channel index (still very specific)
+	int sipmnum = SiPMchannels.size();
+	vector<int> ch_index; for (int i = 0; i < sipmnum; i++) ch_index.push_back(0); // initialze the ch_index vector
+	for (int i = 0; i < active_channels.size(); i++) {
+		for (int j = 0; j < sipmnum; j++) { 
+			if (active_channels[i] == SiPMchannels[j]) ch_index[j] = i;
+		}
+	}
+
+	// compute correction factor
+	vector<float> ly_corr;
+	if (corr) {
+		float ly_av = 0; 
+		// average lightyield of all channels * sipmnum
+		for (int i = 0; i < sipmnum; i++) ly_av += ly_C0[i]; 
+		// divide ly of one channel by (1/sipmnum)*sipmnum*average ly of all channels
+		for (int i = 0; i < sipmnum; i++) ly_corr.push_back(sipmnum * ly_C0[i] / ly_av); 
+	}
+	else for (int i = 0; i < sipmnum; i++) ly_corr.push_back(1); // no correction
+	
+	// print correction factors
+	for (int i = 0; i < sipmnum; i++) cout << "Correction factor for channel " << SiPMchannels[i] << ":" << ly_corr[i] << endl;
+	
+	// initialize canvas + histogramms
+	gStyle->SetOptStat("nemr"); gStyle->SetOptFit(1111); //draws a box with some histogram parameters
+	TString his_name(Form("#phi_ew-spectrum_from_ch%2d_to_ch%2d", SiPMchannels.front(), SiPMchannels.back()));
+	TCanvas* hisc = new TCanvas(his_name, his_name, 600, 400);
+	
+	int min = -180, max = 180; //plot range
+	if (periodic) { min = -540; max = 540; }
+	TH1* his = new TH1F(his_name, his_name, nbins, min, max);
+	
+	// loop through all events and compute phi_ew
+	float lightyield, anglevaluex, anglevaluey, phi_ew = 0;
+	for (int i = 0; i < nevents; i++) {
+		if (!skip_event[i]) {
+			for (int j = 0; j < sipmnum; j++) { //loop through all SiPM-channels
+				TH1F* hisly = ((TH1F*)rundata->At(i * nchannels + ch_index[j]));
+				lightyield = GetPeakIntegral(hisly, windowmin, windowmax, maxfrom, maxto, 0); //lightyield as the integral around maximum
+				anglevaluex += cos(phi_chx[j] * TMath::Pi() / 180) * lightyield / ly_corr[j]; //x part of vectorial addition
+				anglevaluey += sin(phi_chx[j] * TMath::Pi() / 180) * lightyield / ly_corr[j]; //y part of vectorial addition
+			}
+
+			phi_ew = atan2(anglevaluey, anglevaluex) * 180 / TMath::Pi(); //vectorial addition for phi_ew --> fill in histo
+			his->Fill(phi_ew);
+			if (periodic) {
+				his->Fill(phi_ew + 360); 
+				his->Fill(phi_ew - 360);
+			}
+			anglevaluex = 0, anglevaluey = 0; //reset the x and y parts
+		}
+	}
+
+	//make histogram fancy + printing
+	his->GetXaxis()->SetTitle("#phi_ew (deg.)"); his->GetYaxis()->SetTitle("#Entries"); //titeling of axes
+	his->Draw();
+
+	if (periodic) {
+		Fitf_periodic_gauss fitf;
+		int n_par = 4;
+		TF1* f = new TF1("fitf", fitf, -540, 540, n_par); f->SetLineColor(2); f->SetNpx(1000);
+
+		f->SetParName(0, "A");				f->SetParameter(0, 100);
+		f->SetParName(1, "#Phi_{ew}");		f->SetParameter(1, 0);		f->SetParLimits(1, -180, 180); 
+		f->SetParName(2, "#sigma");			f->SetParameter(2, 40);		f->SetParLimits(1, 0, 360);
+		f->SetParName(3, "offset");			f->SetParameter(3, 10.);
+		
+		TFitResultPtr fresults = his->Fit(f, "LRS");
+		fit_results.push_back(fresults);
+	}
+	
+	hisc->Update();
+	root_out->WriteObject(hisc, "Phi_ew");
+	
+	hisc->SaveAs("phi_ew_spectrum.pdf"); //write the histogram to a .pdf-file
+}
+
 /// @brief Time distribution of maximum, CFD, or 10% - 90% rise time in a certain time window
 /// 
 /// See PrintTimeDist() for parameters.
@@ -1838,6 +1928,7 @@ TH1F* ReadRun::TimeDist(int channel_index, float from, float to, float rangestar
 
 				h1->Fill(t90 - t10);
 			}
+			delete his;
 		}
 	}
 	if (which == 1) h1->Fit("gaus", "L", "same");
@@ -1914,6 +2005,7 @@ TGraph2D* ReadRun::MaxDist(int channel_index, float from, float to) {
 			if (from >= 0 && to > 0) his->GetXaxis()->SetRange(his->GetXaxis()->FindBin(from), his->GetXaxis()->FindBin(to));
 			double max = his->GetMaximum();
 			for (int i = 0; i < 1024; i++) g3d->SetPoint(j * 1024 + i, his->GetXaxis()->GetBinCenter(i), max, his->GetBinContent(i));
+			delete his;
 		}
 	}
 	root_out->WriteObject(g3d, name.Data());
@@ -2027,11 +2119,11 @@ TH1F* ReadRun::His_GetTimingCFD_diff(vector<int> channels1, vector<int> channels
 
 	stringstream name;
 	name << "GetTimingCFD_diff <";
-	
+
 	// find channel indices and assemble title
 	int counter = 0;
-	for (int & entry : channels2) {
-		if (counter>0) name << "&";
+	for (int& entry : channels2) {
+		if (counter > 0) name << "&";
 		auto chin2 = find(active_channels.begin(), active_channels.end(), entry);
 		if (chin2 != active_channels.end()) {
 			name << "ch" << entry;
@@ -2042,8 +2134,8 @@ TH1F* ReadRun::His_GetTimingCFD_diff(vector<int> channels1, vector<int> channels
 	}
 	name << ">-<";
 	counter = 0;
-	
-	for (int & entry : channels1) {
+
+	for (int& entry : channels1) {
 		if (counter > 0) name << "&";
 		auto chin1 = find(active_channels.begin(), active_channels.end(), entry);
 		if (chin1 != active_channels.end()) {
@@ -2129,33 +2221,33 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 
 	his->Draw();
 
-	if (do_fit == 1) { 
+	if (do_fit == 1) {
 		// gauss (default)
 		TFitResultPtr fresults = his->Fit("gaus", fitoption.c_str(), "same", fitrangestart, fitrangeend);
 		timing_fit_results.push_back(fresults);
 	}
-	else if (do_fit == 2) { 
+	else if (do_fit == 2) {
 		// gauss x exp convolution (effective delay from random light path and/or self-absorption and reemission)
 		string gxe = "[3]/(2*[0])*TMath::Exp(([1]*[1]+2*[2]*[0]-2*[0]*x)/(2*[0]*[0]))*TMath::Erfc(([1]*[1]+[0]*([2]-x))/(1.4142*[0]*[1]))";
-		auto expgconv = new TF1("exp x gauss convolution", gxe.c_str(), fitrangestart, fitrangeend); 
+		auto expgconv = new TF1("exp x gauss convolution", gxe.c_str(), fitrangestart, fitrangeend);
 		expgconv->SetNpx(5000);
-		
+
 		// this parameter describes the sigma from different light paths and/or the effective decay time constant for self-absorption and reemission
-		expgconv->SetParName(0, "#tau_{eff}");		expgconv->SetParameter(0, .5);		
+		expgconv->SetParName(0, "#tau_{eff}");		expgconv->SetParameter(0, .5);
 		expgconv->SetParLimits(0, 1e-1, 2.5);	//expgconv->FixParameter(0, 1.55);
-		
-		expgconv->SetParName(1, "#sigma_{gaus}");		expgconv->SetParameter(1, .5);	
+
+		expgconv->SetParName(1, "#sigma_{gaus}");		expgconv->SetParameter(1, .5);
 		expgconv->SetParLimits(1, 1e-1, 2.5);	//expgconv->FixParameter(1, .7);
-		
+
 		float posmax = his->GetXaxis()->GetBinCenter(his->GetMaximumBin());
-		expgconv->SetParName(2, "t_{0}");		expgconv->SetParameter(2, posmax);		
+		expgconv->SetParName(2, "t_{0}");		expgconv->SetParameter(2, posmax);
 		expgconv->SetParLimits(2, fitrangestart, fitrangeend);	//expgconv->FixParameter(2, 6.6);
-		
+
 		expgconv->SetParName(3, "norm");		expgconv->SetParameter(3, his->Integral("width"));
 		expgconv->SetParLimits(3, 0.1, 1e6);		//expgconv->FixParameter(3, 105.5);
 
 		TFitResultPtr fresults = his->Fit(expgconv, "SR", "same");
-		timing_fit_results.push_back(fresults); 
+		timing_fit_results.push_back(fresults);
 
 		TLine* mean = new TLine(expgconv->GetParameter(2), 1e-2, expgconv->GetParameter(2), his->GetMaximum());
 		mean->SetLineColor(1); mean->SetLineWidth(2);
@@ -2166,7 +2258,7 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 		auto two_gauss = new TF1("two gaussians", "gaus(0)+gaus(3)", rangestart, rangeend);
 		two_gauss->SetTitle("Sum of two gauss");
 		float posmax = his->GetXaxis()->GetBinCenter(his->GetMaximumBin());
-		two_gauss->SetParameters(his->Integral("width"), posmax, 0.35, his->Integral("width")/30, posmax, 2);
+		two_gauss->SetParameters(his->Integral("width"), posmax, 0.35, his->Integral("width") / 30, posmax, 2);
 		two_gauss->SetParName(0, "norm_{peak}");		two_gauss->SetParName(1, "#mu_{peak}");			two_gauss->SetParName(2, "#sigma_{peak}");			two_gauss->SetParLimits(2, 1e-9, 1e2);
 		two_gauss->SetParName(3, "norm_{background}");	two_gauss->SetParName(4, "#mu_{background}");	two_gauss->SetParName(5, "#sigma_{background}");	two_gauss->SetParLimits(5, 1e-9, 1e2);
 		TFitResultPtr fresults = his->Fit(two_gauss, fitoption.c_str(), "same", fitrangestart, fitrangeend);
@@ -2176,82 +2268,6 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 	root_out->WriteObject(his, his->GetTitle());
 	timing_cfd_d_c->Update();
 	root_out->WriteObject(timing_cfd_d_c, "TimingCFD_diff");
-	gErrorIgnoreLevel = kError; //suppress root terminal output
-	timing_cfd_d_c->Print("out.pdf"); //write the histogram to a .pdf-file (this makes saving in a root-file kinda redundant)
-	gErrorIgnoreLevel = kUnset;
-}
-
-/// @brief Plot distribution of the event-dependent angle phi_ew in a histogram. \n 
-/// The angle is calculated using vectorial addition and the lightyield of each channel in each event. \n
-/// For more info, see master thesis of Alexander Vagts. \n
-/// @param phi_chx Vector of the associated angles of each channel. Order is important. Angle of the first channel first. \n
-/// E.g. if channel 0 is used, the first angle would be from channel 0
-/// @param ly_C0 Vector of the lightyield of all channels at C0 position for the corretion. Order must be the same as in phi_chx
-/// @param SiPMchannels all SiPM channels which should be included in analysis, e.g. {0, 2, 4, 6}
-/// @param windowmin left edge of integration window for lightyield
-/// @param windowmax right edge of integration window for lightyield
-/// @param maxfrom searches for peak from this to
-/// @param maxto this
-/// @param nbins Number of bins in histogramm
-/// @param corr selection bool for corrected or uncorrected spectra \n
-/// If true - corrected spectra \n
-/// If false - uncorrected spectra
-/// @param triple_gauss If true, will print all phi_ew shifted by +/- 360Â° (so normal phi_ew distri * 3) and fit a triple gauss to it
-/// @return Phi_ew spectrum
-void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<double> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss) {
-	// plotting uncorrected/corected phi_ew - spectra ; first: map the phi_i to the channels, like Alex did, but with new channel positions
-	// match channel number to channel index (still very specific)
-	int sipmnum = SiPMchannels.size();
-	vector<int> ch_index; for (int i = 0; i < sipmnum; i++) ch_index.push_back(0); // initialze the ch_index vector
-	for (int i = 0; i < active_channels.size(); i++) {
-		for (int j = 0; j < sipmnum; j++) {if (active_channels[i] == SiPMchannels[j]) ch_index[j] = i;}
-	}
-	// compute correction factor
-	vector<double> ly_corr;
-	if (corr) {
-		double ly_av = 0; for (int i = 0; i < sipmnum; i++) ly_av += ly_C0[i]; // average lightyield of all channels * sipmnum
-		for (int i = 0; i < sipmnum; i++) ly_corr.push_back(sipmnum*ly_C0[i]/ly_av); // divide ly of one channel by (1/sipmnum)*sipmnum*average ly of all channels
-	}
-	else for (int i = 0; i < sipmnum; i++) ly_corr.push_back(1); // if no correction, then all factors are 1
-	// print out correction factors
-	for (int i = 0; i < sipmnum; i++) cout << "Correction factor for channel " << SiPMchannels[i] << ":" << ly_corr[i] << endl;
-	// initialize canvas + histogramms
-	gStyle->SetOptStat("nemr"); gStyle->SetOptFit(1111); //draws a box with some histogram parameters
-	TString his_name(Form("#phi_ew-spectrum_from_ch%2d_to_ch%2d", SiPMchannels.front(), SiPMchannels.back()));
-	TCanvas* hisc = new TCanvas(his_name, his_name, 600, 400);
-	int min, max;
-	if (triple_gauss) {min = -600; max = 600;} else {min = -200; max = 200;} // choose the according plotrange
-	TH1* his = new TH1F(his_name, his_name, nbins, min, max);
-	// go through all events and compute phi_ew
-	double lightyield, anglevaluex, anglevaluey, phi_ew = 0;
-	for (int i = 0 ; i < nevents ; i++){ //loop through all the events
-		if (!skip_event[i]) {
-			for (int j = 0; j < sipmnum; j++){ //loop through all SiPM-channels
-				TH1F* hisly = ((TH1F*)rundata->At(i*nchannels+ch_index[j])); 
-				lightyield = static_cast<double>(GetPeakIntegral(hisly, windowmin, windowmax, maxfrom, maxto, 0)); //lightyield as the integral around maximum
-				anglevaluex += cos(phi_chx[j]* TMath::Pi()/180)*(lightyield/ly_corr[j]); //x part of vectorial addition
-				anglevaluey += sin(phi_chx[j]* TMath::Pi()/180)*(lightyield/ly_corr[j]); //y part of vectorial addition
-				//if (i%50==0) cout << lightyield << " " << cos(phi_chx[j]* TMath::Pi()/180) << endl;
-			}
-			phi_ew = atan2(anglevaluey, anglevaluex)*180/TMath::Pi(); // vectorial addition for phi_ew --> fill in histo
-			//if (i%50==0) cout << anglevaluex << " " << anglevaluey << " " << lightyield << endl;
-			if (triple_gauss) {
-				his->Fill(phi_ew); his->Fill(phi_ew+static_cast<double>(360)); his->Fill(phi_ew-static_cast<double>(360));
-			}
-			else his->Fill(phi_ew);
-			anglevaluex = 0, anglevaluey = 0; //reset the x and y parts
-		}
-	}
-	if (triple_gauss) {
-		/*triple gauss fit, which still needs to be implemented*/
-	}
-	//make histogram fancy + printing
-	his->GetXaxis()->SetTitle("#phi_ew (deg.)"); his->GetYaxis()->SetTitle("#Entries"); //titeling of axes
-	his->Draw(); hisc->Update(); //put stuff on canvas
-	TString pdf_filename(Form("phi_ew_spectrum.pdf")); //write to a pdf-file
-	gErrorIgnoreLevel = kError; //suppress root terminal output
-	hisc->Print(pdf_filename); //write the histogram to a .pdf-file
-	gErrorIgnoreLevel = kUnset;
 }
 
 // helper functions
@@ -2259,8 +2275,8 @@ void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<double> ly_C0, vector<int
 /// @brief Helper. Creates a list of .bin data files in data folder to be read in
 /// @param dirname Directory
 /// @param ext File extension
-/// @return Stringstream of line separated file names
-stringstream ReadRun::list_files(const char* dirname, const char* ext) {
+/// @return String of line separated file names
+string ReadRun::list_files(const char* dirname, const char* ext) {
 
 	stringstream ss;
 	TSystemDirectory dir(dirname, dirname);
@@ -2285,7 +2301,7 @@ stringstream ReadRun::list_files(const char* dirname, const char* ext) {
 			}
 		}
 	}
-	return ss;
+	return ss.str();
 }
 
 /// @brief Helper that returns the waveform histogram for a certain channel number and a certain event number
@@ -2358,7 +2374,7 @@ double* ReadRun::gety(TH1F* his, int start_at, int end_at) {
 /// @param i Index of your plotting loop that is to be translated into a useful ROOT color index
 /// @return ROOT color index
 int ReadRun::rcolor(unsigned int i) {
-	int nclrs = 16;
+	const int nclrs = 16;
 	int rclrs[nclrs] = { 1, 2, 3, 4, 5, 6, 7, 13, 28, 30, 34, 38, 40, 31, 46, 49 };
 	return rclrs[i - static_cast<int>(floor(i / nclrs)) * nclrs];
 }
@@ -2473,34 +2489,17 @@ void ReadRun::Convolute(double*& result, double* first, double* second, int size
 /// 
 /// @param[in,out] ar Array to be smoothed.
 /// @param nbins Number of bins of input.
-/// @param sigma Number of bins for running average/gauss sigma in ns for convolution.
-/// @param doconv If false use running average (default). \n 
-/// If true use gaussian smoothing (slower).
-void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, bool doconv) {
+/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
+/// @param method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
+void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, int method) {
 
 	double* artmp = new double[nbins];
 	for (int i = 0; i < nbins; i++) artmp[i] = ar[i];
 
-	if (doconv) {
-		// convolution with gauss with sigma (experimental, not yet tested)
-		double* gauss = new double[nbins];
-
-		double sum = 0.;
-
-		for (int i = 0; i < nbins; i++) {
-			gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i) * SP - 5 * sigma/*-> offset?*/), 2.) / (2. * sigma * sigma)) / (sigma * 2.506628);
-			sum += gauss[i];
-		}
-
-		for (int i = 0; i < nbins; i++) {
-			gauss[i] /= sum;
-		}
-
-		Convolute(ar, artmp, gauss, nbins, nbins);
-		delete[] gauss;
-	}
-	else {
-		// calculate running average from -sigma until +sigma
+	if (method == 0) {
+		// calculate running average from -sigma until +sigma (sigma = number of bins)
 		for (int i = 0; i < nbins; i++) {
 			double mean1 = 0.;
 			int nmn = 0;
@@ -2514,6 +2513,49 @@ void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, bool doconv) {
 				ar[i] = mean1 / static_cast<double>(nmn);
 			}
 		}
+	}
+	else if (method == 1) {
+		// convolution with gauss clipped at +-5 sigma (very inefficient and slow)
+		double* gauss = new double[nbins];
+
+		double sum = 0.;
+		double position = 0.;
+
+		for (int i = 0; i < nbins; i++) {
+			if (static_cast<double>(i) * SP < 5 * sigma) gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i) * SP - 5 * sigma), 2.) / (2. * sigma * sigma)) / (sigma * 2.506628);
+			else gauss[i] = 0.;
+			sum += gauss[i];
+		}
+
+		for (int i = 0; i < nbins; i++) {
+			gauss[i] /= sum;
+		}
+
+		Convolute(ar, artmp, gauss, nbins, nbins);
+		delete[] gauss;
+	}
+	else {
+		// gauss kernel 3*sigma
+		int nbins_3sigma = static_cast<int>(ceil(6. * sigma / SP));
+		double* gauss = new double[nbins_3sigma];
+
+		double denom = 3. * sigma * sigma;
+		for (int i = 0; i < nbins_3sigma; i++) {
+			gauss[i] = TMath::Exp(-1. * TMath::Power(static_cast<double>(i) * SP - 3. * sigma, 2.) / denom);
+		}
+
+		double res = 0;
+		double norm = 0;
+		for (int i = 0; i < nbins; i++) {
+			res = 0.;
+			norm = 0.;
+			for (int j = max(0, nbins_3sigma / 2 - i); j < min(nbins - i + nbins_3sigma / 2, min(nbins_3sigma, i + nbins_3sigma / 2)); j++) {
+				res += gauss[j] * artmp[i + j - nbins_3sigma / 2];
+				norm += gauss[j];
+			}
+			if (norm != 0.) ar[i] = res / norm;
+		}
+		delete[] gauss;
 	}
 	delete[] artmp;
 }

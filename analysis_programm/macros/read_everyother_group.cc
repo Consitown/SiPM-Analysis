@@ -65,8 +65,8 @@ void read_everyother_group(int which) // main
 	ReadRun mymeas(0);
 
 	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
-	// read data; mymeas.ReadFile(path, true, 0, path + "/cal_results.root") for an explizit output file
-	mymeas.ReadFile(path, true, 8, path + "everyother_results.root");
+	// read data; mymeas.ReadFile(path, true, 0, path + "cal_results.root") for an explizit output file
+	mymeas.ReadFile(path, true, 8, "everyother_results.root");
 
 	// only plot channels specified below. Leaving it empty will plot all channels
 	//mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
@@ -145,9 +145,9 @@ void read_everyother_group(int which) // main
 								// 6 - PMT fit function with biased pedestal
 	
 	// Plotting the phi_ew spectrum
-	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss)
+	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool periodic)
 	vector<int> phi_chx = {225, 270, 315, 0, 45, 90, 135, 180}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's
-	vector<double> ly_C0 = {97.81, 50.42, 94.02, 47.14, 95.07, 52.62, 99.02, 47.95}; //mean lightyields from PrintChargeSpectrum
+	vector<float> ly_C0 = {97.81, 50.42, 94.02, 47.14, 95.07, 52.62, 99.02, 47.95}; //mean lightyields from PrintChargeSpectrum
 	//vector<int> phi_chx_even = {225, 315, 45, 135}; vector<double> ly_C0_even = {97.81, 94.02, 95.07, 99.02}; vector<int> phi_chx_odd = {270, 0, 90, 180}; vector<double> ly_C0_odd = {50.42, 47.14, 52.62, 47.95}; 
 	vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
 	//vector<int> SiPMchannels = {0, 2, 4, 6};
@@ -169,7 +169,7 @@ void read_everyother_group(int which) // main
 	//mymeas.PrintChargeSpectrumPMT(intwindowminus, intwindowplus, findmaxfrom, findmaxto, 5, 300, 202);
 
 	// suppress graphic output
-	gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)
+	//gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)
 
 	// plot waveforms of individual events
 	//int event1 = 68;
@@ -187,5 +187,5 @@ void read_everyother_group(int which) // main
 	for (int i = 1; i < mymeas.nevents; i += static_cast<int>(mymeas.nevents / 10)) {
 		mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, i, ymin, ymax);
 	}
-	gROOT->SetBatch(kFALSE);
+	//gROOT->SetBatch(kFALSE);
 }
