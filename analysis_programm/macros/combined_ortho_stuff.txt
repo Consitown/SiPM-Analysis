@@ -1,4 +1,4 @@
-	//plotting amplitude spectrum; mymeas.timimng_results[waveform][1] contains cfd-time
+	//plotting timing diff; mymeas.timimng_results[waveform][1] contains cfd-time
 	int channel1 = 10; int channel2 = 11;
 	// match channel number to channel index
 	int ch_index1, ch_index2 = 0;

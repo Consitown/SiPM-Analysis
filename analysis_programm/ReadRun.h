@@ -277,6 +277,8 @@ public:
 	vector<vector<float>> timing_results;
 	/// @brief Stores the fit results of Print_GetTimingCFD() for all channels
 	vector<TFitResultPtr> timing_fit_results;
+	/// @brief Stores the mean integral/lightyield from PrintChargeSpectrum for all channels
+	vector<float> mean_integral;
 
 	/// @brief Stores results of analysis
 	TFile* root_out;

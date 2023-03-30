@@ -1,0 +1,164 @@
+Ich bin jetzt in Loop 0
+
+
+
+Der Median wurde zu 3963.67 berechnet.
+ FCN=115.618 FROM MIGRAD    STATUS=CONVERGED     263 CALLS         264 TOTAL
+                     EDM=2.19295e-08    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        8.09097e+02   1.36230e+02   2.71906e-04   4.64971e-04
+   2  MP           2.89052e+03   1.01685e+02   2.15860e-04   1.53848e-03
+   3  Area         4.18430e+04   2.14439e+03   4.90632e-05   1.33688e-02
+   4  GSigma       1.08453e+03   2.17635e+02   4.31048e-04   1.54988e-03
+Fitting done
+Plotting results...
+Langaus Peak = 3317.88#pm4.04548e-09
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 1
+
+
+
+Der Median wurde zu 1707.57 berechnet.
+ FCN=97.5909 FROM MIGRAD    STATUS=CONVERGED     152 CALLS         153 TOTAL
+                     EDM=1.67154e-08    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        3.23390e+01   6.24585e+00   6.92263e-05   8.22906e-03
+   2  MP           1.52707e+03   1.27276e+01   2.16128e-05   3.99292e-03
+   3  Area         3.98962e+04   1.72698e+03   4.27512e-05   9.79183e-03
+   4  GSigma       1.00455e+03   6.99151e+00   1.93475e-05   1.04401e-02
+Fitting done
+Plotting results...
+Langaus Peak = 1561.45#pm1.61695e-14
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 2
+
+
+
+Der Median wurde zu 3725.5 berechnet.
+ FCN=96.9102 FROM MIGRAD    STATUS=CONVERGED     273 CALLS         274 TOTAL
+                     EDM=1.37199e-09    STRATEGY= 1  ERROR MATRIX UNCERTAINTY   2.3 per cent
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        8.01641e+02   1.56918e+02   3.47226e-05   1.67418e-05
+   2  MP           2.75981e+03   1.06802e+02  -2.46620e-06   9.25796e-04
+   3  Area         4.45198e+04   2.42190e+03   7.73191e-06  -3.85173e-03
+   4  GSigma       1.17243e+03   2.56932e+02  -1.49594e-04  -4.24728e-04
+Fitting done
+Plotting results...
+Langaus Peak = 3227.52#pm4.0082e-09
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 3
+
+
+
+Der Median wurde zu 1644.43 berechnet.
+ FCN=88.8491 FROM MIGRAD    STATUS=CONVERGED     276 CALLS         277 TOTAL
+                     EDM=6.79281e-09    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        3.34585e+02   3.85122e+01   1.13129e-04   2.98980e-03
+   2  MP           1.07706e+03   3.78491e+01   8.34700e-05   3.56101e-03
+   3  Area         4.21989e+04   1.87429e+03   4.17238e-05  -2.37350e-03
+   4  GSigma       3.71990e+02   7.78632e+01   2.20019e-04   1.72856e-03
+Fitting done
+Plotting results...
+Langaus Peak = 1217.36#pm1.67292e-07
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 4
+
+
+
+Der Median wurde zu 3762.19 berechnet.
+ FCN=126.155 FROM MIGRAD    STATUS=CONVERGED     205 CALLS         206 TOTAL
+                     EDM=2.19013e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        7.27742e+02   1.42014e+02   2.96158e-04   1.08851e-02
+   2  MP           2.70945e+03   1.13359e+02   2.42700e-04  -1.51577e-03
+   3  Area         4.12074e+04   2.19592e+03   5.16761e-05  -9.69166e-03
+   4  GSigma       1.21807e+03   2.27447e+02   4.50866e-04   5.57201e-03
+Fitting done
+Plotting results...
+Langaus Peak = 3199.94#pm3.63871e-09
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 5
+
+
+
+Der Median wurde zu 1702.22 berechnet.
+ FCN=80.7938 FROM MIGRAD    STATUS=CONVERGED     150 CALLS         151 TOTAL
+                     EDM=8.77234e-09    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        3.04513e+01   5.36212e+00   5.91888e-05   9.16410e-04
+   2  MP           1.51258e+03   1.10115e+01   1.89373e-05   2.00337e-02
+   3  Area         4.12711e+04   1.76185e+03   3.90987e-05   2.58530e-04
+   4  GSigma       1.00407e+03   9.63240e+00   2.28850e-05  -1.60691e-02
+Fitting done
+Plotting results...
+Langaus Peak = 1549.26#pm1.52257e-07
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 6
+
+
+
+Der Median wurde zu 3562.05 berechnet.
+ FCN=83.6208 FROM MIGRAD    STATUS=CONVERGED     226 CALLS         227 TOTAL
+                     EDM=5.78341e-10    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        8.65222e+02   1.38400e+02   2.05064e-04  -2.33401e-04
+   2  MP           2.45109e+03   9.99711e+01   1.79252e-04   2.32723e-04
+   3  Area         4.55443e+04   2.29406e+03   4.26052e-05   3.31571e-03
+   4  GSigma       9.29497e+02   2.80627e+02   4.45794e-04   7.15932e-06
+Fitting done
+Plotting results...
+Langaus Peak = 2797.92#pm4.32611e-05
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+Ich bin jetzt in Loop 7
+
+
+
+Der Median wurde zu 1821.86 berechnet.
+ FCN=75.9393 FROM MIGRAD    STATUS=CONVERGED     213 CALLS         214 TOTAL
+                     EDM=8.00254e-08    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        3.29110e+02   5.49529e+01   1.13154e-04   6.34062e-03
+   2  MP           1.29289e+03   5.13291e+01   8.25521e-05  -6.30310e-03
+   3  Area         4.36165e+04   1.98876e+03   3.89315e-05   7.38453e-03
+   4  GSigma       5.12782e+02   8.90868e+01   1.48408e-04   1.02517e-02
+Fitting done
+Plotting results...
+Langaus Peak = 1498.64#pm1.64555e-05
+22_cosmics_pcbj_everyothergroup_vb42_PSmid.root, ch1
+
+
+
+ FCN=261.441 FROM MIGRAD    STATUS=CONVERGED     202 CALLS         203 TOTAL
+                     EDM=1.173e-08    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  Width        5.36859e+02   2.42333e+01   8.10532e-05   9.04566e-03
+   2  MP           1.51771e+03   2.76060e+01   8.54130e-05  -1.02095e-02
+   3  Area         3.59986e+05   5.41227e+03   8.65660e-05  -6.10580e-03
+   4  GSigma       7.46773e+02   7.50413e+01   2.11761e-04   4.29084e-03
+Fitting of the sum histogram done
+Plotting results...
+Langaus Peak of the sum = 1813.7#pm2.6843e-06

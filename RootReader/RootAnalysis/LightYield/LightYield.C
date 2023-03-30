@@ -338,10 +338,10 @@ int main(int argc, char *argv[]){
 
 
 
-	int Xmin = -10, Xmax = 14000; // histogram range
-	double range_lo = 100, range_hi = 14000; // landau fit range
+	int Xmin = -10, Xmax = 4500; // histogram range
+	double range_lo = 0, range_hi = 4500; // landau fit range
 	float frac_l=0.5,frac_u=0.5; // gauss fit range, threshold fraction
-	int n_bins = 400;
+	int n_bins = 300;
 	double bin_error = (Xmax - Xmin) / n_bins;
 	
 	
@@ -696,7 +696,7 @@ int main(int argc, char *argv[]){
 			//   par[1]=Most Probable (MP, location) parameter of Landau density
 			//   par[2]=Total area (integral -inf to inf, normalization constant)
 			//   par[3]=Width (sigma) of convoluted Gaussian function
-			sv[0]=25; sv[1]=1500.0; sv[2]=20000.0; sv[3]=1000.; // starting values for the fit
+			sv[0]=50; sv[1]=1200.0; sv[2]=20000.0; sv[3]=2000.; // starting values for the fit
 
 			fitsnr = langaufit(h_vec[i], fr, sv, pllo, plhi, fp, fpe, &chisqr_lg, &ndf_lg);
 
@@ -988,7 +988,7 @@ int main(int argc, char *argv[]){
 	{
 		cout << "\n\n" << endl;
 		// set all the parameters for the fit
-		Double_t fr[2] {0, 12000}; //fit range
+		Double_t fr[2] {0, 5000}; //fit range
 		Double_t sv[4], pllo[4], plhi[4];
 		Double_t fp[4], fpe[4]; // the final fit parameters and their errors are saved here
 
@@ -998,7 +998,7 @@ int main(int argc, char *argv[]){
 			//   par[1]=Most Probable (MP, location) parameter of Landau density
 			//   par[2]=Total area (integral -inf to inf, normalization constant)
 			//   par[3]=Width (sigma) of convoluted Gaussian function
-			sv[0]=25; sv[1]=1500.0; sv[2]=20000.0; sv[3]=1000.; // starting values for the fit
+			sv[0]=20; sv[1]=1200.0; sv[2]=20000.0; sv[3]=2000.; // starting values for the fit
 
 		Double_t chisqr_lg;
 		Int_t    ndf_lg;

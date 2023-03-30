@@ -17,7 +17,6 @@ void read_sipm_cal_pcb(int which) // main
 	// edit for your work-directory
 	path = "/mnt/d/Work_SHK_Bachelor/analysis_programm/measurements/";
 
-	// WARNING: the name of the folder where the .bin-files are stored must be the same as the name of the bin files
 	switch (which) { //specify folders to run below, ALL bin files in this folder will be used.
 	case(0): {
 		path += "6sipm_cal_pcbj_vb43_tune8270_part/"; // vb = Voltage bias (applied voltage); note: the power supply actually outputs 891 mV less

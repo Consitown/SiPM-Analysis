@@ -1,0 +1,1513 @@
+
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+22_cosmics_pcbj_everyothergroup_vb42_PSmid
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000
+#Run log of timing cuts 
+#Runname: 
+23_cosmics_pcbj_everyothergroup_vb42_PSright
+Position cuts: true
+Angle cuts (DEPR): false
+Integral cuts: false
+PMT amp cuts: false
+#POS top min	POS top max	 POS bot min	 bot max	ANGLE interval left	ANGLE interval right	min. N_pe	max. N_pre	min PMT amp	max PMT amp
+-1.750000	2.250000	-1.150000	2.850000	999.000000	999.000000	300.000000	1500.000000	-2000.000000	-60.000000

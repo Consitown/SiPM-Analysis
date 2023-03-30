@@ -50,7 +50,7 @@ int firstTrigger = 8; // first of 4 trigger channels. COSMICS
 bool ANGLECUTS = false; //
 
 bool POSITIONCUTS = true; // this automatically makes angle cut now!
-bool INTEGRALCUT = false;
+bool INTEGRALCUT = true;
 bool SCINTCUT = false;
 bool FILTERWEIRD = true; // filter "weird" (may 2021) PMT signals by cutting PMT amp over 5mV
 

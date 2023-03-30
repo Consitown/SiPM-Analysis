@@ -19,7 +19,6 @@ void read_cfd_PS(int which) // main
 	path = "/mnt/d/Work_SHK_Bachelor/analysis_programm/measurements/";
 	int run = 0;
 
-	// WARNING: the name of the folder where the .bin-files are stored must be the same as the name of the bin files
 	switch (which) { //specify folders to run below, ALL bin files in this folder will be used.
 	case(0): {
 		path += "5time_testrun_PS_better/"; // PS run with the right trigger settings for CFD
@@ -90,16 +89,12 @@ void read_cfd_PS(int which) // main
 	mymeas.ReadFile(path, true, 0, path + "/cfd_results.root");
 
 	// only plot channels specified below. Leaving it empty or commenting it will plot all channels
-	//mymeas.plot_active_channels={};
-
-	//use SmoothAll() for general smoothing of waveforms --> find good parameters; then use the internal smoothig of GetTimingCFD
-	//mymeas.SmoothAll(3, false); //Syntax: ...(double sigma, bool doconv) ; doconv - If false use running average (default). If true use gaussian smoothing (slower).
+	//mymeas.plot_active_channels={10, 11};
 
 	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
 	mymeas.CorrectBaseline(0., 50.); // use mean from 0 ns to 50 ns
-
-	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
-	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9);
+	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, int smooth_method, int skip_channel)
+	//mymeas.CorrectBaselineMin(40, false, 0, 352, 192); // use minimal mean method
 
 	// Syntax: ...(vector<double> thresholds, double rangestart, double rangeend, bool verbose)
 	//std::vector<double> thresholds = {0, 0, -7, -7, -7, -7}; //for identifying out burst events (high frequency oscillations), if run5: erase the 0's
@@ -125,7 +120,7 @@ void read_cfd_PS(int which) // main
 	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, bool doconv, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
 	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, false, false); // this creates the timing_results matrix
 
-	//plotting amplitude spectrum; mymeas.timimng_results[waveform][1] contains cfd-time
+	//plotting timing diff; mymeas.timimng_results[waveform][1] contains cfd-time
 	int channel1 = 10; int channel2 = 13;
 	// match channel number to channel index
 	int ch_index1, ch_index2 = 0;
@@ -177,11 +172,6 @@ void read_cfd_PS(int which) // main
 	//mymeas.SkipEventsTimeDiffCut(10, 11, -2.5, 2.5, false);
 	//mymeas.SkipEventsTimeDiffCut(12, 13, -2.5, 2.5, false);
 
-
-	// prints some stats for events above a threshold into the terminal to identify interesting events
-	// Syntax: ...(float threshold, bool max, bool greater, double from, double to, bool verbose)
-	//mymeas.FractionEventsAboveThreshold(5, true, true, 200, 250, false);
-
 	//**********//
 	// Plotting
 	//**********//
@@ -190,41 +180,21 @@ void read_cfd_PS(int which) // main
 	// Syntax: ...(bool doaverage, bool normalize, double shift, double sigma, bool doconv)
 	//mymeas.PlotChannelSums(false);
 
+	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
 	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption, bool set_errors)
 	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
-	//mymeas.Print_GetTimingCFD_diff({12}, {13}, -15, 15, 0, 200, -8, 8, "RS", false);
+	// do_fit: 0 - no fit, 1 - gauss ; fitoptions: use "LRS" for log likelihood and "RS" for chi-squared
+	//mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 1, 200, -8, 8, "LRS", true);
 
-	// Syntax: ... (float rangestart, float rangeend, int do_fit, int nbins, string fitoption)
-	//mymeas.Print_GetTimingCFD(110,140,1,200,"S"); //for channelwise cfd
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
-	float intwindowminus = 3.;	// lower integration window in ns rel. to max
-	float intwindowplus = 5.;	// upper integration window in ns rel. to max
+	float intwindowminus = 0.;	// lower integration window in ns rel. to max
+	float intwindowplus = 0.;	// upper integration window in ns rel. to max
 	float findmaxfrom = 100.;	// assume pulse after trigger arrives between here ...
 	float findmaxto = 150.;		// ... and here (depends on trigger delay setting etc., for dark counts the signal is random so we look at the whole recorded time range)
-	
-	// old timing histogramm (should not use for cfd)
-	//mymeas.PrintTimeDist(110, 140, 105, 145, 200, 1, cfd_x);
-
-	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
-	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
-	//mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, -10, 350, 300, 0, 0, 0, 0);
-
-	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins)
-	// PrintChargeSpectrumPMT will apply a fit automatically from rangestart to rangeend (which are also the boundaries for the plot)
-	//mymeas.PrintChargeSpectrumPMT(intwindowminus, intwindowplus, findmaxfrom, findmaxto, 5, 300, 202);
-
-	// plot waveforms of individual events
-	//int event1 = 2257;
-	//int event2 = 79;
-
 	//plot range for individual waveforms
 	double ymin = -5;
 	double ymax = 25;
-
-	// plot waveforms for certain events with integration window
-	//mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, event1, ymin, ymax);
-	//mymeas.PrintChargeSpectrumWF(intwindowminus, intwindowplus, findmaxfrom, findmaxto, event2, ymin, ymax);
 
 	// suppress graphic output
 	gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)

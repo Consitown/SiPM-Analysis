@@ -18,7 +18,6 @@ void read_everyother_group(int which) // main
 	path = "/mnt/d/Work_SHK_Bachelor/analysis_programm/measurements/";
 	int run = 0;
 
-	// WARNING: the name of the folder where the .bin-files are stored must be the same as the name of the bin files
 	switch (which) { //specify folders to run below, ALL bin files in this folder will be used.
 	case(0): {
 		path += "19cosmics_pcbj_everyothergroup_vb42_PSleft/"; // only every other group of the SiPM's
@@ -121,8 +120,9 @@ void read_everyother_group(int which) // main
 	// PMT's are at channels 10-13; 10 - right upper PMT, 11 - left upper PMT, 12 - right lower PMT, 13 - left lower PMT (perspective from door)
 	// Syntax: ...(vector<int> channels1, vector<int> channels2, float rangestart, float rangeend, int do_fit, int nbins, float fitrangestart, float fitrangeend, string fitoption, bool set_errors)
 	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
-	//mymeas.Print_GetTimingCFD_diff({12}, {13}, -15, 15, 0, 200, -8, 8, "RS", false);
-	//mymeas.Print_GetTimingCFD(110,140,1,200);
+	// do_fit: 0 - no fit, 1 - gauss, 2 - gauss*exp decay; fitoptions: use "LRS" for log likelihood and "RS" for chi-squared
+	//mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 2, 200, -8, 8, "RS", true);
+	//mymeas.Print_GetTimingCFD_diff({12}, {13}, -15, 15, 2, 200, -8, 8, "RS", true);
 
 	// print events above a threshold to identify interesting events
 	// mymeas.FractionEventsAboveThreshold(4, true, true, 100, 150);
@@ -137,7 +137,7 @@ void read_everyother_group(int which) // main
 	float fitstart = 15;		// start of the fit (x-axis)
 	float fitend = 400;		// end of the fit
 	int channels_to_fit = 8; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
-	int which_fit = 1;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
+	int which_fit = 0;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
 								// 1 - landau gauss convolution for large number of photons
 								// 2 - biased: if pedestal is biased because of peak finder algorithm
 								// 3 - SiPM fit function with exponential delayed afterpulsing
@@ -145,13 +145,14 @@ void read_everyother_group(int which) // main
 								// 6 - PMT fit function with biased pedestal
 	
 	// Plotting the phi_ew spectrum
-	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool periodic)
+	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss)
 	vector<int> phi_chx = {225, 270, 315, 0, 45, 90, 135, 180}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's
-	vector<float> ly_C0 = {97.81, 50.42, 94.02, 47.14, 95.07, 52.62, 99.02, 47.95}; //mean lightyields from PrintChargeSpectrum
-	//vector<int> phi_chx_even = {225, 315, 45, 135}; vector<double> ly_C0_even = {97.81, 94.02, 95.07, 99.02}; vector<int> phi_chx_odd = {270, 0, 90, 180}; vector<double> ly_C0_odd = {50.42, 47.14, 52.62, 47.95}; 
+	//vector<int> phi_chx_even = {225, 315, 45, 135}; vector<int> phi_chx_odd = {270, 0, 90, 180};
+	vector<float> ly_C0 = {106, 59.01, 105, 59.27, 107.6, 67.13, 111.2, 58.48}; //mean lightyields from PrintChargeSpectrum for run 37 (C0)
+	//vector<float> ly_C0_even = {106, 105, 107.6, 111.2}; vector<float> ly_C0_odd = {59.01, 59.27, 67.13, 58.48};
 	vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
 	//vector<int> SiPMchannels = {0, 2, 4, 6};
-	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
+	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, true);
 
 	// old timing histogramm (should not use for cfd, so cfd_x should be 1)
 	//mymeas.PrintTimeDist(110, 140, 105, 145, 200, 1, cfd_x);
@@ -163,11 +164,8 @@ void read_everyother_group(int which) // main
 	// for getting average lightyield, do which_fit=0 and look at the histogramms in the .root-file and manually extract the means
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
 	//mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, plotrangestart, plotrangeend, 200, fitstart, fitend, channels_to_fit, which_fit);
-
-	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins)
-	// PrintChargeSpectrumPMT will apply a fit automatically from rangestart to rangeend (which are also the boundaries for the plot)
-	//mymeas.PrintChargeSpectrumPMT(intwindowminus, intwindowplus, findmaxfrom, findmaxto, 5, 300, 202);
-
+	//for(int i = 0; i < mymeas.mean_integral.size(), i++) cout << mymeas.mean_integral[i] << endl;
+	
 	// suppress graphic output
 	//gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)
 
