@@ -320,21 +320,21 @@ public:
 	/// @return Func value
 	double operator() (double* x, double* par) {
 		// Numeric constants
-		Double_t invsq2pi = 0.3989422804014;   // (2 pi)^(-1/2)
-		Double_t mpshift = -0.22278298;       // Landau maximum location
+		double invsq2pi = 0.3989422804014;   // (2 pi)^(-1/2)
+		double mpshift = -0.22278298;       // Landau maximum location
 
 		// Control constants
-		Double_t np = 100.0;      // number of convolution steps
-		Double_t sc = 5.0;      // convolution extends to +-sc Gaussian sigmas
+		double np = 100.0;      // number of convolution steps
+		double sc = 5.0;      // convolution extends to +-sc Gaussian sigmas
 
 		// Variables
-		Double_t xx;
-		Double_t mpc;
-		Double_t fland;
-		Double_t sum = 0.0;
-		Double_t xlow, xupp;
-		Double_t step;
-		Double_t i;
+		double xx;
+		double mpc;
+		double fland;
+		double sum = 0.0;
+		double xlow, xupp;
+		double step;
+		double i;
 
 
 		// MP shift correction

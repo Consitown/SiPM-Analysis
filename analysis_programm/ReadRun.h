@@ -139,6 +139,7 @@ public:
 
 	// average all waveforms to simplify peak ID
 	void SmoothAll(double = 5, int = 0);
+	void FilterAll(double = .3, double = .9, double = .2);
 	void DerivativeAll();
 
 	// functions for charge spectrum
@@ -173,7 +174,7 @@ public:
 	TH1F* His_GetTimingCFD(int, float, float, int = -999);
 	void Print_GetTimingCFD(float = 100, float = 140, int = 0, int = -999, string = "S", bool = true);
 	TH1F* His_GetTimingCFD_diff(vector<int>, vector<int>, float, float, int = -999);
-	void Print_GetTimingCFD_diff(vector<int>, vector<int>, float = 100, float = 140, int = 0, int = -999, float = -999, float = -999, string = "RS", bool= true);
+	void Print_GetTimingCFD_diff(vector<int>, vector<int>, float = 100, float = 140, int = 0, int = -999, float = -999, float = -999, string = "RS", bool = true);
 
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
@@ -186,7 +187,7 @@ public:
 	double* gety(TH1F*);								// y values for histogram
 	double* gety(TH1F*, int, int);						// y values for dedicated y range of a histogram 
 	int rcolor(unsigned int);							// useful root colors
-	
+
 	float LinearInterpolation(float, float, float, float, float); // linear interpolation
 
 	int GetEventIndex(int);										// get index of a triggered event (finds the correct event if files are not read sequentially)
@@ -194,6 +195,7 @@ public:
 	void SplitCanvas(TCanvas*&);								// split canvas into pads to display all active channels on one canvas
 	void Convolute(double*&, double*, double*, int, int);		// convolution for filtering waveforms
 	void SmoothArray(double*&, int, double = 1., int = 0);		// filtering
+	void FilterArray(double*&, int, double = .4, double = 1.2, double = .25); // filtering
 
 	/// @brief Constructor of the class with arguments to filter noise events in the cosmics setup. Default values do nothing 
 	ReadRun(double = 0, int = 1);
@@ -215,7 +217,7 @@ public:
 	/// If set to -1 (default) all channels will be read in one go. \n
 	/// Else channels from "start_read_at_channel" to "end_read_at_channel" will be read. \n 
 	/// If "end_read_at_channel" is not defined will only read channel specified in "start_read_at_channel".
-	int start_read_at_channel = -1;	
+	int start_read_at_channel = -1;
 	/// @brief See ReadRun::start_read_at_channel
 	int end_read_at_channel = -1;
 
@@ -249,7 +251,10 @@ public:
 	vector<int> plot_active_channels;
 
 	/// @brief Stores the fit results of PrintChargeSpectrum() for all channels and all function calls in ascending order 
-	vector<TFitResultPtr> fit_results; 
+	vector<TFitResultPtr> fit_results;
+
+	/// @brief Stores the mean integral/lightyield from PrintChargeSpectrum() for all channels
+	vector<float> mean_integral;
 
 	/// @brief Stores the event numbers which should be skipped in the analysis
 	/// 
@@ -264,7 +269,7 @@ public:
 	/// @brief Special parameter for HU cosmics setup
 	///
 	/// define how many PMT channels need to be above threshold to discard event (RF pick up should be seen by alls PMTs).
-	int skip_event_threshold_nch; 
+	int skip_event_threshold_nch;
 
 	void SkipEventsPerChannel(vector<double>, double = 0, double = 0, bool = false);  // in case you want to have indiviual thresholds in individual channels
 	void IntegralFilter(vector<double>, vector<bool>, float, float, float = 50, float = 250, bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
@@ -277,8 +282,6 @@ public:
 	vector<vector<float>> timing_results;
 	/// @brief Stores the fit results of Print_GetTimingCFD() for all channels
 	vector<TFitResultPtr> timing_fit_results;
-	/// @brief Stores the mean integral/lightyield from PrintChargeSpectrum for all channels
-	vector<float> mean_integral;
 
 	/// @brief Stores results of analysis
 	TFile* root_out;
@@ -294,7 +297,8 @@ public:
 	float tCutEndg;
 
 	/// @brief Shift waveforms with CFD so that all events start at the same time
-	/// Call after initializing class and before calling ReadFile().
+	/// Call after initializing class and before calling ReadFile(). \n
+	/// Set the constant fraction, the bin to shift the signal to, and the search window with tWF_CF, tWF_CF_bin, and tWF_CF_lo and tWF_CF_hi, respectively.
 	bool Shift_WFs_in_file_loop = false;
 	/// @brief Constant fraction of maximum (between ~0.1 and 1) for ReadRun::Shift_WFs_in_file_loop
 	float tWF_CF = 0.3;
