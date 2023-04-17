@@ -1837,7 +1837,7 @@ void ReadRun::PrintDCR(float windowlow, float windowhi, float rangestart, float 
 /// @param corr selection bool for corrected or uncorrected spectra \n
 /// If true - corrected spectra \n
 /// If false - uncorrected spectra
-/// @param periodic If true, will print all phi_ew shifted by +/- 360° (so normal phi_ew distri * 3) and fit a periodic gauss
+/// @param periodic If true, will print all phi_ew shifted by +/- 360ï¿½ (so normal phi_ew distri * 3) and fit a periodic gauss
 /// @return Phi_ew spectrum
 void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool periodic) {
 
@@ -1907,12 +1907,12 @@ void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<int>
 		double max = his->GetMaximum();
 		double min = his->GetMinimum();
 		his->GetXaxis()->SetRangeUser(-180, 180); //only look at one period for starting values
-		double phi_est = his->GetXaxis()->GetBinCenter(his->GetMaximumBin());
+		double phi_est = min_angle+(max_angle*2/nbins)*his->GetMaximumBin();
 		his->GetXaxis()->SetRangeUser(0, 0); //reset scale
 
 		f->SetParName(0, "A");				f->SetParameter(0, max - min);		f->SetParLimits(0, 1, 1e9);
 		f->SetParName(1, "#Phi_{ew}");		f->SetParameter(1, phi_est);		f->SetParLimits(1, -180, 180);
-		f->SetParName(2, "#sigma");			f->SetParameter(2, 40);				f->SetParLimits(2, 5, 360);
+		f->SetParName(2, "#sigma");			f->SetParameter(2, 50);				f->SetParLimits(2, 5, 360);
 		f->SetParName(3, "offset");			f->SetParameter(3, min);			f->SetParLimits(3, 1e-1, 1e9);
 
 		TFitResultPtr fresults = his->Fit(f, "LRS");
