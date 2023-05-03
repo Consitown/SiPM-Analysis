@@ -121,7 +121,7 @@ public:
 	TClonesArray* rundata;
 
 	// plots amplValuessum
-	void PlotChannelSums(bool = true, bool = false, double = 0., double = 4., int = 0);
+	void PlotChannelSums(bool = false, bool = false, double = 0., double = 0., int = 2);
 
 	// baseline correction (shifts all waveforms individually)
 	void CorrectBaseline(float, float = -999);
@@ -132,7 +132,7 @@ public:
 	void CorrectBaselineMin(int = 100, bool = false, double = 0.5, int = 0, int = 0, int = 2, int = 8);
 
 	// get timing of peaks
-	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0.2, bool = false, int = 2, bool = false);
+	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0., bool = false, int = 2, bool = false);
 	void SkipEventsTimeDiffCut(int, int, double, double, bool = false);
 
 	void FractionEventsAboveThreshold(float = 4, bool = true, bool = true, double = 0., double = 0., bool = false);
@@ -186,16 +186,16 @@ public:
 	double* gety(int, int);								// y values for waveform(ch, event)
 	double* gety(TH1F*);								// y values for histogram
 	double* gety(TH1F*, int, int);						// y values for dedicated y range of a histogram 
-	int rcolor(unsigned int);							// useful root colors
+	static int rcolor(unsigned int);					// useful root colors
 
-	float LinearInterpolation(float, float, float, float, float); // linear interpolation
+	static float LinearInterpolation(float, float, float, float, float); // linear interpolation
 
 	int GetEventIndex(int);										// get index of a triggered event (finds the correct event if files are not read sequentially)
 	int GetChannelIndex(int);									// get index of a certain channel
 	void SplitCanvas(TCanvas*&);								// split canvas into pads to display all active channels on one canvas
-	void Convolute(double*&, double*, double*, int, int);		// convolution for filtering waveforms
-	void SmoothArray(double*&, int, double = 1., int = 0);		// filtering
-	void FilterArray(double*&, int, double = .4, double = 1.2, double = .25); // filtering
+	static void Convolute(double*&, double*, double*, int, int);	// convolution for filtering waveforms
+	static void SmoothArray(double*&, int, double = 1., int = 0, double = .3125);		// smoothing
+	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = .3125);	// filtering
 
 	/// @brief Constructor of the class with arguments to filter noise events in the cosmics setup. Default values do nothing 
 	ReadRun(double = 0, int = 1);
@@ -228,14 +228,14 @@ public:
 	/// @brief Total number of waveforms in data (nchannels*nacquisitions)
 	int nwf;
 
-	/// @brief ns per bin in data (has to be .3125 ns)
-	float SP;
-	/// @brief Conversion coefficient for wavecatcher
+	/// @brief ns per bin in data (sampling rate 3.2 GS/s -> 0.3125 ns)
+	float SP = .3125;
+	/// @brief DAC conversion coefficient for wavecatcher
 	/// 
 	/// From https://owncloud.lal.in2p3.fr/public.php?service=files&t=56e4a2c53a991cb08f73d03f1ce58ba2 
-	double coef;
-	/// @brief Number of bins (always 1024 samples per waveform)
-	int binNumber;
+	double coef = 2.5 / (4096 * 10);
+	/// @brief Number of bins (always 1024 samples per waveform). Do not change!
+	int binNumber = 1024;
 
 	/// @brief Stores bin numbers where the sum of waveforms have their maximum
 	/// 
