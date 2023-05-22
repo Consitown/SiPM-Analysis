@@ -35,12 +35,13 @@
 #include <TText.h>
 #include <TFitResultPtr.h>
 #include <TFitResult.h>
-#include <TSpline.h> 
+#include <TSpline.h>
 #include <TPaveStats.h> 
 //#include <TSpectrum.h>   // peakfinder
 //#include <TPolyMarker.h> // peakfinder
 #include <TError.h>      // root verbosity level
 #include <TSystem.h>
+#include <TROOT.h>
 #include <TLatex.h>
 
 //C, C++
@@ -52,7 +53,7 @@
 #include <stdlib.h>
 #include <sstream>
 
-#include "misc/FitFunctions.h"
+#include "../misc/FitFunctions.h"
 
 using namespace std;
 
@@ -70,6 +71,8 @@ private:
 	int PrintChargeSpectrumPMT_cnt;
 	/// @brief Index for multiple executions of the same plotting function
 	int PrintChargeSpectrumPMTthreshold_cnt;
+	/// @brief Index for multiple executions of the same plotting function
+	int PlotChannelAverages_cnt;
 
 
 #pragma pack(1) // padding suppression
@@ -123,31 +126,34 @@ public:
 	// plots amplValuessum
 	void PlotChannelSums(bool = false, bool = false, double = 0., double = 0., int = 2);
 
+	void PlotChannelAverages(bool = false);
+
 	// baseline correction (shifts all waveforms individually)
 	void CorrectBaseline(float, float = -999);
 	void CorrectBaseline_function(TH1F*, float, float, int);
 
 	void CorrectBaselineMinSlopeRMS(int = 100, bool = false, double = 0.5, int = 0, int = 0, bool = false, int = 2, int = 8);
 
-	void CorrectBaselineMin(int = 100, bool = false, double = 0.5, int = 0, int = 0, int = 2, int = 8);
+	void CorrectBaselineMin(int = 100, double = 0.5, int = 0, int = 0, int = 2, int = 8);
 
 	// get timing of peaks
-	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0., bool = false, int = 2, bool = false);
+	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0., bool = true, int = 2, bool = false);
 	void SkipEventsTimeDiffCut(int, int, double, double, bool = false);
 
 	void FractionEventsAboveThreshold(float = 4, bool = true, bool = true, double = 0., double = 0., bool = false);
 
 	// average all waveforms to simplify peak ID
-	void SmoothAll(double = 5, int = 0);
+	void SmoothAll(double = 5, int = 2);
 	void FilterAll(double = .3, double = .9, double = .2);
 	void DerivativeAll();
+	void ShiftAllToAverageCF();
 
 	// functions for charge spectrum
 	int* GetIntWindow(TH1F*, float, float, float, float, int);
 	float GetPeakIntegral(TH1F*, float, float, float, float, int = 0);
 	void PrintChargeSpectrumWF(float, float, float = 0, float = 300, int = 1, float = 0., float = 0.);
 	TH1F* ChargeSpectrum(int, float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
-	void PrintChargeSpectrum(float, float, float = 0, float = 300, float = -50, float = 600, int = 750, float = 0., float = 0., int = 8, int = 0);
+	void PrintChargeSpectrum(float, float, float = 0, float = 300, float = -50, float = 600, int = 750, float = 0., float = 0., int = 99, int = 0);
 	/// @brief Starting values of the fit parameters for PrintChargeSpectrum()
 	vector<float> PrintChargeSpectrum_pars;
 	void PrintChargeSpectrumPMT(float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
@@ -179,28 +185,31 @@ public:
 	// print FFT
 	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
 
-	// helper functions
-	string list_files(const char*, const char*);	// find data files
-	TH1F* Getwf(int, int, int = 1);						// channel, eventnr, color
-	double* getx(double = 0.);							// x values
-	double* gety(int, int);								// y values for waveform(ch, event)
-	double* gety(TH1F*);								// y values for histogram
-	double* gety(TH1F*, int, int);						// y values for dedicated y range of a histogram 
-	static int rcolor(unsigned int);					// useful root colors
-
+	// helper functions defined in helpers.cc
+	string ListFiles(const char*, const char*);	// find data files
+	TH1F* Getwf(int, int, int = 1);					// channel, eventnr, color
+	double* getx(double = 0.);						// x values
+	double* gety(int);							// y values for waveform index
+	double* gety(int, int);							// y values for waveform(ch, event)
+	double* gety(TH1F*);							// y values for histogram
+	double* gety(TH1F*, int, int);					// y values for dedicated y range of a histogram 
+	static int rcolor(unsigned int);				// useful root colors
 	static float LinearInterpolation(float, float, float, float, float); // linear interpolation
-
-	int GetEventIndex(int);										// get index of a triggered event (finds the correct event if files are not read sequentially)
-	int GetChannelIndex(int);									// get index of a certain channel
-	void SplitCanvas(TCanvas*&);								// split canvas into pads to display all active channels on one canvas
-	static void Convolute(double*&, double*, double*, int, int);	// convolution for filtering waveforms
+	int GetEventIndex(int);			// get index of a triggered event (finds the correct event if files are not read sequentially)
+	int GetChannelIndex(int);		// get index of a certain channel
+	int GetCurrentChannel(int);		// get index of channel for a certain waveform
+	int GetCurrentEvent(int);		// get index of event for a certain waveform
+	void SplitCanvas(TCanvas*&);	// split canvas into pads to display all active channels on one canvas
+	static void Convolute(double*&, double*, double*, int);	// convolution for filtering waveforms
 	static void SmoothArray(double*&, int, double = 1., int = 0, double = .3125);		// smoothing
 	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = .3125);	// filtering
 
-	/// @brief Constructor of the class with arguments to filter noise events in the cosmics setup. Default values do nothing 
-	ReadRun(double = 0, int = 1);
-
-	void ReadFile(string, bool = false, int = 9, string = "out.root", bool = false); // file name, bool whether or not to change sign of PMT channels (channel number>8)
+	/// @brief Constructor of the class
+	/// @param no_of_bin_files_to_read Set to >1 in order to constrain the number of .bin files read from the target folder. 
+	/// Intended for quick tests on a fraction of the full dataset.
+	ReadRun(int no_of_bin_files_to_read = 0);
+	
+	void ReadFile(string, bool = false, int = 9, string = "out.root", bool = false);
 
 	virtual ~ReadRun();
 
@@ -208,6 +217,17 @@ public:
 	/// 
 	/// Can be used to save analysis results in the data folder
 	string data_path;
+
+	/// @brief Number of bin files to be read in. 
+	///
+	/// Can be used to test analysis on a small sample of the data.
+	int NoOfBinFilesToRead;
+
+	/// @brief Can be used to discard the original event numbering of the data
+	/// 
+	/// Set to true if you want to read several runs at once. The events will be numbered in the order they are read in. 
+	/// The original event numbers of the different runs will be lost.
+	bool discard_original_eventnr = false;
 
 	/// @brief Do analysis only for limited range of channels to reduce memory usage
 	/// 
@@ -262,18 +282,10 @@ public:
 	vector<bool> skip_event;
 	int Nevents_good();
 
-	/// @brief Special parameter for HU cosmics setup
-	/// 
-	/// Threshold (usually 4 mV) for PMT signal (hardcoded channel >8) to skip events where PMTs pick up radio frequency noise (NO BASELINE CORRECTION!).
-	double skip_event_threshold;
-	/// @brief Special parameter for HU cosmics setup
-	///
-	/// define how many PMT channels need to be above threshold to discard event (RF pick up should be seen by alls PMTs).
-	int skip_event_threshold_nch;
-
 	void SkipEventsPerChannel(vector<double>, double = 0, double = 0, bool = false);  // in case you want to have indiviual thresholds in individual channels
 	void IntegralFilter(vector<double>, vector<bool>, float, float, float = 50, float = 250, bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
 	void PrintSkippedEvents();
+	void UnskipAll();
 
 	/// @brief Stores baseline correction results for CorrectBaseline() and related functions
 	vector<vector<float>> baseline_correction_result;
@@ -313,4 +325,3 @@ public:
 	ClassDef(ReadRun, 1)
 };
 #endif
-

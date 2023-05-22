@@ -62,10 +62,17 @@ void read_everyother_group(int which) // main
 
 	// initialize class
 	ReadRun mymeas(0);
-
+/*
+	mymeas.Shift_WFs_in_file_loop = true;
+	mymeas.tWF_CF = 0.5;
+	mymeas.tWF_CF_lo = 230;
+	mymeas.tWF_CF_hi = 480;
+*/
 	// Syntax:...(string path, bool change_polarity, int change_sign_from_to_ch_num, string out_file_name, bool debu)
 	// read data; mymeas.ReadFile(path, true, 0, path + "cal_results.root") for an explizit output file
 	mymeas.ReadFile(path, true, 8, "everyother_results.root");
+
+	//mymeas.discard_original_eventnr = true; //false is default
 
 	// only plot channels specified below. Leaving it empty will plot all channels
 	//mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
@@ -85,7 +92,7 @@ void read_everyother_group(int which) // main
 	vector<double> thresholds2 = {0, 0, 0, 0, 0, 0, 0, 0, 4, 0}; //skip all events where ch8 fires
 	mymeas.SkipEventsPerChannel(thresholds2, 110, 150, false);
 	vector<bool> first_ch_skip = mymeas.skip_event; //save the info
-	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = false; //reset the vector
+	for (int i = 0; i < mymeas.skip_event.size(); i++) mymeas.skip_event[i] = false;//mymeas.UnskipAll(); //reset the vector
 	vector<double> thresholds3 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 4}; //skip all events where ch9 fires
 	mymeas.SkipEventsPerChannel(thresholds3, 110, 150, false);
 	vector<bool> second_ch_skip = mymeas.skip_event; //save the info
@@ -98,6 +105,15 @@ void read_everyother_group(int which) // main
 	//skip weird events: -5 mV for identifying out burst/weird events (high frequency oscillations) in large PS (-7 only if signals inverted)
 	vector<double> thresholds_weird = {0, 0, 0, 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5};
 	mymeas.SkipEventsPerChannel(thresholds_weird, 100, 200, false);
+
+	// cutting on integrals
+	// Syntax: ...(vector<double> thresholds, vector<bool>, float winlow, float winhi, float start, float end, bool use_AND_condition, bool verbose)
+	vector<bool> below = {true, true, true, true, true, true, true, true}; // false for cut if (int < threshold)
+	vector<bool> above = {false, false, false, false, false, false, false, false};
+	vector<double> thresholds_int1 = {2500, 0, 2500, 0, 2500, 0, 2500, 0};
+	mymeas.IntegralFilter(thresholds_int1, above, 20, 10, 90, 150, false, false);
+	//vector<double> thresholds_int2 = {1500, 0, 1500, 0, 1500, 0, 1500, 0};
+	//mymeas.IntegralFilter(thresholds_int2, below, 20, 10, 90, 150, false, false);
 /*
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;

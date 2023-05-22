@@ -1,14 +1,14 @@
 /// \mainpage Introduction
-/// This page serves as documentation of the waveform analysis framework for WaveCatcher setups in the high 
-/// energy physics groups at the Humboldt University of Berlin. \n \n \n
+/// This page serves as documentation of the waveform analysis framework ```wavecatcher-analysis``` for WaveCatcher setups 
+/// in the Experimental Elementary Particle Physics Group at the Institute of Physics at Humboldt University of Berlin. \n \n \n
 /// 
-/// You can find the relevant documentation of the functions and variables at <a href="classReadRun.html"> ReadRun Class Reference</a>
-///  
+/// You can find the documentation of the functions and variables at <a href="classReadRun.html"> ReadRun Class Reference</a>
+/// 
 /// Installation instructions can be found at <https://cscharf-hub.github.io/wavecatcher-analysis/>
 /// 
-/// And the code can be found at <https://github.com/cscharf-hub/wavecatcher-analysis>
+/// The source code is available at <https://github.com/cscharf-hub/wavecatcher-analysis>
 /// 
-/// Creators: \n
+/// Development and maintenance: \n
 /// Christian Scharf \n 
 /// Contributors: \n 
 /// Doramas Jimeno Sanchez \n
@@ -25,27 +25,19 @@
 
 ClassImp(ReadRun)
 
-/// @brief Constructor of the class with arguments to filter noise events in the cosmics setup. Default values do nothing 
-/// 
-/// PMT_threshold -> set to 0 to do nothing. If a value is set, events where the maximum value is > PMT_threshold in \n
-/// channel > 7 are removed from the analysis (for cosmics setup). Used to filter out events where the PMTs have triggered on picked-up radio frequency noise signals
-ReadRun::ReadRun(double PMT_threshold, int channels_above_threshold) {
+/// @brief Constructor of the class
+ReadRun::ReadRun(int no_of_bin_files_to_read) {
 
 	cout << "\ninitializing ..." << endl;
+	ROOT::EnableImplicitMT();
+	TH1::AddDirectory(kFALSE);
 
-	skip_event_threshold = PMT_threshold;
-	skip_event_threshold_nch = channels_above_threshold;
-	if (skip_event_threshold > 0) {
-		cout << "\n removing events where channels 9-16 have entries exceeding +" << skip_event_threshold << " mV amplitude in at least " << channels_above_threshold << " PMTs\n\n";
-	}
-	else if (skip_event_threshold < 0) {
-		cout << "\n removing events where channels 9-16 have entries below " << skip_event_threshold << " mV amplitude in at least " << channels_above_threshold << " PMTs\n\n";
-	}
 	nwf = 0;
-
 	PrintChargeSpectrum_cnt = 0;
 	PrintChargeSpectrumPMT_cnt = 0;
 	PrintChargeSpectrumPMTthreshold_cnt = 0;
+	PlotChannelAverages_cnt = 0;
+	NoOfBinFilesToRead = no_of_bin_files_to_read;
 
 	root_out = new TFile();	// init results file
 }
@@ -90,9 +82,9 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 
 	unsigned short output_channel;
 	unsigned int output_event;
-	unsigned long long int output_tdc;
+	//unsigned long long int output_tdc;
 	unsigned short output_nbchannels;
-	unsigned short read_channels;
+	unsigned short read_channels = 0;
 
 	amplValuessum = new double* [nChannelsWC]; //sum of all wf for each channel
 	for (int i = 0; i < nChannelsWC; i++) {//init
@@ -104,17 +96,15 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 
 	//Start reading the raw data from .bin files.
 	stringstream inFileList;
-	inFileList << list_files(path.c_str(), ".bin"); //all *.bin* files in folder path
-	int nitem = 1;
+	inFileList << ListFiles(path.c_str(), ".bin"); //all *.bin* files in folder path
 	string fileName;
 	int file_counter = 0;
-	int currentPrint = -1;
 	int wfcounter = 0;
 	int event_counter = 0;
-	int removed_event_counter = 0;
 
 	while (inFileList >> fileName) {
 		// file loop
+		if (NoOfBinFilesToRead > 0 && file_counter >= NoOfBinFilesToRead) break;
 
 		fileName = path + fileName;
 		ifstream input_file(fileName.c_str(), std::ios::binary | std::ios::in);
@@ -207,12 +197,10 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 
 		while (input_file.read((char*)(&an_event), sizeof(an_event))) {
 			//event loop
-			int event_flag_cnt = 0;
-
 			if (debug_data) printf("%03d has %d channels\n", an_event.EventNumber, an_event.nchannelstored);
 
 			output_event = an_event.EventNumber;
-			output_tdc = an_event.TDCsamIndex;
+			//output_tdc = an_event.TDCsamIndex;
 			output_nbchannels = an_event.nchannelstored;
 
 			if (debug_data && output_event % 200 == 0) printf("EventNr: %d, nCh: %d\n", output_event, output_nbchannels);
@@ -253,15 +241,13 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 				output_channel = a_channel_data.channel;
 				if (debug_data) printf("- reading channel %d\n", output_channel);
 
-				//if (event_counter < 10) cout << "\touter: " << ch;
 				//---------------------------------------------------------------------------------------------------------------
 				if (ch >= start_at_ch && ch <= end_at_ch) {
-					//if (event_counter < 10) cout << "\tinner: " << ch;
 
 					if (event_counter == 0) active_channels.push_back(static_cast<int>(output_channel));
 
 					TString name(Form("channel%02d_event%05d", output_channel, an_event.EventNumber));
-					TString title(Form("Channel %d, event %d raw data;time [ns];signal [mV]", output_channel, an_event.EventNumber));
+					TString title(Form("Channel %d, event %d;time [ns];signal [mV]", output_channel, an_event.EventNumber));
 					auto hCh = (TH1F*)testrundata.ConstructedAt(wfcounter);
 					hCh->SetName(name.Data());
 					hCh->SetTitle(title.Data());
@@ -331,28 +317,15 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 						CorrectBaseline_function(hCh, tCutg, tCutEndg, wfcounter);
 					}
 
-
-					// skip events where there are large positive amplitudes in the PMT channels (real PMT photoelectron signals are negative, positive signals are pick up noise)
-					for (int s = 0; s < binNumber; ++s) {
-						if ((skip_event_threshold != 0 && (skip_event_threshold > 0 && output_channel > 8 && val >= skip_event_threshold)) || (skip_event_threshold < 0 && output_channel > 8 && val <= skip_event_threshold)) {
-							event_flag_cnt++;
-						}
-					}
-
-					//hCh->SetLineColor(ch + 1); // gets a bit too colorful
-					//hCh->SetMarkerColor(ch + 1);
-
 					wfcounter++;
 				}//--------------------------------------------------------------------------------------------------------------
 
 			} // for ch
 
-			bool event_flag = false;
-			if (event_flag_cnt >= skip_event_threshold_nch) event_flag = true;
-			eventnr_storage.push_back(output_event);	//  Adds the current event number(the one from the WaveCatcher) to the storage vector
-			skip_event.push_back(event_flag);
+			skip_event.push_back(false);
+			if (!discard_original_eventnr) eventnr_storage.push_back(output_event); // Stores the current WaveCatcher event number
+			else eventnr_storage.push_back(event_counter);
 			event_counter++;
-			if (event_flag) removed_event_counter++;
 		} // while an_event
 
 		input_file.close();
@@ -375,8 +348,6 @@ void ReadRun::ReadFile(string path, bool change_polarity, int change_sign_from_t
 
 	nevents = event_counter;
 	nwf = wfcounter;
-
-	if (skip_event_threshold != 0) cout << "\n\n total number of events: " << nevents << "\n number of removed events: " << removed_event_counter << "\n\n";
 }
 
 /// @brief Destructor
@@ -388,8 +359,13 @@ ReadRun::~ReadRun() {
 	cout << "\ndeleting nothing currently..." << endl;
 }
 
-/// @brief Plot sums of all waveforms for each channel
-/// @param doaverage If true it will apply smoothing to plots. \n 
+/// @brief Plot sums of all raw waveforms for each channel
+/// 
+/// To plot the average waveforms after baseline correction etc. use PlotChannelAverages().
+/// 
+/// \image html PlotChannelSums.png "This function plots the sum of all waveforms for each channel, without any corrections. Channel 9 was measured with an offset as visible here. Code in example." width=75%
+/// 
+/// @param smooth If true it will apply smoothing to plots. \n 
 /// Do not use without very good reason as it biases the results.
 /// @param normalize If true will normalize the maximum to 1.
 /// @param shift Shift histogram by "shift" ns
@@ -397,7 +373,7 @@ ReadRun::~ReadRun() {
 /// @param smooth_method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
 /// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks! Very slow. \n
 /// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
-void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, double sigma, int smooth_method) {
+void ReadRun::PlotChannelSums(bool smooth, bool normalize, double shift, double sigma, int smooth_method) {
 
 	double* xv = getx(shift);
 	TMultiGraph* mgsums = new TMultiGraph();
@@ -409,7 +385,7 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 	for (int i = 0; i < nchannels; i++) {
 		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
 			double* yv = amplValuessum[i];
-			if (doaverage) SmoothArray(yv, binNumber, sigma, smooth_method);
+			if (smooth) SmoothArray(yv, binNumber, sigma, smooth_method);
 
 			TGraph* gr = new TGraph(binNumber, xv, yv);
 			delete[] yv;
@@ -441,8 +417,78 @@ void ReadRun::PlotChannelSums(bool doaverage, bool normalize, double shift, doub
 	root_out->WriteObject(mgsums, "channelsums");
 	root_out->WriteObject(sumc, "channelsums_c");
 }
+/// @example read_exampledata.cc
 
-/// @brief Smoothing all waveforms which are not skipped (for testing, do not use for analysis!)
+/// @brief Plot averages only of the good, corrected waveforms for each channel
+/// 
+/// Similar to PlotChannelSums(), but will average all non-skipped waveforms. \n
+/// Can be used to inspect average waveforms after baseline correction etc. has been applied. 
+/// To do so, call function after calling correction and event filter functions.
+/// 
+/// \image html PlotChannelAverages.png "This function plots the sum of all non-skipped waveforms for each channel, with corrections. Compare with the result for PlotChannelSums(). Code in example." width=75%
+/// 
+/// @param normalize If true will normalize the maximum to 1.
+void ReadRun::PlotChannelAverages(bool normalize) {
+	
+	double* xv = getx();
+	TMultiGraph* mgav = new TMultiGraph();
+	mgav->SetTitle("channel averages; t [ns]; amplitude [mV]");
+	if (normalize) mgav->SetTitle("channel averages; t[ns]; amplitude[arb.]");
+
+	double max = 0., min = 0.;
+		
+	for (int i = 0; i < nchannels; i++) {
+		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
+			
+			double* yv = new double[binNumber];
+			for (int k = 0; k < binNumber; k++) yv[k] = 0.;
+
+			for (int j = 0; j < nevents; j++) {
+				if (!skip_event[j]) {
+					double* y_tmp = gety(i, j);
+					for (int k = 0; k < binNumber; k++) yv[k] += y_tmp[k];
+					delete[] y_tmp;
+				}
+			}
+
+			double norm = static_cast<double>(Nevents_good());
+			for (int k = 0; k < binNumber; k++) yv[k] /= norm;
+
+			TGraph* gr = new TGraph(binNumber, xv, yv);
+			delete[] yv;
+
+			double tmp_min = TMath::MinElement(gr->GetN(), gr->GetY());
+			if (tmp_min < min) min = tmp_min;
+			double tmp_max = TMath::MaxElement(gr->GetN(), gr->GetY());
+			if (tmp_max > max) max = tmp_max;
+			if (normalize) {
+				for (int j = 0; j < gr->GetN(); j++) gr->SetPointY(j, gr->GetPointY(j) / tmp_max);
+			}
+
+			TString name(Form("channel_%02d", active_channels[i]));
+			TString title(Form("Channel %d", active_channels[i]));
+			gr->SetName(name.Data());
+			gr->SetTitle(title.Data());
+			gr->SetLineColor(rcolor(i));
+			gr->SetMarkerColor(rcolor(i));
+			mgav->Add(gr);
+		}
+	}
+	delete[] xv;
+
+	string cname("Averages_" + to_string(PlotChannelAverages_cnt++));
+	TCanvas* avc = new TCanvas(cname.c_str(), cname.c_str(), 600, 400);
+	mgav->Draw("AL");
+	if (normalize) mgav->GetYaxis()->SetRangeUser(-0.2, 1);
+	else mgav->GetYaxis()->SetRangeUser(min, max);
+	avc->BuildLegend(0.85, 0.70, .99, .95);
+	root_out->WriteObject(mgav, "channelaverages");
+	root_out->WriteObject(avc, "channelaverages_c");
+}
+/// @example timing_example.cc
+/// @example read_exampledata.cc
+
+/// @brief Smoothing all waveforms which are not skipped (for testing, careful when using for analysis!)
 /// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
 /// @param method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
 /// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
@@ -451,11 +497,11 @@ void ReadRun::SmoothAll(double sigma, int method) {
 	// just for testing, not very efficient
 	cout << "\nsmoothing wfs";
 	for (int j = 0; j < nwf; j++) {
-		if (!skip_event[j]) {
+		if (!skip_event[GetCurrentEvent(j)]) {
 			TH1F* his = ((TH1F*)rundata->At(j));
 			double* yvals = gety(his);
 			SmoothArray(yvals, binNumber, sigma, method);
-			for (int i = 1; i < his->GetNbinsX(); i++) his->SetBinContent(i, yvals[i]);
+			for (int i = 1; i <= his->GetNbinsX(); i++) his->SetBinContent(i, yvals[i - 1]);
 			delete[] yvals;
 		}
 		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
@@ -475,7 +521,7 @@ void ReadRun::FilterAll(double sigma1, double sigma2, double factor) {
 		TH1F* his = ((TH1F*)rundata->At(j));
 		double* yvals = gety(his);
 		FilterArray(yvals, binNumber, sigma1, sigma2, factor);
-		for (int i = 1; i < his->GetNbinsX(); i++) his->SetBinContent(i, yvals[i]);
+		for (int i = 1; i <= his->GetNbinsX(); i++) his->SetBinContent(i, yvals[i - 1]);
 		delete[] yvals;
 		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 	}
@@ -490,10 +536,55 @@ void ReadRun::DerivativeAll() {
 	for (int j = 0; j < nwf; j++) {
 		TH1F* his = ((TH1F*)rundata->At(j));
 		double* yvals = gety(his);
-		for (int i = 1; i < his->GetNbinsX() - 1; i++) his->SetBinContent(i, yvals[i + 1] - yvals[i]);
+		for (int i = 1; i <= his->GetNbinsX() - 1; i++) his->SetBinContent(i, yvals[i + 1] - yvals[i]);
 		delete[] yvals;
 		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 	}
+}
+
+/// @brief Shift all waveforms to the average start times of the signals per channel
+/// 
+/// Please make sure to call GetTimingCFD() with parameters useful for your data **before** calling this function. \n
+/// Also make sure to call PrintChargeSpectrumWF() **before** calling this function since the timing reference (blue line) won't be shifted.
+/// 
+void ReadRun::ShiftAllToAverageCF() {
+	cout << "\nshifting all WFs to the average CF time for each channel.\n";
+	
+	//call GetTimingCFD() in case it was not initialized
+	if (static_cast<int>(timing_results.size()) == 0) GetTimingCFD();
+	
+	double* timing_mean = new double[nchannels];
+	for (int i = 0; i < nchannels; i++) timing_mean[i] = 0.;
+	
+	for (int j = 0; j < nwf; j++) {
+		if (!skip_event[GetCurrentEvent(j)]) timing_mean[GetCurrentChannel(j)] += timing_results[j][0];
+	}
+
+	double norm = static_cast<double>(Nevents_good());
+
+	int* timing_mean_n = new int[nchannels];
+	for (int i = 0; i < nchannels; i++) {
+		timing_mean_n[i] = static_cast<int>(round(timing_mean[i] / norm ));
+	}
+	delete[] timing_mean;
+
+	for (int j = 0; j < nwf; j++) {
+		if (!skip_event[GetCurrentEvent(j)]) {
+			TH1F* his = ((TH1F*)rundata->At(j));
+			double* yvals = gety(his);
+			int shift = static_cast<int>(timing_results[j][0]) - timing_mean_n[GetCurrentChannel(j)];
+
+			for (int i = 0; i < his->GetNbinsX(); i++) {
+				int icycle = 0;
+				if (i + shift >= his->GetNbinsX()) icycle = -1 * his->GetNbinsX();
+				else if (i + shift < 0) icycle = his->GetNbinsX();
+				his->SetBinContent(i + 1, yvals[i + shift + icycle]);
+			}
+			delete[] yvals;
+		}
+		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
+	}
+	delete[] timing_mean_n;
 }
 
 /// @brief Baseline correction constant window
@@ -551,7 +642,7 @@ void ReadRun::CorrectBaseline_function(TH1F* his, float tCut, float tCutEnd, int
 
 	// write corrected values to histograms
 	if (tCut >= 0) {
-		for (int i = 1; i < his->GetNbinsX(); i++) his->SetBinContent(i, his->GetBinContent(i) - corr);
+		for (int i = 1; i <= his->GetNbinsX(); i++) his->SetBinContent(i, his->GetBinContent(i) - corr);
 	}
 
 	if (!Using_BaselineCorrection_in_file_loop) {
@@ -579,7 +670,7 @@ void ReadRun::CorrectBaseline_function(TH1F* his, float tCut, float tCutEnd, int
 /// Results will be visualized for each event in PrintChargeSpectrumWF(). \n \n 
 /// 
 /// @param nIntegrationWindow Number of bins of integration window
-/// @param doaverage If true will use averaging for more reliable slope. Use with care!
+/// @param smooth If true will use averaging for more reliable slope. Use with care!
 /// @param sigma NNumber of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution. Use with care!
 /// @param max_bin_for_baseline Maximum bin for search window.
 /// @param start_at Minimum bin for search window.
@@ -589,7 +680,7 @@ void ReadRun::CorrectBaseline_function(TH1F* his, float tCut, float tCutEnd, int
 /// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
 /// @param skip_channel Skip a channel
 /// @todo Work on "skip_channel" and remove "search_min"
-void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, int smooth_method, int skip_channel) {
+void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool smooth, double sigma, int max_bin_for_baseline, int start_at, bool search_min, int smooth_method, int skip_channel) {
 
 	const int binNumberSlope = binNumber - 1;
 	double* slope = new double[binNumberSlope];
@@ -672,7 +763,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 			}
 
 			corr = 0.;
-			if (!doaverage) {
+			if (!smooth) {
 				corr = his->Integral(iintwindowstart, iintwindowstart + nIntegrationWindow) / static_cast<float>(nIntegrationWindow + 1);
 			}
 			else {
@@ -681,8 +772,8 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 			}
 
 			for (int i = 0; i < binNumber; i++) {
-				if (!doaverage) his->SetBinContent(i, his->GetBinContent(i) - corr);
-				else his->SetBinContent(i, yvals[i] - corr);
+				if (!smooth) his->SetBinContent(i + 1, his->GetBinContent(i + 1) - corr);
+				else his->SetBinContent(i + 1, yvals[i] - corr);
 			}
 			delete[] yvals;
 		}
@@ -700,6 +791,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 	}
 	delete[] slope;
 }
+/// @example read_exampledata.cc
 
 /// @brief Baseline correction using minimum sum (\f$\propto\f$ mean) in range for correction 
 /// 
@@ -715,9 +807,7 @@ void ReadRun::CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage,
 /// Results will be visualized for each event in PrintChargeSpectrumWF(). \n 
 /// For parameters see CorrectBaselineMinSlopeRMS() 
 /// 
-void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, int smooth_method, int skip_channel) {
-
-	int binNumberSlope = binNumber - 1;
+void ReadRun::CorrectBaselineMin(int nIntegrationWindow, double sigma, int max_bin_for_baseline, int start_at, int smooth_method, int skip_channel) {
 	skip_channel += 1;
 
 	if (start_at > max_bin_for_baseline - nIntegrationWindow) start_at = 0;
@@ -762,18 +852,10 @@ void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double 
 				}
 			}
 
-			corr = 0.;
-			if (!doaverage) {
-				corr = his->Integral(iintwindowstart, iintwindowstart + nIntegrationWindow) / static_cast<float>(nIntegrationWindow + 1);
-			}
-			else {
-				for (int i = iintwindowstart; i < iintwindowstart + nIntegrationWindow; i++) corr += yvals[i];
-				corr /= static_cast<float>(nIntegrationWindow);
-			}
+			corr = his->Integral(iintwindowstart, iintwindowstart + nIntegrationWindow) / static_cast<float>(nIntegrationWindow + 1);
 
 			for (int i = 0; i < binNumber; i++) {
-				if (!doaverage) his->SetBinContent(i, his->GetBinContent(i) - corr);
-				else his->SetBinContent(i, yvals[i] - corr);
+				his->SetBinContent(i + 1, his->GetBinContent(i + 1) - corr);
 			}
 			delete[] yvals; //delete slow
 		}
@@ -787,6 +869,7 @@ void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double 
 		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
 	}
 }
+/// @example timing_example.cc
 
 /// @brief Determine the timing of the maximum peak with constant fraction discrimination
 /// 
@@ -801,8 +884,8 @@ void ReadRun::CorrectBaselineMin(int nIntegrationWindow, bool doaverage, double 
 /// @param end_at_t Time in ns to end searching.
 /// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution.
 /// This will bias the results! Do not use (or use very carefully, only for noisy data)! Set to 0 if you do not want to use smoothing.
-/// @param find_CF_from_start If true will start search from "start_at_t" \n 
-/// If false searches backwards from time of maximum (default setting).
+/// @param find_CF_from_start If true will start search from "start_at_t" to find the first arriving photon (default setting). \n 
+/// If false search backwards from the time of the maximum.  
 /// @param smooth_method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
 /// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
 /// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
@@ -879,6 +962,7 @@ void ReadRun::GetTimingCFD(float cf_r, float start_at_t, float end_at_t, double 
 	}
 	cout << endl;
 }
+/// @example timing_example.cc
 
 /// @brief Skip events where the time difference between two channels is outside of specified range
 /// 
@@ -904,19 +988,20 @@ void ReadRun::SkipEventsTimeDiffCut(int first_channel_abs, int second_channel_ab
 
 	// loop through events, calculate timing difference between channels and compare with cuts
 	for (int j = 0; j < nwf; j += nchannels) {
-		if (!skip_event[floor(j / nchannels)]) {
+		if (!skip_event[GetCurrentEvent(j)]) {
 			float time_diff = timing_results[j + second_channel][1] - timing_results[j + first_channel][1];
 
 			if (j <= static_cast<int>(timing_results.size()) && (time_diff < time_diff_min || time_diff > time_diff_max)) {
-				int currevent = eventnr_storage[floor(j / nchannels)];
+				int currevent = eventnr_storage[GetCurrentEvent(j)];
 				if (verbose) cout << "\nevent:\t" << currevent << "\tchannels:\t" << first_channel_abs << " & " << second_channel_abs << "\ttime diff:\t" << time_diff;
-				skip_event[floor(j / nchannels)] = true;
+				skip_event[GetCurrentEvent(j)] = true;
 				counter++;
 			}
 		}
 	}
 	cout << "\n\n\t" << counter << " events will be cut out of " << nevents << "\n\n";
 }
+/// @example timing_example.cc
 
 /// @brief Find events with max/min above/below a certain threshold
 /// 
@@ -956,10 +1041,10 @@ void ReadRun::FractionEventsAboveThreshold(float threshold, bool max, bool great
 			his->GetXaxis()->SetRange(his->GetXaxis()->FindBin(from), his->GetXaxis()->FindBin(to));
 		}
 
-		currchannel = j - nchannels * floor(j / nchannels);
+		currchannel = j - nchannels * GetCurrentEvent(j);
 		if (find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[currchannel]) != plot_active_channels.end()) {
 			if ((max && greater && his->GetMaximum() > threshold) || (max && !greater && his->GetMaximum() < threshold) || (!max && greater && his->GetMinimum() > threshold) || (!max && !greater && his->GetMinimum() < threshold)) {
-				currevent = eventnr_storage[floor(j / nchannels)];
+				currevent = eventnr_storage[GetCurrentEvent(j)];
 
 				if (verbose) cout << "\nevent:\t" << currevent << "\tchannel:\t" << active_channels[currchannel];
 
@@ -1003,17 +1088,17 @@ void ReadRun::SkipEventsPerChannel(vector<double> thresholds, double rangestart,
 	int counter = 0;
 
 	for (int j = 0; j < nwf; j++) {
-		if (!skip_event[floor(j / nchannels)]) {
-			int currchannel = j - nchannels * floor(j / nchannels);
+		if (!skip_event[GetCurrentEvent(j)]) {
+			int currchannel = j - nchannels * GetCurrentEvent(j);
 			if (currchannel < static_cast<int>(thresholds.size())) {
 				auto his = (TH1F*)((TH1F*)rundata->At(j))->Clone(); // use Clone() to not change ranges of original histogram
 				if (rangestart != 0 && rangeend != 0) his->GetXaxis()->SetRange(his->GetXaxis()->FindBin(rangestart), his->GetXaxis()->FindBin(rangeend));
 
-				if (thresholds[currchannel] != 0. && !skip_event[floor(j / nchannels)] && ((thresholds[currchannel] > 0 && his->GetMaximum() > thresholds[currchannel]) || (thresholds[currchannel] < 0 && his->GetMinimum() < thresholds[currchannel]))) {
+				if (thresholds[currchannel] != 0. && !skip_event[GetCurrentEvent(j)] && ((thresholds[currchannel] > 0 && his->GetMaximum() > thresholds[currchannel]) || (thresholds[currchannel] < 0 && his->GetMinimum() < thresholds[currchannel]))) {
 
-					int currevent = eventnr_storage[floor(j / nchannels)];
+					int currevent = eventnr_storage[GetCurrentEvent(j)];
 					if (verbose) cout << "\nevent:\t" << currevent << "\tchannel:\t" << active_channels[currchannel] << "\tthreshold\t" << thresholds[currchannel];
-					skip_event[floor(j / nchannels)] = true;
+					skip_event[GetCurrentEvent(j)] = true;
 					counter++;
 				}
 				delete his;
@@ -1050,7 +1135,7 @@ void ReadRun::IntegralFilter(vector<double> thresholds, vector<bool> highlow, fl
 	int currevent = 0;
 
 	for (int j = 0; j < nwf; j++) {
-		currevent_counter = floor(j / nchannels);
+		currevent_counter = GetCurrentEvent(j);
 
 		if (use_AND_condition || !skip_event[currevent_counter]) {
 			currchannel = j - nchannels * currevent_counter;
@@ -1079,6 +1164,8 @@ void ReadRun::IntegralFilter(vector<double> thresholds, vector<bool> highlow, fl
 
 	cout << "\n\n\t" << counter << " events will be cut out of " << nevents << endl;
 }
+/// @example timing_example.cc
+/// @example read_exampledata.cc
 
 /// @brief Prints a list of all skipped events into the terminal for diagnostics
 void ReadRun::PrintSkippedEvents() {
@@ -1091,6 +1178,12 @@ void ReadRun::PrintSkippedEvents() {
 		}
 	}
 	cout << "\n\ntotal number of skipped events:\t" << counter << "\tout of:\t" << nevents << endl;
+}
+
+/// @brief Sets skip_event flag to false for all events, removing any previous cuts
+void ReadRun::UnskipAll() {
+	for (int j = 0; j < static_cast<int>(skip_event.size()); j++) skip_event[j] = false;
+	cout << "\n\nAll event cuts were removed" << endl;
 }
 
 /// @brief Number of good events that are not skipped
@@ -1177,6 +1270,8 @@ float ReadRun::GetPeakIntegral(TH1F* his, float windowlow, float windowhi, float
 /// See GetIntWindow() for explanation of parameters. \n
 /// Will also add CFD timing if GetTimingCFD() was called before. 
 /// 
+/// image html PrintChargeSpectrumWF.png "Waveforms in all channels for a single event. Code in example."
+/// 
 /// @param windowlow Integrate from "windowlow" ns from max...
 /// @param windowhi ...to "windowhi" ns from max.
 /// @param start Find max from "start" in ns...
@@ -1256,6 +1351,7 @@ void ReadRun::PrintChargeSpectrumWF(float windowlow, float windowhi, float start
 
 	root_out->WriteObject(intwinc, name.Data());
 }
+/// @example timing_example.cc
 
 /// @brief Returns array with the individual "charge"/amplitude for all events of one channel
 /// 
@@ -1321,7 +1417,9 @@ void ReadRun::SaveChargeLists(float windowlow, float windowhi, float start, floa
 
 /// @brief Plot correlation of integrals/amplitudes between two channels
 /// 
-/// See GetIntWindow() and PrintChargeSpectrum().
+/// See GetIntWindow() and PrintChargeSpectrum() for parameters.
+/// 
+/// \image html ChargeCorrelation.png "Plots the integrals of two channels against each other. A clear correlation is visible. Around (0,0) the correlation of the pedestals can be seen (no signal in both channels). Code in example." width=75% 
 /// 
 /// @param windowlow Integrate from "windowlow" ns from max...
 /// @param windowhi ...to "windowhi" ns from max.
@@ -1341,7 +1439,7 @@ void ReadRun::ChargeCorrelation(float windowlow, float windowhi, float start, fl
 	if (windowlow + windowhi > 0.) title << ";integral ch" << channel1 << " in mV#timesns;integral ch" << channel2 << " in mV#timesns;Entries";
 	else title << ";amplitude ch" << channel1 << " in mV;amplitude ch" << channel2 << " in mV;Entries";
 
-	auto charge_corr_canvas = new TCanvas(name.str().c_str(), "canvas", 600, 400);
+	auto charge_corr_canvas = new TCanvas(name.str().c_str(), "canvas", 600, 600);
 	charge_corr_canvas->SetRightMargin(0.15);
 
 	float* charge1 = ChargeList(GetChannelIndex(channel1), windowlow, windowhi, start, end);
@@ -1351,14 +1449,22 @@ void ReadRun::ChargeCorrelation(float windowlow, float windowhi, float start, fl
 	for (int i = 0; i < nevents; i++) {
 		if (!ignore_skipped_events || !skip_event[i]) charge_corr->Fill(charge1[i], charge2[i]);
 	}
+	
 	charge_corr->Draw("colz");
 	root_out->WriteObject(charge_corr, name.str().c_str());
 
-	// move stat box out of the way
-	gPad->Update(); TPaveStats* stat_box = (TPaveStats*)charge_corr->FindObject("stats"); stat_box->SetX1NDC(0.6); stat_box->SetX2NDC(.85);
-	name << "_canvas";
+	charge_corr_canvas->Update();
+	charge_corr_canvas->SetGrid();
+	// move stat box out of the way (causing problems since May 23?)
+	//TPaveStats* stat_box = (TPaveStats*)charge_corr->FindObject("stats"); 
+	//stat_box->SetX1NDC(0.6); 
+	//stat_box->SetX2NDC(0.85);
+	charge_corr->SetStats(0);
+	charge_corr_canvas->Modified();
+	name << "_c";
 	root_out->WriteObject(charge_corr_canvas, name.str().c_str());
 }
+/// @example timing_example.cc
 
 /// @brief Histogram of the "charge" spectrum for one channel
 /// 
@@ -1385,6 +1491,10 @@ TH1F* ReadRun::ChargeSpectrum(int channel_index, float windowlow, float windowhi
 /// and return the charge histogram with x range ("rangestart", "rangeend") and the number of bins "nbins". \n 
 /// It is not really charge, but either amplitude (mV) or integral (mV x ns).
 /// See ChargeSpectrum() and GetIntWindow().
+/// 
+/// \image html PrintChargeSpectrum.png "Simple example of the integrated signals for a single channel. The resulting integrated signals are fitted with a Landau-Gauss convolution (-> energy deposition of a minimum ionizing particle in a thin absorber). Code in example." width=75%
+/// 
+/// \image html cosmics-fit-example.png "Integrated signals for a SiPM in blue and a fit with the fit function Fitf for SiPMs missing after-pulses and dark counts in red. The spectrum is not well fit by the simplified model. You can try different fit models in the example cosmics-fit.ipynb." width=50%
 /// 
 /// @param windowlow Integrate from "windowlow" ns from max...
 /// @param windowhi ...to "windowhi" ns from max.
@@ -1422,19 +1532,16 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 
 	cout << "\n\nThere is data recorded in " << active_channels.size() << " channels \n\n\n";
 	int current_canvas = 0;
-
+	
+	TH1F* his;
 	for (int i = 0; i < nchannels; i++) {
 		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
 			current_canvas++;
-
-			TH1F* his;
+			
 			his = ChargeSpectrum(i, windowlow, windowhi, start, end, rangestart, rangeend, nbins);
 			his->GetYaxis()->SetTitle("#Entries");
 			if (windowlow + windowhi > 0.) his->GetXaxis()->SetTitle("integral in mV#timesns");
 			else his->GetXaxis()->SetTitle("amplitude in mV");
-
-			TString name(Form("ChargeSpectrum channel_%02d", active_channels[i]));
-			root_out->WriteObject(his, name.Data());
 
 			//store the mean integral of each channel --> used for correction factors of phi_ew analysis
 			mean_integral.push_back(his->GetMean());
@@ -1442,195 +1549,200 @@ void ReadRun::PrintChargeSpectrum(float windowlow, float windowhi, float start, 
 			chargec->cd(current_canvas);
 
 			//fitting
-			if (which_fitf == 0) {}
-			else if (which_fitf == 1) { // landau gauss convolution for large number of photons
-				Fitf_langaus fitf;
-				int n_par = 4;
-				TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+			if (i < max_channel_nr_to_fit) {
+				if (which_fitf == 0) {}
+				else if (which_fitf == 1) { // landau gauss convolution for large number of photons
+					Fitf_langaus fitf;
+					int n_par = 4;
+					TF1* f = new TF1("fitf_langaus", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
 
-				f->SetParName(0, "Width");				f->SetParameter(0, 35);
-				f->SetParName(1, "MPV");				f->SetParameter(1, 1000);
-				f->SetParName(2, "Area");			    f->SetParameter(2, 10000);
-				f->SetParName(3, "#sigma_{Gauss}");		f->SetParameter(3, 100);
+					f->SetParName(0, "Width");				f->SetParameter(0, 35);
+					f->SetParName(1, "MPV");				f->SetParameter(1, 1000);
+					f->SetParName(2, "Area");			    f->SetParameter(2, 10000);
+					f->SetParName(3, "#sigma_{Gauss}");		f->SetParameter(3, 100);
 
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(4, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(4, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
 
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else if (which_fitf == 2) { // if pedestal is biased because of peak finder algorithm
+					Fitf_biased fitf;
+					int n_par = 9;
+					TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
+					f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
+					f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
+					f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4); //f->SetParLimits(4, 1.e-9, 1.e3);
+					f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 10.);
+					f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
+					f->SetParName(7, "norm_{0}");			f->SetParameter(7, 0.7);
+					f->SetParName(8, "x_{0}");				f->SetParameter(8, 5.);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+
+					// get number of excess events in the pedestal in the fit region. To get the absolute number of excess events the full pedestal needs to be inside of the fit range (fitrangestart, fitrangeend)
+					//double excessEventsInPedestal = f->Integral(fitrangestart, fitrangeend)/.3125;
+					//f->SetParameter(7, 1.);
+					//excessEventsInPedestal -= f->Integral(fitrangestart, fitrangeend)/.3125;
+					//cout << "\nNumber of excess events in the pedestal within the fit range:\t" << excessEventsInPedestal << "\n\n";
+				}
+				else if (which_fitf == 3) { // SiPM fit function with exponential delayed after pulsing
+					Fitf_full fitf;
+					int n_par = 9;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
+					f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
+					f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
+					f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4);
+					f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 40.);
+					f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
+					f->SetParName(7, "#alpha");				f->SetParameter(7, .1); //f->FixParameter(7, .2);
+					f->SetParName(8, "#beta");				f->SetParameter(8, 80.); //f->FixParameter(8, 80);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else if (which_fitf == 4) { // ideal PMT fit function
+					Fitf_PMT_ideal fitf;
+					int n_par = 4;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
+					f->SetParName(1, "#mu");				f->SetParameter(1, 1.);
+					f->SetParName(2, "#sigma");				f->SetParameter(2, 5.);
+					f->SetParName(3, "gain");				f->SetParameter(3, 10.);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else if (which_fitf == 5) { // PMT fit function
+					Fitf_PMT fitf;
+					int n_par = 8;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
+					f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-99, 4.e-1); //probability for type II BG
+					f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-99, 5.e-2); //coefficient of exponential decrease of typ II BG
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
+					f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);
+					f->SetParName(5, "#mu");				f->SetParameter(5, 1.);
+					f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
+					f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else if (which_fitf == 6) { // PMT fit function with biased pedestal
+					Fitf_PMT_pedestal fitf;
+					int n_par = 9;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
+					f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
+					f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-9, 5.e-2);	//coefficient of exponential decrease of typ II BG
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
+					f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);		f->SetParLimits(4, -1.e2, 1.e2);
+					f->SetParName(5, "#mu");				f->SetParameter(5, 1.);		f->SetParLimits(5, 1.e-9, 1.e2);
+					f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
+					f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);	f->SetParLimits(7, 1.e-9, 1.e9);
+					f->SetParName(8, "A_{0}");				f->SetParameter(8, 1.);		f->SetParLimits(8, 1.e-9, 1.e1);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else if (which_fitf == 7) { // default SiPM fit function + dark count spectrum (for lots of false triggers)
+					Fitf_plus_DC fitf;
+					int n_par = 9;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
+					f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
+					f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-9, 5.e-2);	//coefficient of exponential decrease of typ II BG
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
+					f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);		f->SetParLimits(4, -1.e2, 1.e2);
+					f->SetParName(5, "#mu");				f->SetParameter(5, 1.);		f->SetParLimits(5, 1.e-9, 1.e2);
+					f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
+					f->SetParName(7, "#mu_darkcount");		f->SetParameter(7, .1);		f->SetParLimits(7, 1.e-9, 1.);
+					f->SetParName(8, "N_{0}_darkcount");	f->SetParameter(8, .05);	f->SetParLimits(8, 1.e-9, .3);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
+				}
+				else { // default SiPM fit function
+					Fitf fitf;
+					int n_par = 7;
+					TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
+
+					f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
+					f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
+					f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
+					f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
+					f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4);
+					f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 40.);
+					f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
+
+					if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
+
+					if (i < max_channel_nr_to_fit) {
+						cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
+						TFitResultPtr fresults = his->Fit(f, "LRS");
+						fit_results.push_back(fresults);
+					}
 				}
 			}
-			else if (which_fitf == 2) { // if pedestal is biased because of peak finder algorithm
-				Fitf_biased fitf;
-				int n_par = 9;
-				TF1* f = new TF1("fitf_biased", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
-				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
-				f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
-				f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4); //f->SetParLimits(4, 1.e-9, 1.e3);
-				f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 10.);
-				f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
-				f->SetParName(7, "norm_{0}");			f->SetParameter(7, 0.7);
-				f->SetParName(8, "x_{0}");				f->SetParameter(8, 5.);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-
-				// get number of excess events in the pedestal in the fit region. To get the absolute number of excess events the full pedestal needs to be inside of the fit range (fitrangestart, fitrangeend)
-				//double excessEventsInPedestal = f->Integral(fitrangestart, fitrangeend)/.3125;
-				//f->SetParameter(7, 1.);
-				//excessEventsInPedestal -= f->Integral(fitrangestart, fitrangeend)/.3125;
-				//cout << "\nNumber of excess events in the pedestal within the fit range:\t" << excessEventsInPedestal << "\n\n";
-			}
-			else if (which_fitf == 3) { // SiPM fit function with exponential delayed after pulsing
-				Fitf_full fitf;
-				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
-				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
-				f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
-				f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4);
-				f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 40.);
-				f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
-				f->SetParName(7, "#alpha");				f->SetParameter(7, .1); //f->FixParameter(7, .2);
-				f->SetParName(8, "#beta");				f->SetParameter(8, 80.); //f->FixParameter(8, 80);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
-			else if (which_fitf == 4) { // ideal PMT fit function
-				Fitf_PMT_ideal fitf;
-				int n_par = 4;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
-				f->SetParName(1, "#mu");				f->SetParameter(1, 1.);
-				f->SetParName(2, "#sigma");				f->SetParameter(2, 5.);
-				f->SetParName(3, "gain");				f->SetParameter(3, 10.);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
-			else if (which_fitf == 5) { // PMT fit function
-				Fitf_PMT fitf;
-				int n_par = 8;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
-				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-99, 4.e-1); //probability for type II BG
-				f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-99, 5.e-2); //coefficient of exponential decrease of typ II BG
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
-				f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);
-				f->SetParName(5, "#mu");				f->SetParameter(5, 1.);
-				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
-				f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
-			else if (which_fitf == 6) { // PMT fit function with biased pedestal
-				Fitf_PMT_pedestal fitf;
-				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
-				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
-				f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-9, 5.e-2);	//coefficient of exponential decrease of typ II BG
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
-				f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);		f->SetParLimits(4, -1.e2, 1.e2);
-				f->SetParName(5, "#mu");				f->SetParameter(5, 1.);		f->SetParLimits(5, 1.e-9, 1.e2);
-				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
-				f->SetParName(7, "Q_{1}");				f->SetParameter(7, 10.);	f->SetParLimits(7, 1.e-9, 1.e9);
-				f->SetParName(8, "A_{0}");				f->SetParameter(8, 1.);		f->SetParLimits(8, 1.e-9, 1.e1);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
-			else if (which_fitf == 7) { // default SiPM fit function + dark count spectrum (for lots of false triggers)
-				Fitf_plus_DC fitf;
-				int n_par = 9;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "A");					f->SetParameter(0, his->Integral());
-				f->SetParName(1, "w");					f->SetParameter(1, .05);	f->SetParLimits(1, 1.e-9, 4.e-1);	//probability for type II BG
-				f->SetParName(2, "#alpha");				f->SetParameter(2, .05);	f->SetParLimits(2, 1.e-9, 5.e-2);	//coefficient of exponential decrease of typ II BG
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 5.);		f->SetParLimits(3, 1.e-9, 1.e3);
-				f->SetParName(4, "Q_{0}");				f->SetParameter(4, 0.);		f->SetParLimits(4, -1.e2, 1.e2);
-				f->SetParName(5, "#mu");				f->SetParameter(5, 1.);		f->SetParLimits(5, 1.e-9, 1.e2);
-				f->SetParName(6, "#sigma_{1}");			f->SetParameter(6, 5.);		f->SetParLimits(6, 1.e-9, 1.e3);
-				f->SetParName(7, "#mu_darkcount");		f->SetParameter(7, .1);		f->SetParLimits(7, 1.e-9, 1.);
-				f->SetParName(8, "N_{0}_darkcount");	f->SetParameter(8, .05);	f->SetParLimits(8, 1.e-9, .3);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
-			else { // default SiPM fit function
-				Fitf fitf;
-				int n_par = 7;
-				TF1* f = new TF1("fitf", fitf, fitrangestart, fitrangeend, n_par); f->SetLineColor(3); f->SetNpx(1000);
-
-				f->SetParName(0, "N_{0}");				f->SetParameter(0, his->Integral());
-				f->SetParName(1, "#mu");				f->SetParameter(1, 2.);
-				f->SetParName(2, "#lambda");			f->SetParameter(2, .04);
-				f->SetParName(3, "#sigma_{0}");			f->SetParameter(3, 2.1);
-				f->SetParName(4, "#sigma_{1}");			f->SetParameter(4, 3.4);
-				f->SetParName(5, "Gain");				f->SetParameter(5, 30.); //f->FixParameter(5, 40.);
-				f->SetParName(6, "Pedestal");			f->SetParameter(6, 2.);
-
-				if (!PrintChargeSpectrum_pars.empty()) for (int j = 0; j < min(n_par, static_cast<int>(PrintChargeSpectrum_pars.size())); j++) f->SetParameter(j, PrintChargeSpectrum_pars[j]);
-
-				if (i < max_channel_nr_to_fit) {
-					cout << "\n\n---------------------- Fit for channel " << active_channels[i] << " ----------------------\n";
-					TFitResultPtr fresults = his->Fit(f, "LRS");
-					fit_results.push_back(fresults);
-				}
-			}
+			TString name(Form("ChargeSpectrum channel_%02d", active_channels[i]));
+			root_out->WriteObject(his, name.Data());
 			his->Draw();
 		}
 	}
-
-	chargec->Update();
 	root_out->WriteObject(chargec, "ChargeSpectra");
 }
+/// @example timing_example.cc
+/// @example read_exampledata.cc
 
 /// @brief "Charge" spectrum optimized for PMT signals
 /// 
-/// Just for plotting. To analyze the data use PrintChargeSpectrum() with Fitf_PMT_pedestal() for low number of photons and Fitf_langaus() for >10-15 photons. \n 
+/// Just for plotting. To analyze the data use PrintChargeSpectrum() with Fitf_PMT_pedestal() for low number of photons 
+/// and Fitf_langaus() for >10-15 photons. \n 
 /// See PrintChargeSpectrum() for parameters.
 /// 
 void ReadRun::PrintChargeSpectrumPMT(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins) {
@@ -1822,10 +1934,15 @@ void ReadRun::PrintDCR(float windowlow, float windowhi, float rangestart, float 
 	}
 }
 
-/// @brief Plot distribution of the event-dependent angle phi_ew in a histogram. \n 
+/// @brief Angular distribution of passing particles in the cosmics setup 
+/// 
+/// Plots distribution of the event-dependent angle phi_ew in a histogram. \n 
 /// The angle is calculated using vectorial addition and the lightyield of each channel in each event. \n
 /// For more info, see master thesis of Alexander Vagts. \n
-/// Currently uses the uncorrected formulas
+/// Currently uses the uncorrected formulas.
+/// 
+/// \image html phi-ew.png "Example fit of the reconstructed angles for a certain event selection in one corner of the cosmics box. Code in example phi-ew.ipynb." width=50%
+/// 
 /// @param phi_chx Vector of the associated angles of each channel. Order is important. Angle of the first channel first. \n
 /// E.g. if channel 0 is used, the first angle would be from channel 0
 /// @param ly_C0 Vector of the lightyield of all channels at C0 position for the correction. Order must be the same as in phi_chx
@@ -1838,7 +1955,7 @@ void ReadRun::PrintDCR(float windowlow, float windowhi, float rangestart, float 
 /// @param corr selection bool for corrected or uncorrected spectra \n
 /// If true - corrected spectra \n
 /// If false - uncorrected spectra
-/// @param periodic If true, will print all phi_ew shifted by +/- 360° (so normal phi_ew distri * 3) and fit a periodic gauss
+/// @param periodic If true, will print all phi_ew shifted by +/- 360 deg (so normal phi_ew distri * 3) and fit a periodic gauss
 /// @return Phi_ew spectrum
 void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool periodic) {
 
@@ -1846,7 +1963,7 @@ void ReadRun::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<int>
 	// match channel number to channel index (still very specific)
 	int sipmnum = SiPMchannels.size();
 	vector<int> ch_index; for (int i = 0; i < sipmnum; i++) ch_index.push_back(0); // initialize the ch_index vector
-	for (int i = 0; i < active_channels.size(); i++) {
+	for (int i = 0; i < static_cast<int>(active_channels.size()); i++) {
 		for (int j = 0; j < sipmnum; j++) {
 			if (active_channels[i] == SiPMchannels[j]) ch_index[j] = i;
 		}
@@ -2033,6 +2150,7 @@ void ReadRun::PrintTimeDist(float from, float to, float rangestart, float rangee
 	time_dist_c->Update();
 	root_out->WriteObject(time_dist_c, "TimeDist");
 }
+/// @example read_exampledata.cc
 
 /// @brief Finds maximum amplitude for a given channel in time window ["from", "to"] and creates 3d map of waveforms ordered by maxima
 /// 
@@ -2102,12 +2220,15 @@ TH1F* ReadRun::His_GetTimingCFD(int channel_index, float rangestart, float range
 }
 
 /// @brief Plot results of GetTimingCFD()
+/// 
+/// \image html Print_GetTimingCFD.png "Beginning of the signals for all good events determined with constant fraction discrimination. The red lines are gauss functions fitted to the distrutions. Code in example." width=75%
+/// 
 /// @param rangestart Start of x range for plot in ns.
 /// @param rangeend End of x range for plot in ns.
 /// @param do_fit If 1: fits a gaussian. \n
 /// Else do not fit. \n 
 /// Fit results per channel are stored in ReadRun::timing_fit_results.
-/// @param nbins Number of bins for histogram.
+/// @param nbins Number of bins for histogram. Will use 320 MHz sampling rate for binning if nbins = -999.
 /// @param fitoption ROOT fit option, default is "S".
 /// @param set_errors Assign errors to the bins. Will assign errors of 1 to empty bins and \f$ \sqrt(N) \f$ if they are not empty. 
 /// Can improve the chi^2 fit.
@@ -2134,7 +2255,7 @@ void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit, i
 			his->GetXaxis()->SetTitle("time [ns]");
 
 			if (set_errors) {
-				for (int i = 0; i < his->GetNbinsX(); i++) {
+				for (int i = 1; i <= his->GetNbinsX(); i++) {
 					if (his->GetBinContent(i) < 2) his->SetBinError(i, 1);
 					else his->SetBinError(i, sqrt(his->GetBinContent(i)));
 				}
@@ -2155,6 +2276,7 @@ void ReadRun::Print_GetTimingCFD(float rangestart, float rangeend, int do_fit, i
 	timing_cfd_c->Update();
 	root_out->WriteObject(timing_cfd_c, "TimingCFD");
 }
+/// @example timing_example.cc
 
 /// @brief Plot timing difference between the mean timings of two channel ranges
 /// 
@@ -2220,18 +2342,21 @@ TH1F* ReadRun::His_GetTimingCFD_diff(vector<int> channels1, vector<int> channels
 /// Plots the difference between the peak times between the mean times of two ranges of channels for each event. \n
 /// It calculates \f$ \Delta t = <t_{second,i}> - <t_{first,i}> \f$ . \n \n \n
 /// 
-/// Example:
+/// The vectors of channels to compare are added with curly brackets:
 /// > mymeas.Print_GetTimingCFD_diff({ 26, 14 }, { 19 }, 0, 20, 2, 200); \n
-/// Plots \f$ \Delta t = t_{ch19} - (t_{ch26} + t_{ch14})/2 \f$ from 0 ns to 20 ns with 200 bins (100 ps bin width).
+/// would plot \f$ \Delta t = t_{ch19} - (t_{ch26} + t_{ch14})/2 \f$ from 0 ns to 20 ns with 200 bins (100 ps bin width). Another example is given in the plot below.
+/// 
+/// \image html Print_GetTimingCFD_diff.png "Event-wise time differences of the start of the signals of two channels. Code in example." width=75%
 /// 
 /// @param channels1 Vector of first channel numbers (wavecatcher channel numbers). 
 /// @param channels2 Vector of second channel numbers to compare. 
 /// @param rangestart Start of x range for plot in ns.
 /// @param rangeend End of x range for plot in ns.
-/// @param do_fit If 1: fits a gaussian. \n
-/// If 2: Fits a gaussian and exponential convolution to account for different arrival times of photons due to different possible light paths in the scintillator/light guide 
+/// @param do_fit If 1: Fit a gaussian. \n
+/// If 2: Fit a gaussian-exponential convolution to account for different arrival times of photons due to different possible light paths in the scintillator/light guide \n
 /// and/or delay due to self-absorption and reemission of photons in the scintillator. \n
 /// To be used for long light paths in the scintillator. See https://doi.org/10.1016/S0029-554X(79)90170-8 . \n
+/// This option only works for sufficient asymmetry \f$\tau > \sigma/2\f$. Otherwise, the exponential decay time becomes too small to be fitted. In this case please use option 1.\n
 /// If 3: Fits the sum of two gaussians where the second gauss serves as a rough background estimate. Background means events that should have been filtered out. \n
 /// Else: Do not fit. \n 
 /// @param nbins Number of bins for histogram.
@@ -2262,7 +2387,7 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 	his->GetXaxis()->SetTitle("time [ns]");
 
 	if (set_errors) {
-		for (int i = 0; i < his->GetNbinsX(); i++) {
+		for (int i = 1; i <= his->GetNbinsX(); i++) {
 			if (his->GetBinContent(i) < 2) his->SetBinError(i, 1);
 			else his->SetBinError(i, sqrt(his->GetBinContent(i)));
 		}
@@ -2270,30 +2395,35 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 
 	his->Draw();
 
-	if (do_fit == 1) {
+	double skewness = his->GetSkewness();
+
+	if (do_fit == 1 || (do_fit == 2 && abs(skewness) < .15)) {
 		// gauss (default)
 		TFitResultPtr fresults = his->Fit("gaus", fitoption.c_str(), "same", fitrangestart, fitrangeend);
 		timing_fit_results.push_back(fresults);
+		if (do_fit == 2) cout << "\nWARNING: Print_GetTimingCFD_diff\nFITTING GAUSS INSTEAD OF GAUSS x EXP CONVOLUTION BC SYMMETRY\n";
 	}
 	else if (do_fit == 2) {
 		// gauss x exp convolution (effective delay from random light path and/or self-absorption and reemission)
-		string gxe = "[3]/(2*[0])*TMath::Exp(([1]*[1]+2*[2]*[0]-2*[0]*x)/(2*[0]*[0]))*TMath::Erfc(([1]*[1]+[0]*([2]-x))/(1.4142*[0]*[1]))";
+		string gxe = "[3]/(2*TMath::Abs([0]))*TMath::Exp(([1]*[1]+2*[2]*[0]-2*[0]*x)/(2*[0]*[0]))*TMath::Erfc(([1]*[1]+[0]*([2]-x))/(1.4142*TMath::Abs([0])*[1]))";
 		auto expgconv = new TF1("exp x gauss convolution", gxe.c_str(), fitrangestart, fitrangeend);
 		expgconv->SetNpx(5000);
 
-		// this parameter describes the sigma from different light paths and/or the effective decay time constant for self-absorption and reemission
-		expgconv->SetParName(0, "#tau_{eff}");		expgconv->SetParameter(0, .5);
-		expgconv->SetParLimits(0, 1e-3, 5.);	//expgconv->FixParameter(0, 1.55);
+		// this parameter describes the sigma from different light paths 
+		// and/or the effective decay time constant for self-absorption and reemission
+		expgconv->SetParName(0, "#tau_{eff}");		expgconv->SetParameter(0, skewness);
+		if (skewness>0) expgconv->SetParLimits(0, .15, 5.);
+		else expgconv->SetParLimits(0, -5., -.15);
+		//expgconv->FixParameter(0, 1.55);
 
-		expgconv->SetParName(1, "#sigma_{gaus}");		expgconv->SetParameter(1, .5);
-		expgconv->SetParLimits(1, 1e-1, 5.);	//expgconv->FixParameter(1, .7);
+		expgconv->SetParName(1, "#sigma_{gaus}");		expgconv->SetParameter(1, his->GetStdDev());
+		expgconv->SetParLimits(1, 1e-1, 7.);	//expgconv->FixParameter(1, .7);
 
-		float posmax = his->GetXaxis()->GetBinCenter(his->GetMaximumBin());
-		expgconv->SetParName(2, "t_{0}");		expgconv->SetParameter(2, posmax);
+		expgconv->SetParName(2, "t_{0}");		expgconv->SetParameter(2, his->GetMean());
 		expgconv->SetParLimits(2, fitrangestart, fitrangeend);	//expgconv->FixParameter(2, 6.6);
 
 		expgconv->SetParName(3, "norm");		expgconv->SetParameter(3, his->Integral("width"));
-		expgconv->SetParLimits(3, 0.1, 1e7);		//expgconv->FixParameter(3, 105.5);
+		expgconv->SetParLimits(3, 1., 1e8);		//expgconv->FixParameter(3, 105.5);
 
 		TFitResultPtr fresults = his->Fit(expgconv, "SR", "same");
 		timing_fit_results.push_back(fresults);
@@ -2322,341 +2452,7 @@ void ReadRun::Print_GetTimingCFD_diff(vector<int> channels1, vector<int> channel
 	timing_cfd_d_c->Update();
 	root_out->WriteObject(timing_cfd_d_c, "TimingCFD_diff");
 }
-
-// helper functions
-
-/// @brief Helper. Creates a list of .bin data files in data folder to be read in
-/// @param dirname Directory
-/// @param ext File extension
-/// @return String of line separated file names
-string ReadRun::list_files(const char* dirname, const char* ext) {
-
-	stringstream ss;
-	TSystemDirectory dir(dirname, dirname);
-	TList* files = dir.GetListOfFiles();
-	if (files) {
-		TSystemFile* file;
-		TString fname;
-		TIter next(files);
-		while ((file = (TSystemFile*)next())) {
-			fname = file->GetName();
-			if (!file->IsDirectory() && fname.EndsWith(ext)) {
-				ss << fname.Data() << "\n";
-				//cout << fname.Data() << "\n";
-			}
-		}
-		TIter next2(files);
-		while ((file = (TSystemFile*)next2())) {
-			fname = file->GetName();
-			if (!file->IsDirectory() && !fname.EndsWith(ext) && fname.Contains(ext)) {
-				ss << fname.Data() << "\n";
-				//cout << fname.Data() << "\n";
-			}
-		}
-	}
-	return ss.str();
-}
-
-/// @brief Helper that returns the waveform histogram for a certain channel number and a certain event number
-/// @param channelnr Channel number index (not the actual channel number)
-/// @param eventnr Event number
-/// @param color Choose color of histogram
-/// @return Waveform histogram 
-TH1F* ReadRun::Getwf(int channelnr, int eventnr, int color) {
-	TH1F* his;
-	his = (TH1F*)rundata->At(eventnr * nchannels + channelnr);
-	his->SetLineColor(color);
-	his->SetMarkerColor(color);
-	return his;
-}
-
-/// @brief Get array of x axis (time) for standard wavecatcher settings
-/// @param shift Offset
-/// @return Time array
-double* ReadRun::getx(double shift) {
-	double* xvals = new double[binNumber];
-	for (int i = 0; i < binNumber; i++) {
-		xvals[i] = static_cast<double>(SP) * static_cast<double>(i) + shift;
-	}
-	return xvals;
-}
-
-/// @brief Get array of y values for a certain waveform
-/// @param channelnr Channel number index (not the actual channel number)
-/// @param eventnr Event number
-/// @return Y values of waveform
-double* ReadRun::gety(int channelnr, int eventnr) {
-	TH1F* his = Getwf(channelnr, eventnr);
-	double* yvals = new double[binNumber];
-	for (int i = 0; i < his->GetNbinsX(); i++) {
-		yvals[i] = his->GetBinContent(i);
-	}
-	return yvals;
-}
-
-/// @brief Get array of y values for a certain waveform
-/// @param his Waveform histogram
-/// @return Y values of waveform
-double* ReadRun::gety(TH1F* his) {
-	double* yvals = new double[binNumber];
-	for (int i = 0; i < his->GetNbinsX(); i++) {
-		yvals[i] = his->GetBinContent(i);
-	}
-	return yvals;
-}
-
-/// @brief Get truncated array of y values for a certain waveform
-/// @param his Waveform histogram
-/// @param start_at Truncate from index
-/// @param end_at Truncate to index
-/// @return Truncated Y values of waveform
-double* ReadRun::gety(TH1F* his, int start_at, int end_at) {
-	if (start_at < 0 || start_at >= his->GetNbinsX() || end_at >= his->GetNbinsX() || end_at - start_at < 1) {
-		cout << "\nError: ReadRun::gety out of range" << endl;
-		return 0;
-	}
-	const int n_bins_new = end_at - start_at;
-	double* yvals = new double[n_bins_new];
-	for (int i = start_at; i < end_at; i++) {
-		yvals[i - start_at] = his->GetBinContent(i);
-	}
-	return yvals;
-}
-
-/// @brief Translate a random number into a useful root color https://root.cern.ch/doc/master/classTColor.html
-/// @param i Index of your plotting loop that is to be translated into a useful ROOT color index
-/// @return ROOT color index
-int ReadRun::rcolor(unsigned int i) {
-	const int nclrs = 16;
-	int rclrs[nclrs] = { 1, 2, 3, 4, 5, 6, 7, 13, 28, 30, 34, 38, 40, 31, 46, 49 };
-	return rclrs[i - static_cast<int>(floor(i / nclrs)) * nclrs];
-}
-
-/// @brief Returns index of a certain event number (if data files are read in parallel threads)
-/// @param eventnr Event number as stored in the data.
-/// @return Corresponding event number in the internal data structure.
-int ReadRun::GetEventIndex(int eventnr) {
-	if (eventnr <= 0) eventnr = 1; // first event is 1
-	if (eventnr > nevents) eventnr = nevents;
-	return distance(eventnr_storage.begin(), find(eventnr_storage.begin(), eventnr_storage.end(), eventnr));
-}
-
-/// @brief  Match channel number (wavecatcher input channel) to channel index
-/// @param channel_number Number of the channel as defined in the wavecatcher software
-/// @return Corresponding index for this channel
-int ReadRun::GetChannelIndex(int channel_number) {
-	int channel_index = -1;
-	for (int i = 0; i < static_cast<int>(active_channels.size()); i++) {
-		if (active_channels[i] == channel_number) channel_index = i;
-	}
-	if (channel_index == -1) {
-		cout << "\n\n\tERROR: channel " << channel_number << " does not exist in data. Will continue with first channel\n\n";
-		channel_index = 0;
-	}
-	return channel_index;
-}
-
-/// @brief Helper to split canvas according to the number of channels to be plotted
-/// @param c Canvas to be split
-void ReadRun::SplitCanvas(TCanvas*& c) {
-	if (plot_active_channels.empty()) c->Divide(TMath::Min(static_cast<double>(active_channels.size()), 4.), TMath::Max(TMath::Ceil(static_cast<double>(active_channels.size()) / 4.), 1.), 0, 0);
-	else if (static_cast<int>(plot_active_channels.size()) > 1) c->Divide(TMath::Min(static_cast<double>(plot_active_channels.size()), 4.), TMath::Max(ceil(static_cast<double>(plot_active_channels.size()) / 4.), 1.), 0, 0);
-}
-
-/// @brief Simple linear interpolation for x
-/// @param ym Y value for evaluation
-/// @param x1 X1 
-/// @param x2 X2
-/// @param y1 Y1
-/// @param y2 Y2
-/// @return x value at "ym"
-float ReadRun::LinearInterpolation(float ym, float x1, float x2, float y1, float y2) {
-	return x1 + (ym - y1) * (x2 - x1) / (y2 - y1);
-}
-
-/// @brief Helper to perform convolution of two 1D arrays
-/// 
-/// Used for smoothing etc.
-/// 
-/// @param[in,out] result Array containing convolution result
-/// @param first First array for convolution
-/// @param second Second array for convolution 
-/// @param size1 Size of first array (ideally size1 should be equal to size2)
-/// @param size2 Size of second array
-void ReadRun::Convolute(double*& result, double* first, double* second, int size1, int size2) {
-
-	// uncomment to use sum instead of FFT
-	// faster if size1<size2
-	//for (int i = 0; i < size2; i++) {
-	//	result[i] = 0.;
-	//	for (int j = 0; j < TMath::Min(size1, i); j++) {
-	//		result[i] += first[j] * second[i - j];
-	//	}
-	//}
-
-	double* refirst = new double[size1];
-	double* imfirst = new double[size1];
-	double* resecond = new double[size1];
-	double* imsecond = new double[size1];
-	double* reres = new double[size1];
-	double* imres = new double[size1];
-
-	TVirtualFFT* fftfirst = TVirtualFFT::FFT(1, &size1, "R2C ES");
-	fftfirst->SetPoints(first);
-	fftfirst->Transform();
-	fftfirst->GetPointsComplex(refirst, imfirst);
-	delete fftfirst;
-
-	TVirtualFFT* fftsecond = TVirtualFFT::FFT(1, &size1, "R2C ES");
-	fftsecond->SetPoints(second);
-	fftsecond->Transform();
-	fftsecond->GetPointsComplex(resecond, imsecond);
-	delete fftsecond;
-
-	TComplex cofirst;
-	TComplex cosecond;
-	TComplex cores;
-
-	for (int i = 0; i < size1; i++) {
-		cofirst(refirst[i], imfirst[i]);
-		cosecond(resecond[i], imsecond[i]);
-
-		cores = cofirst * cosecond / static_cast<double>(size1);
-
-		reres[i] = cores.Re();
-		imres[i] = cores.Im();
-	}
-
-	//cout << "performing IFFT ... ";
-	TVirtualFFT* fft_back = TVirtualFFT::FFT(1, &size1, "C2R ES");
-	fft_back->SetPointsComplex(reres, imres);
-	fft_back->Transform();
-	fft_back->GetPoints(result);
-	delete fft_back;
-	delete[] imres; delete[] reres; delete[] refirst; delete[] imfirst; delete[] resecond; delete[] imsecond;
-}
-
-/// @brief Apply smoothing array of double with length nbins
-/// 
-/// Use with care. Method=2 is preferred. \n \n
-///
-/// Please note that if you want to use gaussian smoothing for data with a binning different from 0.3125 ns/bin you need to set the variable bin_size to the new bin size.
-/// 
-/// @param[in,out] ar Array to be smoothed.
-/// @param nbins Number of bins of input.
-/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution (see parameter bin_size).
-/// @param method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
-/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
-/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
-/// @param bin_size Bin width of the array to smooth for gauss sigma. Default is .3125 for wavecatcher sampling rate. Set to 1 to change sigma unit to number of bins.
-void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, int method, double bin_size) {
-
-	double* artmp = new double[nbins];
-	for (int i = 0; i < nbins; i++) artmp[i] = ar[i];
-
-	if (method == 0) {
-		// calculate running average from -sigma until +sigma (sigma = number of bins)
-		for (int i = 0; i < nbins; i++) {
-			double mean1 = 0.;
-			int nmn = 0;
-			for (int k = -1 * static_cast<int>(floor(sigma)); k <= static_cast<int>(ceil(sigma)); k++) {
-				if (i + k >= 0 && i + k < nbins) {
-					mean1 += artmp[i + k];
-					nmn++;
-				}
-			}
-			if (nmn != 0.) {
-				ar[i] = mean1 / static_cast<double>(nmn);
-			}
-		}
-	}
-	else if (method == 1) {
-		// convolution with gauss clipped at +-5 sigma (very inefficient and slow)
-		double* gauss = new double[nbins];
-
-		double sum = 0.;
-		double position = 0.;
-
-		for (int i = 0; i < nbins; i++) {
-			if (static_cast<double>(i) * bin_size < 5 * sigma) gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i) * bin_size - 5 * sigma), 2.) / (2. * sigma * sigma)) / (sigma * 2.506628);
-			else gauss[i] = 0.;
-			sum += gauss[i];
-		}
-
-		for (int i = 0; i < nbins; i++) {
-			gauss[i] /= sum;
-		}
-
-		Convolute(ar, artmp, gauss, nbins, nbins);
-		delete[] gauss;
-	}
-	else {
-		// gauss kernel 3*sigma
-		int nbins_3sigma = static_cast<int>(ceil(6. * sigma / bin_size));
-		if (nbins_3sigma % 2 == 0) nbins_3sigma++;
-		if (nbins_3sigma > 1) {
-			double* gauss = new double[nbins_3sigma];
-			double gauss_offset = floor(static_cast<double>(nbins_3sigma) / 2.) * bin_size; 
-			double denom = 2. * sigma * sigma;
-			for (int i = 0; i < nbins_3sigma; i++) {
-				gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i)) * bin_size - gauss_offset, 2.) / denom);
-			}
-
-			double res = 0;
-			double norm = 0;
-			for (int i = 0; i < nbins; i++) {
-				res = 0.;
-				norm = 0.;
-				for (int j = max(0, nbins_3sigma / 2 - i); j < min(nbins - i + nbins_3sigma / 2, nbins_3sigma); j++) {
-					res += gauss[j] * artmp[i + j - nbins_3sigma / 2];
-					norm += gauss[j];
-				}
-				if (norm != 0.) ar[i] = res / norm;
-			}
-			delete[] gauss;
-		}
-	}
-	delete[] artmp;
-}
-
-/// @brief Apply filter for array of double with length nbins
-/// 
-/// Experimental, can be used to highlight peaks and suppress long tails (suppresses low and high frequencies). Use Filter_test.ipynb to test parameters.
-/// 
-/// @param[in,out] ar Array to be filtered.
-/// @param nbins Number of bins of input.
-/// @param sigma1 First.
-/// @param sigma2 Second.
-/// @param factor Factor for negative part (<=1).
-/// @param bin_size Bin width. Default is .3125. Set to 1 to get sigma in units of bins.
-void ReadRun::FilterArray(double*& ar, int nbins, double sigma1, double sigma2, double factor, double bin_size) {
-
-	double* artmp = new double[nbins];
-	for (int i = 0; i < nbins; i++) artmp[i] = ar[i];
-
-	// shifted difference of two gauss functions (~smoothed derivative)
-	int nbins_2sigma = static_cast<int>(ceil((2. * sigma1 + 3. * sigma2) / bin_size));
-	double* sdog = new double[nbins_2sigma];
-
-	double denom1 = 2. * sigma1 * sigma1;
-	double denom2 = 2. * sigma2 * sigma2;
-	for (int i = 0; i < nbins_2sigma; i++) {
-		sdog[i] = TMath::Exp(-1. * TMath::Power(static_cast<double>(i) * bin_size - 3. * sigma2, 2.) / denom1) - factor * TMath::Exp(-1. * TMath::Power(static_cast<double>(i) * bin_size - 2. * sigma2, 2.) / denom2);
-	}
-
-	double res = 0;
-	double norm = 0;
-	for (int i = 0; i < nbins; i++) {
-		res = 0.;
-		norm = 0.;
-		for (int j = max(0, nbins_2sigma / 2 - i); j < min(nbins - i + nbins_2sigma / 2, nbins_2sigma); j++) {
-			res += sdog[j] * artmp[i + j - nbins_2sigma / 2];
-			if (sdog[j] > 0.) norm += sdog[j];
-		}
-		if (norm != 0.) ar[i] = res / norm;
-	}
-	delete[] sdog;
-}
+/// @example timing_example.cc
 
 /// @brief Print Fourier transform of waveform
 /// @param eventnr Event number
@@ -2729,4 +2525,380 @@ void ReadRun::PrintFFTWF(int eventnr, float xmin, float xmax, int multiplier) {
 	delete[] refft;
 	delete[] imfft;
 	delete[] xvals;
+}
+
+
+
+
+
+
+
+
+
+/// @brief Helper. Creates a list of .bin data files in data folder to be read in
+/// @param dirname Directory
+/// @param ext File extension
+/// @return String of line separated file names
+string ReadRun::ListFiles(const char* dirname, const char* ext) {
+
+	stringstream ss;
+	TSystemDirectory dir(dirname, dirname);
+	TList* files = dir.GetListOfFiles();
+	if (files) {
+		TSystemFile* file;
+		TString fname;
+		TIter next(files);
+		while ((file = (TSystemFile*)next())) {
+			fname = file->GetName();
+			if (!file->IsDirectory() && fname.EndsWith(ext)) {
+				ss << fname.Data() << "\n";
+				//cout << fname.Data() << "\n";
+			}
+		}
+		TIter next2(files);
+		while ((file = (TSystemFile*)next2())) {
+			fname = file->GetName();
+			if (!file->IsDirectory() && !fname.EndsWith(ext) && fname.Contains(ext)) {
+				ss << fname.Data() << "\n";
+				//cout << fname.Data() << "\n";
+			}
+		}
+	}
+	return ss.str();
+}
+
+/// @brief Helper that returns the waveform histogram for a certain channel number and a certain event number
+/// @param channelnr Channel number index (not the actual channel number)
+/// @param eventnr Event number
+/// @param color Choose color of histogram
+/// @return Waveform histogram 
+TH1F* ReadRun::Getwf(int channelnr, int eventnr, int color) {
+	TH1F* his;
+	his = (TH1F*)rundata->At(eventnr * nchannels + channelnr);
+	his->SetLineColor(color);
+	his->SetMarkerColor(color);
+	return his;
+}
+
+/// @brief Get array of x axis (time) for standard wavecatcher settings
+/// @param shift Offset
+/// @return Time array
+double* ReadRun::getx(double shift) {
+	double* xvals = new double[binNumber];
+	for (int i = 0; i < binNumber; i++) {
+		xvals[i] = static_cast<double>(SP) * static_cast<double>(i) + shift;
+	}
+	return xvals;
+}
+
+/// @brief Get array of y values for a certain waveform
+/// @param waveform_index Waveform index
+/// @return Y values of waveform
+double* ReadRun::gety(int waveform_index) {
+	TH1F* his = (TH1F*)rundata->At(waveform_index);
+	double* yvals = new double[binNumber];
+	for (int i = 0; i < his->GetNbinsX(); i++) {
+		yvals[i] = his->GetBinContent(i + 1);
+	}
+	return yvals;
+}
+
+/// @brief Get array of y values for a certain waveform
+/// @param channelnr Channel number index (not the actual channel number)
+/// @param eventnr Event number
+/// @return Y values of waveform
+double* ReadRun::gety(int channelnr, int eventnr) {
+	TH1F* his = Getwf(channelnr, eventnr);
+	double* yvals = new double[binNumber];
+	for (int i = 0; i < his->GetNbinsX(); i++) {
+		yvals[i] = his->GetBinContent(i + 1);
+	}
+	return yvals;
+}
+
+/// @brief Get array of y values for a certain waveform
+/// @param his Waveform histogram
+/// @return Y values of waveform
+double* ReadRun::gety(TH1F* his) {
+	double* yvals = new double[binNumber];
+	for (int i = 0; i < his->GetNbinsX(); i++) {
+		yvals[i] = his->GetBinContent(i + 1);
+	}
+	return yvals;
+}
+
+/// @brief Get truncated array of y values for a certain waveform
+/// @param his Waveform histogram
+/// @param start_at Truncate from index
+/// @param end_at Truncate to index
+/// @return Truncated Y values of waveform
+double* ReadRun::gety(TH1F* his, int start_at, int end_at) {
+	if (start_at < 0 || start_at >= his->GetNbinsX() || end_at >= his->GetNbinsX() || end_at - start_at < 1) {
+		cout << "\nError: ReadRun::gety out of range" << endl;
+		return 0;
+	}
+	const int n_bins_new = end_at - start_at;
+	double* yvals = new double[n_bins_new];
+	for (int i = start_at; i < end_at; i++) {
+		yvals[i - start_at] = his->GetBinContent(i + 1);
+	}
+	return yvals;
+}
+
+/// @brief Translate a random number into a useful root color https://root.cern.ch/doc/master/classTColor.html
+/// @param i Index of your plotting loop that is to be translated into a useful ROOT color index
+/// @return ROOT color index
+int ReadRun::rcolor(unsigned int i) {
+	const int nclrs = 17;
+	int rclrs[nclrs] = { 1, 2, 3, 4, 6, 8, 9, 13, 20, 28, 30, 34, 38, 40, 31, 46, 49 };
+	return rclrs[i - static_cast<int>(floor(i / nclrs)) * nclrs];
+}
+
+/// @brief Returns index of a certain event number (if data files are read in parallel threads)
+/// @param eventnr Event number as stored in the data.
+/// @return Corresponding event number in the internal data structure.
+int ReadRun::GetEventIndex(int eventnr) {
+	if (eventnr <= 0) eventnr = 1; // first event is 1
+	if (eventnr > nevents) eventnr = nevents;
+	return distance(eventnr_storage.begin(), find(eventnr_storage.begin(), eventnr_storage.end(), eventnr));
+}
+
+/// @brief  Match channel number (wavecatcher input channel) to channel index
+/// @param channel_number Number of the channel as defined in the wavecatcher software
+/// @return Corresponding index for this channel
+int ReadRun::GetChannelIndex(int channel_number) {
+	int channel_index = -1;
+	for (int i = 0; i < static_cast<int>(active_channels.size()); i++) {
+		if (active_channels[i] == channel_number) channel_index = i;
+	}
+	if (channel_index == -1) {
+		cout << "\n\n\tERROR: channel " << channel_number << " does not exist in data. Will continue with first channel\n\n";
+		channel_index = 0;
+	}
+	return channel_index;
+}
+
+/// @brief Get the current channel index for a certain waveform index
+/// @param waveform_index 
+/// @return Current channel index
+int ReadRun::GetCurrentChannel(int waveform_index) {
+	return (waveform_index - nchannels * floor(waveform_index / nchannels));
+}
+
+/// @brief Get the current event index for a certain waveform index
+/// @param waveform_index 
+/// @return Current event index
+int ReadRun::GetCurrentEvent(int waveform_index) {
+	return floor(waveform_index / nchannels);
+}
+
+/// @brief Helper to split canvas according to the number of channels to be plotted
+/// @param c Canvas to be split
+void ReadRun::SplitCanvas(TCanvas*& c) {
+	// cross check if user input exists in data
+	vector<int> rmv;
+	for (int i = 0; i < static_cast<int>(plot_active_channels.size()); i++) {
+		if (find(active_channels.begin(), active_channels.end(), plot_active_channels[i]) == active_channels.end()) {
+			cout << "\n\n\n ------------ WARNING ------------\n";
+			cout << "YOUR SELECTED CHANNEL " << plot_active_channels[i] << " DOES NOT EXIST IN DATA\n";
+			cout << "PLEASE CHANGE plot_active_channels\n\n\n";
+			rmv.push_back(plot_active_channels[i]);
+		}
+	}
+
+	for (int i = 0; i < static_cast<int>(rmv.size()); i++) {
+		auto it = find(plot_active_channels.begin(), plot_active_channels.end(), rmv[i]);
+		if (it != plot_active_channels.end()) plot_active_channels.erase(it);
+	}
+
+	if (plot_active_channels.empty()) c->Divide(TMath::Min(static_cast<double>(active_channels.size()), 4.), TMath::Max(TMath::Ceil(static_cast<double>(active_channels.size()) / 4.), 1.), 0, 0);
+	else if (static_cast<int>(plot_active_channels.size()) > 1) c->Divide(TMath::Min(static_cast<double>(plot_active_channels.size()), 4.), TMath::Max(ceil(static_cast<double>(plot_active_channels.size()) / 4.), 1.), 0, 0);
+}
+
+/// @brief Simple linear interpolation for x
+/// @param ym Y value for evaluation
+/// @param x1 X1 
+/// @param x2 X2
+/// @param y1 Y1
+/// @param y2 Y2
+/// @return x value at "ym"
+float ReadRun::LinearInterpolation(float ym, float x1, float x2, float y1, float y2) {
+	return x1 + (ym - y1) * (x2 - x1) / (y2 - y1);
+}
+
+/// @brief Helper to perform convolution of two 1D arrays
+/// 
+/// Used for smoothing etc.
+/// 
+/// @param[in,out] result Array containing convolution result
+/// @param first First array for convolution
+/// @param second Second array for convolution 
+/// @param size Size of arrays
+void ReadRun::Convolute(double*& result, double* first, double* second, int size) {
+
+	double* refirst = new double[size];
+	double* imfirst = new double[size];
+	double* resecond = new double[size];
+	double* imsecond = new double[size];
+	double* reres = new double[size];
+	double* imres = new double[size];
+
+	TVirtualFFT* fftfirst = TVirtualFFT::FFT(1, &size, "R2C ES");
+	fftfirst->SetPoints(first);
+	fftfirst->Transform();
+	fftfirst->GetPointsComplex(refirst, imfirst);
+	delete fftfirst;
+
+	TVirtualFFT* fftsecond = TVirtualFFT::FFT(1, &size, "R2C ES");
+	fftsecond->SetPoints(second);
+	fftsecond->Transform();
+	fftsecond->GetPointsComplex(resecond, imsecond);
+	delete fftsecond;
+
+	TComplex cofirst;
+	TComplex cosecond;
+	TComplex cores;
+
+	for (int i = 0; i < size; i++) {
+		cofirst(refirst[i], imfirst[i]);
+		cosecond(resecond[i], imsecond[i]);
+
+		cores = cofirst * cosecond / static_cast<double>(size);
+
+		reres[i] = cores.Re();
+		imres[i] = cores.Im();
+	}
+
+	//cout << "performing IFFT ... ";
+	TVirtualFFT* fft_back = TVirtualFFT::FFT(1, &size, "C2R ES");
+	fft_back->SetPointsComplex(reres, imres);
+	fft_back->Transform();
+	fft_back->GetPoints(result);
+	delete fft_back;
+	delete[] imres; delete[] reres; delete[] refirst; delete[] imfirst; delete[] resecond; delete[] imsecond;
+}
+
+/// @brief Apply smoothing array of double with length nbins
+/// 
+/// Use with care. Method=2 is preferred. \n \n
+///
+/// Please note that if you want to use gaussian smoothing for data with a binning different from 0.3125 ns/bin 
+/// you need to set the variable bin_size to the new bin size.
+/// 
+/// \image html use_functions_wo_measurement.png "Gaussian smoothing of a simple array with 15 entries. Code in example." width=50%
+/// 
+/// @param[in,out] ar Array to be smoothed.
+/// @param nbins Number of bins of input.
+/// @param sigma Number of bins before and after central bin for running average OR gauss sigma in ns for gauss kernel and convolution (see parameter bin_size).
+/// @param method If 0 use running average (box kernel smoothing). Simple, very fast. \n 
+/// If 1 use 5 sigma gaussian smoothing. This method is not central and will shift peaks. Very slow. \n
+/// Else use 3 sigma gaussian kernel smoothing. Preferred method, fast.
+/// @param bin_size Bin width of the array to smooth for gauss sigma. Default is .3125 for wavecatcher sampling rate. Set to 1 to change sigma unit to number of bins.
+void ReadRun::SmoothArray(double*& ar, int nbins, double sigma, int method, double bin_size) {
+
+	double* artmp = new double[nbins];
+	for (int i = 0; i < nbins; i++) artmp[i] = ar[i];
+
+	if (method == 0) {
+		// calculate running average from -sigma until +sigma (sigma = number of bins)
+		for (int i = 0; i < nbins; i++) {
+			double mean1 = 0.;
+			int nmn = 0;
+			for (int k = -1 * static_cast<int>(floor(sigma)); k <= static_cast<int>(ceil(sigma)); k++) {
+				if (i + k >= 0 && i + k < nbins) {
+					mean1 += artmp[i + k];
+					nmn++;
+				}
+			}
+			if (nmn != 0.) {
+				ar[i] = mean1 / static_cast<double>(nmn);
+			}
+		}
+	}
+	else if (method == 1) {
+		// convolution with gauss clipped at +-5 sigma (very inefficient and slow)
+		double* gauss = new double[nbins];
+
+		double sum = 0.;
+
+		for (int i = 0; i < nbins; i++) {
+			if (static_cast<double>(i) * bin_size < 5 * sigma) gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i) * bin_size - 5 * sigma), 2.) / (2. * sigma * sigma)) / (sigma * 2.506628);
+			else gauss[i] = 0.;
+			sum += gauss[i];
+		}
+
+		for (int i = 0; i < nbins; i++) {
+			gauss[i] /= sum;
+		}
+
+		Convolute(ar, artmp, gauss, nbins);
+		delete[] gauss;
+	}
+	else {
+		// gauss kernel 3*sigma
+		int nbins_3sigma = static_cast<int>(ceil(6. * sigma / bin_size));
+		if (nbins_3sigma % 2 == 0) nbins_3sigma++;
+		if (nbins_3sigma > 1) {
+			double* gauss = new double[nbins_3sigma];
+			double gauss_offset = floor(static_cast<double>(nbins_3sigma) / 2.) * bin_size;
+			double denom = 2. * sigma * sigma;
+			for (int i = 0; i < nbins_3sigma; i++) {
+				gauss[i] = TMath::Exp(-1. * TMath::Power((static_cast<double>(i)) * bin_size - gauss_offset, 2.) / denom);
+			}
+
+			double res = 0;
+			double norm = 0;
+			for (int i = 0; i < nbins; i++) {
+				res = 0.;
+				norm = 0.;
+				for (int j = max(0, nbins_3sigma / 2 - i); j < min(nbins - i + nbins_3sigma / 2, nbins_3sigma); j++) {
+					res += gauss[j] * artmp[i + j - nbins_3sigma / 2];
+					norm += gauss[j];
+				}
+				if (norm != 0.) ar[i] = res / norm;
+			}
+			delete[] gauss;
+		}
+	}
+	delete[] artmp;
+}
+/// @example use_functions_wo_measurement.cc
+
+/// @brief Apply filter for array of double with length nbins
+/// 
+/// Experimental, can be used to highlight peaks and suppress long tails (suppresses low and high frequencies). Use Filter_test.ipynb to test parameters.
+/// 
+/// @param[in,out] ar Array to be filtered.
+/// @param nbins Number of bins of input.
+/// @param sigma1 First.
+/// @param sigma2 Second.
+/// @param factor Factor for negative part (<=1).
+/// @param bin_size Bin width. Default is .3125. Set to 1 to get sigma in units of bins.
+void ReadRun::FilterArray(double*& ar, int nbins, double sigma1, double sigma2, double factor, double bin_size) {
+
+	double* artmp = new double[nbins];
+	for (int i = 0; i < nbins; i++) artmp[i] = ar[i];
+
+	// shifted difference of two gauss functions (~smoothed derivative)
+	int nbins_2sigma = static_cast<int>(ceil((2. * sigma1 + 3. * sigma2) / bin_size));
+	double* sdog = new double[nbins_2sigma];
+
+	double denom1 = 2. * sigma1 * sigma1;
+	double denom2 = 2. * sigma2 * sigma2;
+	for (int i = 0; i < nbins_2sigma; i++) {
+		sdog[i] = TMath::Exp(-1. * TMath::Power(static_cast<double>(i) * bin_size - 3. * sigma2, 2.) / denom1) - factor * TMath::Exp(-1. * TMath::Power(static_cast<double>(i) * bin_size - 2. * sigma2, 2.) / denom2);
+	}
+
+	double res = 0;
+	double norm = 0;
+	for (int i = 0; i < nbins; i++) {
+		res = 0.;
+		norm = 0.;
+		for (int j = max(0, nbins_2sigma / 2 - i); j < min(nbins - i + nbins_2sigma / 2, nbins_2sigma); j++) {
+			res += sdog[j] * artmp[i + j - nbins_2sigma / 2];
+			if (sdog[j] > 0.) norm += sdog[j];
+		}
+		if (norm != 0.) ar[i] = res / norm;
+	}
+	delete[] sdog;
 }

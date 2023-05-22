@@ -376,8 +376,8 @@ public:
 	/// 3,4 -sigma0, sigma1 \n 
 	/// 5 - G: gain \n 
 	/// 6 - B: Pedestal \n 
-	/// 7 - mu_dk: mu for dark count rate in dark events (dark events = noise/background triggers without photons in SiPMs) \n 
-	/// 8 - N0_dk: fraction (dark events)/(total number of events) 
+	/// 7 - mu_dc: mu for dark count rate in dark events (dark events = noise/background triggers without photons in SiPMs) \n 
+	/// 8 - N0_dc: fraction (dark events)/(total number of events) 
 	/// @return 
 	double operator() (double* x, double* p) {
 		double sum = 0;
@@ -392,14 +392,14 @@ public:
 		double G = p[5];
 		double B = p[6];
 
-		double mu_dk = p[7];
-		double N0_dk = p[8];
+		double mu_dc = p[7];
+		double N0_dc = p[8];
 
 		for (int kint = 0; kint <= kmax; kint++) {
 			double k = static_cast<double>(kint);
 			double sigmaK = sqrt(sigma0 * sigma0 + k * sigma1 * sigma1);
 			//generalized poisson envelope
-			double gp = ((1. - N0_dk) * (mu * TMath::Power((mu + k * lambda), k - 1) * TMath::Exp(-(mu + k * lambda))) + N0_dk * (mu_dk * TMath::Power((mu_dk + k * lambda), k - 1) * TMath::Exp(-(mu_dk + k * lambda)))) / TMath::Factorial(kint);
+			double gp = ((1. - N0_dc) * (mu * TMath::Power((mu + k * lambda), k - 1) * TMath::Exp(-(mu + k * lambda))) + N0_dc * (mu_dc * TMath::Power((mu_dc + k * lambda), k - 1) * TMath::Exp(-(mu_dc + k * lambda)))) / TMath::Factorial(kint);
 
 			sum += p[0] * gp * (1. / sqrt(2. * TMath::Pi()) / sigmaK) * TMath::Exp(-TMath::Power(((x[0] - (k * G + B)) / sqrt(2) / sigmaK), 2));
 		}
@@ -419,7 +419,7 @@ public:
 	/// @return 
 	double operator() (double* x, double* p) {
 		double k = 0;
-		int k_pm = 2;
+		int k_pm = 2; // how many Gaussians to consider -> k_pm=2 means 2+1+2=5 Gaussians
 		double A = p[0];
 		double mu = p[1];
 		double sigma = p[2];
