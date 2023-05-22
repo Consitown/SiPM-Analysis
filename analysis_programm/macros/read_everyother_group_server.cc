@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void read_everyother_group(int which) // main
+void read_everyother_group_server(int which) // main
 {
 	string path;
 
@@ -107,10 +107,10 @@ void read_everyother_group(int which) // main
 
 	// cutting on integrals
 	// Syntax: ...(vector<double> thresholds, vector<bool>, float winlow, float winhi, float start, float end, bool use_AND_condition, bool verbose)
-	vector<bool> below = {true, true, true, true, true, true, true, true}; // false for cut if (int < threshold)
+	vector<bool> below = {true, true, true, true, true, true, true, true}; // true for cut if (int > threshold)
 	vector<bool> above = {false, false, false, false, false, false, false, false};
-	vector<double> thresholds_int1 = {2500, 0, 2500, 0, 2500, 0, 2500, 0};
-	mymeas.IntegralFilter(thresholds_int1, above, 20, 10, 90, 150, false, false);
+	vector<double> thresholds_int1 = {500, 0, 500, 0, 500, 0, 500, 0};
+	mymeas.IntegralFilter(thresholds_int1, below, 20, 10, 90, 150, false, false);
 	//vector<double> thresholds_int2 = {1500, 0, 1500, 0, 1500, 0, 1500, 0};
 	//mymeas.IntegralFilter(thresholds_int2, below, 20, 10, 90, 150, false, false);
 
@@ -159,18 +159,18 @@ void read_everyother_group(int which) // main
 	
 	// Plotting the phi_ew spectrum
 	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss)
-	//vector<int> phi_chx = {225-4, 270-4, 315-4, 0-4, 45-4, 90-4, 135-4, 180-4}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's/Andrea's
+	vector<int> phi_chx = {225-4, 270-4, 315-4, 0-4, 45-4, 90-4, 135-4, 180-4}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's/Andrea's
 	//vector<int> phi_chx_andrea = {0, 315, 270, 225, 45, 90, 135, 180}; //ordered from channel 0 to channel 7
-	vector<int> phi_chx_even = {225-4, 315-4, 45-4, 135-4}; vector<int> phi_chx_odd = {270-4, 0-4, 90-4, 180-4};
-	//vector<float> ly_C0 = {1361.92, 768.23, 1354.06, 765.312, 1385.92, 873.016, 1433.86, 774.65}; //selection with small PS + larger int-window2 (larger_intw_catch_prim_gamma2.png); best for my data
+	//vector<int> phi_chx_even = {225-4, 315-4, 45-4, 135-4}; vector<int> phi_chx_odd = {270-4, 0-4, 90-4, 180-4};
+	vector<float> ly_C0 = {1361.92, 768.23, 1354.06, 765.312, 1385.92, 873.016, 1433.86, 774.65}; //selection with small PS + larger int-window2 (larger_intw_catch_prim_gamma2.png); best for my data
 	//vector<float> ly_C0 = {1558.22, 908.343, 1535.05, 909.704, 1578.06, 1045.79, 1656.23, 907.486}; //selection with small PS + larger int-window3 (larger_intw_catch_prim_gamma3.png)
 	//vector<float> ly_C0 = {1526.43, 893.474, 1505.19, 894.504, 1548.95, 1019.63, 1614.68, 891.464}; //selection with small PS + larger int-window4 (larger_intw_catch_prim_gamma4.png)
 	//vector<float> ly_C0_andrea = {1893.04, 1987.92, 1754.29, 1714.65, 1754.73, 1747.16, 1855.23, 1690.39}; //andrea_C0: selection with 1ns window (time_cut_andrea_C0_new.png) + larger intw (intw_andrea_big.png); best for andreas data
-	vector<float> ly_C0_even = {1361.92, 1354.06, 1385.92, 1433.86}; vector<float> ly_C0_odd = {768.23, 765.312, 873.016, 774.65};
-	//vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
-	vector<int> SiPMchannels = {1, 3, 5, 7}; //for the odd/even analysis
-	mymeas.Print_Phi_ew(phi_chx_odd, ly_C0_odd, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, false, false);
-	mymeas.Print_Phi_ew(phi_chx_odd, ly_C0_odd, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
+	//vector<float> ly_C0_even = {1361.92, 1354.06, 1385.92, 1433.86}; vector<float> ly_C0_odd = {768.23, 765.312, 873.016, 774.65};
+	vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
+	//vector<int> SiPMchannels = {1, 3, 5, 7}; //for the odd/even analysis
+	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, false, false);
+	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
 
 	// plot cfd-results (between t=110 ns and t=140 ns) for all channels and fit gauss (thats what the 1 is for)
 	//mymeas.Print_GetTimingCFD(110, 140, 1, 200);
