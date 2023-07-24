@@ -435,3 +435,32 @@ public:
 		return gauss + B;
 	};
 };
+
+/// @brief Integral of Landau-Gauss-Convolution ("S-curve")
+class Fitf_langaus_int {
+public:
+	/// @param x
+	/// @param par
+	/// par[0]=Width (scale) parameter of Landau density \n 
+	/// par[1]=Most Probable (MP, location) parameter of Landau density \n 
+	/// par[2]=Total area (integral -inf to inf, normalization constant) \n 
+	/// par[3]=Width (sigma) of convoluted Gaussian function
+	/// par[4]=Maximum value of integral (usually 1)
+	/// @return Func value
+	double operator() (double* x, double* par) {
+		// Control constants
+		Double_t sc = 5.;        // integral extends to MPV-sc*(Gaussian sigma + Landau width)
+
+		// Variables
+		Double_t start = par[1] - sc * (par[0] + par[3]);
+
+		Fitf_langaus func;
+		TF1* fun = new TF1("fun", func, start - 1, x[0] + 1, 4);
+		fun->SetParameter(0, par[0]);
+		fun->SetParameter(1, par[1]);
+		fun->SetParameter(2, par[2]);
+		fun->SetParameter(3, par[3]);
+
+		return (par[4] * (1. - fun->Integral(start, x[0])));
+	};
+};

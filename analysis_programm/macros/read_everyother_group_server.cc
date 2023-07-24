@@ -71,7 +71,7 @@ void read_everyother_group_server(int which) // main
 	//mymeas.discard_original_eventnr = true; //false is default
 
 	// only plot channels specified below. Leaving it empty will plot all channels
-	//mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
+	mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
 	//mymeas.plot_active_channels={8,9,10,11,12,13};
 
 	//use SmoothAll() for general smoothing of waveforms --> find good parameters; then use the internal smoothig of GetTimingCFD
@@ -84,7 +84,7 @@ void read_everyother_group_server(int which) // main
 
 	// Syntax: ...(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
 	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 10, 0, false, false, 9);
-
+/*
 	// filter out events where all PMT's have fired. small PS are channel 12 and 13
 	// Syntax: ...(vector<double> thresholds, double rangestart, double rangeend, bool verbose)
 	vector<double> thresholds2 = {0, 0, 0, 0, 0, 0, 0, 0, 4, 0}; //skip all events where ch8 fires
@@ -99,21 +99,21 @@ void read_everyother_group_server(int which) // main
 	for (int i = 0; i < mymeas.skip_event.size(); i++) {if (mymeas.skip_event[i]) ++counter;} //a bit debugging; necessary for event number computation
 	cout << "Number of orthogonal events: " << counter << endl;
 	mymeas.skip_event.flip(); //all non ortho events get skipped --> only ortho events get plotted
-
+*/
 	//skip weird events: -5 mV for identifying out burst/weird events (high frequency oscillations) in large PS (-7 only if signals inverted)
 	vector<double> thresholds_weird = {0, 0, 0, 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5};
 	vector<double> thresholds_weird_andrea = {0, 0, 0, 0, 0, 0, 0, 0, -5, -5, -5, -5};
 	mymeas.SkipEventsPerChannel(thresholds_weird, 100, 200, false);
-
+/*
 	// cutting on integrals
 	// Syntax: ...(vector<double> thresholds, vector<bool>, float winlow, float winhi, float start, float end, bool use_AND_condition, bool verbose)
 	vector<bool> below = {true, true, true, true, true, true, true, true}; // true for cut if (int > threshold)
 	vector<bool> above = {false, false, false, false, false, false, false, false};
-	vector<double> thresholds_int1 = {500, 0, 500, 0, 500, 0, 500, 0};
-	mymeas.IntegralFilter(thresholds_int1, below, 20, 10, 90, 150, false, false);
-	//vector<double> thresholds_int2 = {1500, 0, 1500, 0, 1500, 0, 1500, 0};
-	//mymeas.IntegralFilter(thresholds_int2, below, 20, 10, 90, 150, false, false);
-
+	//vector<double> thresholds_int1 = {500, 0, 500, 0, 500, 0, 500, 0};
+	//mymeas.IntegralFilter(thresholds_int1, above, 20, 10, 90, 150, false, false);
+	vector<double> thresholds_int2 = {1500, 0, 1500, 0, 1500, 0, 1500, 0};
+	mymeas.IntegralFilter(thresholds_int2, above, 20, 10, 90, 150, false, false);
+*/
 	// cfd-stuff; here: get the cfd-times off all waveforms
 	float cfd_x = .3;
 	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, int smooth_method, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
@@ -138,7 +138,7 @@ void read_everyother_group_server(int which) // main
 	//from entering lab: upper right: 10, upper left: 11, lower right: 12, lower left: 13; channel 8 is upper orthogonal PMT, 9 is lower
 	// do_fit: 0 - no fit, 1 - gauss, 2 - gauss*exp decay; fitoptions: use "LRS" for log likelihood and "RS" for chi-squared
 	//mymeas.Print_GetTimingCFD_diff({12}, {13}, -15, 15, 2, 200, -8, 8, "RS", true);
-	//mymeas.Print_GetTimingCFD_diff({10}, {11}, -15, 15, 1, 200, -8, 8, "RS", true);
+	//mymeas.Print_GetTimingCFD_diff({10,11}, {12,13}, -7.5, 12.5, 1, 200, 0, 5.5, "RS", true);
 
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
 	float intwindowminus = 20.;	// lower integration window in ns rel. to max
@@ -159,18 +159,18 @@ void read_everyother_group_server(int which) // main
 	
 	// Plotting the phi_ew spectrum
 	// Syntax: ...(vector<int> phi_chx, vector<float> ly_C0, vector<int> SiPMchannels, float windowmin, float windowmax, float maxfrom, float maxto, int nbins, bool corr, bool triple_gauss)
-	vector<int> phi_chx = {225-4, 270-4, 315-4, 0-4, 45-4, 90-4, 135-4, 180-4}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's/Andrea's
+	//vector<int> phi_chx = {225-4, 270-4, 315-4, 0-4, 45-4, 90-4, 135-4, 180-4}; //ordered from channel 0 to channel 7; my channel alignment was a bit different from Alex's/Andrea's
 	//vector<int> phi_chx_andrea = {0, 315, 270, 225, 45, 90, 135, 180}; //ordered from channel 0 to channel 7
-	//vector<int> phi_chx_even = {225-4, 315-4, 45-4, 135-4}; vector<int> phi_chx_odd = {270-4, 0-4, 90-4, 180-4};
-	vector<float> ly_C0 = {1361.92, 768.23, 1354.06, 765.312, 1385.92, 873.016, 1433.86, 774.65}; //selection with small PS + larger int-window2 (larger_intw_catch_prim_gamma2.png); best for my data
+	vector<int> phi_chx_even = {225-4, 315-4, 45-4, 135-4}; vector<int> phi_chx_odd = {270-4, 0-4, 90-4, 180-4};
+	//vector<float> ly_C0 = {1361.92, 768.23, 1354.06, 765.312, 1385.92, 873.016, 1433.86, 774.65}; //selection with small PS + larger int-window2 (larger_intw_catch_prim_gamma2.png); best for my data
 	//vector<float> ly_C0 = {1558.22, 908.343, 1535.05, 909.704, 1578.06, 1045.79, 1656.23, 907.486}; //selection with small PS + larger int-window3 (larger_intw_catch_prim_gamma3.png)
 	//vector<float> ly_C0 = {1526.43, 893.474, 1505.19, 894.504, 1548.95, 1019.63, 1614.68, 891.464}; //selection with small PS + larger int-window4 (larger_intw_catch_prim_gamma4.png)
 	//vector<float> ly_C0_andrea = {1893.04, 1987.92, 1754.29, 1714.65, 1754.73, 1747.16, 1855.23, 1690.39}; //andrea_C0: selection with 1ns window (time_cut_andrea_C0_new.png) + larger intw (intw_andrea_big.png); best for andreas data
-	//vector<float> ly_C0_even = {1361.92, 1354.06, 1385.92, 1433.86}; vector<float> ly_C0_odd = {768.23, 765.312, 873.016, 774.65};
-	vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
-	//vector<int> SiPMchannels = {1, 3, 5, 7}; //for the odd/even analysis
-	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, false, false);
-	mymeas.Print_Phi_ew(phi_chx, ly_C0, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
+	vector<float> ly_C0_even = {1361.92, 1354.06, 1385.92, 1433.86}; vector<float> ly_C0_odd = {768.23, 765.312, 873.016, 774.65};
+	//vector<int> SiPMchannels = {0, 1, 2, 3, 4, 5, 6, 7};
+	vector<int> SiPMchannels = {1, 3, 5, 7}; //for the odd/even analysis
+	//mymeas.Print_Phi_ew(phi_chx_odd, ly_C0_odd, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, false, false);
+	//mymeas.Print_Phi_ew(phi_chx_odd, ly_C0_odd, SiPMchannels, intwindowminus, intwindowplus, findmaxfrom, findmaxto, 200, true, false);
 
 	// plot cfd-results (between t=110 ns and t=140 ns) for all channels and fit gauss (thats what the 1 is for)
 	//mymeas.Print_GetTimingCFD(110, 140, 1, 200);
@@ -178,8 +178,8 @@ void read_everyother_group_server(int which) // main
 	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
 	// for getting average lightyield, do which_fit=0 and look at the histogramms in the .root-file and manually extract the means
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
-	//mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, plotrangestart, plotrangeend, 200, fitstart, fitend, channels_to_fit, which_fit);
-	//for(int i = 0; i < mymeas.mean_integral.size(); i++) cout << mymeas.mean_integral[i] << endl;
+	mymeas.PrintChargeSpectrum(intwindowminus, intwindowplus, findmaxfrom, findmaxto, plotrangestart, plotrangeend, 200, fitstart, fitend, channels_to_fit, which_fit);
+	for(int i = 0; i < mymeas.mean_integral.size(); i++) cout << mymeas.mean_integral[i] << endl;
 
 	// suppress graphic output
 	gROOT->SetBatch(kTRUE); // TRUE enables batch-mode --> disables graphic output (all prints before this will still be shown)

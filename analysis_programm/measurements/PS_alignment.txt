@@ -1,0 +1,4 @@
+perspective from entering lab:
+
+upper right: ch10		upper left: ch11
+lower right: ch12		lower left: ch13

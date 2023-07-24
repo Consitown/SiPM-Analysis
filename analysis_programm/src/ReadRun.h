@@ -1,8 +1,8 @@
+/// Main class containing the file reader and most analysis functions
 #ifndef _ReadRun
 #define _ReadRun
 
-// contact: christian.scharf@cern.ch
-// some includes are probably not needed anymore
+// contact: christian.scharf@physik.hu-berlin.de
 
 #include <Math/Minimizer.h>
 #include <Math/Factory.h>
@@ -25,7 +25,6 @@
 #include <TMath.h>
 #include <TF1.h>
 #include <TStyle.h>
-#include <TTree.h>
 #include <TH1F.h>
 #include <TH2D.h>
 #include <TEfficiency.h>
@@ -37,8 +36,6 @@
 #include <TFitResult.h>
 #include <TSpline.h>
 #include <TPaveStats.h> 
-//#include <TSpectrum.h>   // peakfinder
-//#include <TPolyMarker.h> // peakfinder
 #include <TError.h>      // root verbosity level
 #include <TSystem.h>
 #include <TROOT.h>
@@ -57,7 +54,7 @@
 
 using namespace std;
 
-class ReadRun/* : public TObject*/ {
+class ReadRun {
 private:
 	/// @brief Collects sums of all waveforms for each channel
 	double** amplValuessum;
@@ -67,10 +64,6 @@ private:
 
 	/// @brief Index for multiple executions of the same plotting function
 	int PrintChargeSpectrum_cnt;
-	/// @brief Index for multiple executions of the same plotting function
-	int PrintChargeSpectrumPMT_cnt;
-	/// @brief Index for multiple executions of the same plotting function
-	int PrintChargeSpectrumPMTthreshold_cnt;
 	/// @brief Index for multiple executions of the same plotting function
 	int PlotChannelAverages_cnt;
 
@@ -128,7 +121,7 @@ public:
 
 	void PlotChannelAverages(bool = false);
 
-	// baseline correction (shifts all waveforms individually)
+	// baseline correction (shifts all waveforms individually in y)
 	void CorrectBaseline(float, float = -999);
 	void CorrectBaseline_function(TH1F*, float, float, int);
 
@@ -145,31 +138,24 @@ public:
 	// average all waveforms to simplify peak ID
 	void SmoothAll(double = 5, int = 2);
 	void FilterAll(double = .3, double = .9, double = .2);
-	void DerivativeAll();
 	void ShiftAllToAverageCF();
 
 	// functions for charge spectrum
 	int* GetIntWindow(TH1F*, float, float, float, float, int);
 	float GetPeakIntegral(TH1F*, float, float, float, float, int = 0);
-	void PrintChargeSpectrumWF(float, float, float = 0, float = 300, int = 1, float = 0., float = 0.);
+	void PrintChargeSpectrumWF(float, float, float = 0, float = 300, int = 1, float = 0., float = 0., float = 0., float = 0.);
 	TH1F* ChargeSpectrum(int, float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
 	void PrintChargeSpectrum(float, float, float = 0, float = 300, float = -50, float = 600, int = 750, float = 0., float = 0., int = 99, int = 0);
 	/// @brief Starting values of the fit parameters for PrintChargeSpectrum()
 	vector<float> PrintChargeSpectrum_pars;
-	void PrintChargeSpectrumPMT(float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
-	/// @brief Starting values of the fit parameters for PrintChargeSpectrumPMT()
-	vector<float> PrintChargeSpectrumPMT_pars;
-	void PrintChargeSpectrumPMTthreshold(float = 0, float = 0, float = 0, float = 300, int = 750, double = 4, bool = false);
+
 
 	float* ChargeList(int, float = 20, float = 80, float = 0, float = 300, bool = 1);
 	void SaveChargeLists(float = 20, float = 80, float = 0, float = 300, bool = 1);
 	void ChargeCorrelation(float, float, float, float, float, float, int, int, int, bool = false);
 
 	// SiPM specific
-	void PrintDCR(float = 15, float = 85, float = 0, float = 300, double = 3); // based on PrintChargeSpectrumPMTthreshold()
-
-	// Cosmics specific
-	void Print_Phi_ew(vector<int>, vector<float>, vector<int>, float = 1, float = 1, float = 100, float = 140, int = 400, bool = true, bool = false);
+	void PrintDCR(float = 15, float = 85, float = 0, float = 300, double = 3); // based on PMT::PrintChargeSpectrumPMTthreshold()
 
 	// functions for time distribution
 	TH1F* TimeDist(int, float = 0, float = 300, float = 0, float = 300, int = 100, int = 0, float = .3);
@@ -182,27 +168,30 @@ public:
 	TH1F* His_GetTimingCFD_diff(vector<int>, vector<int>, float, float, int = -999);
 	void Print_GetTimingCFD_diff(vector<int>, vector<int>, float = 100, float = 140, int = 0, int = -999, float = -999, float = -999, string = "RS", bool = true);
 
-	// print FFT
-	void PrintFFTWF(int = 1, float = 0., float = 0., int = 1);
-
-	// helper functions defined in helpers.cc
+	
+	// helper functions
 	string ListFiles(const char*, const char*);	// find data files
-	TH1F* Getwf(int, int, int = 1);					// channel, eventnr, color
-	double* getx(double = 0.);						// x values
+	TH1F* Getwf(int);							// waveform number
+	TH1F* Getwf(int, int, int = 1);				// channel, eventnr, color
+	double* getx(double = 0.);					// x values
 	double* gety(int);							// y values for waveform index
-	double* gety(int, int);							// y values for waveform(ch, event)
-	double* gety(TH1F*);							// y values for histogram
-	double* gety(TH1F*, int, int);					// y values for dedicated y range of a histogram 
-	static int rcolor(unsigned int);				// useful root colors
+	double* gety(int, int);						// y values for waveform(channel, event)
+	double* gety(TH1F*);						// y values for histogram
+	double* gety(TH1F*, int, int);				// y values for dedicated y range of a histogram 
+
+	static int rcolor(unsigned int);			// useful root colors
 	static float LinearInterpolation(float, float, float, float, float); // linear interpolation
+	
 	int GetEventIndex(int);			// get index of a triggered event (finds the correct event if files are not read sequentially)
 	int GetChannelIndex(int);		// get index of a certain channel
 	int GetCurrentChannel(int);		// get index of channel for a certain waveform
 	int GetCurrentEvent(int);		// get index of event for a certain waveform
+	
 	void SplitCanvas(TCanvas*&);	// split canvas into pads to display all active channels on one canvas
-	static void Convolute(double*&, double*, double*, int);	// convolution for filtering waveforms
-	static void SmoothArray(double*&, int, double = 1., int = 0, double = .3125);		// smoothing
-	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = .3125);	// filtering
+	static void SetRangeCanvas(TCanvas*&, double, double, double = -999, double = -999);			// set consistent ranges
+	static void Convolute(double*&, double*, double*, int);											// convolution for filtering waveforms
+	static void SmoothArray(double*&, int, double = 1., int = 0, double = .3125);					// smoothing
+	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = -1.);	// filtering
 
 	/// @brief Constructor of the class
 	/// @param no_of_bin_files_to_read Set to >1 in order to constrain the number of .bin files read from the target folder. 
@@ -227,6 +216,7 @@ public:
 	/// 
 	/// Set to true if you want to read several runs at once. The events will be numbered in the order they are read in. 
 	/// The original event numbers of the different runs will be lost.
+	/// CAUTION: All .bin files of the different runs need to contain the same number of channels.
 	bool discard_original_eventnr = false;
 
 	/// @brief Do analysis only for limited range of channels to reduce memory usage
@@ -245,10 +235,14 @@ public:
 	int nevents;
 	/// @brief Number of active channels in data
 	int nchannels;
-	/// @brief Total number of waveforms in data (nchannels*nacquisitions)
+	/// @brief Total number of waveforms read from data: number of active channels x number of events
 	int nwf;
+	/// @brief Maximum possible number of waveforms in data: number of active channels x number of events
+	///
+	/// Default is 10 million waveforms. Increase this number for very large runs.
+	int maxNWF = 1e7;
 
-	/// @brief ns per bin in data (sampling rate 3.2 GS/s -> 0.3125 ns)
+	/// @brief Sampling: ns per bin of data, sampling rate 3.2 GS/s -> 0.3125 ns
 	float SP = .3125;
 	/// @brief DAC conversion coefficient for wavecatcher
 	/// 
@@ -290,7 +284,17 @@ public:
 	/// @brief Stores baseline correction results for CorrectBaseline() and related functions
 	vector<vector<float>> baseline_correction_result;
 
-	/// @brief Store timing of peaks from GetTimingCFD()
+	/// @brief Matrix to store timing of peaks from GetTimingCFD()
+	/// 
+	/// First index is the index of the waveform. \n
+	/// Second index is:\n
+	/// 0: CFD bin number
+	/// 1: CFD time
+	/// 2: Y-value of the maximum
+	/// 3: Bin number of the maximum
+	/// 4: Constant fraction (maximum * cf_r)
+	/// 5: Start of search window
+	/// 6: End of search window
 	vector<vector<float>> timing_results;
 	/// @brief Stores the fit results of Print_GetTimingCFD() for all channels
 	vector<TFitResultPtr> timing_fit_results;
@@ -321,7 +325,5 @@ public:
 	int tWF_CF_lo = 320;
 	/// @brief End of range of bins where the signal is expected for ReadRun::Shift_WFs_in_file_loop
 	int tWF_CF_hi = 500;
-
-	ClassDef(ReadRun, 1)
 };
 #endif

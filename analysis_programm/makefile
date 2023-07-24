@@ -15,6 +15,8 @@ ifeq ($(shell expr $(word 1,$(subst ., ,$(CXXVER))) \< 7), 1)
 	else
 		CXXFLAGS += -std=c++14
 	endif
+else 
+	CXXFLAGS += -std=c++17
 endif
 
 
@@ -23,9 +25,9 @@ DICTH           =${DICTB}.h
 DICT            =${DICTB}.cc
 DICTO           =${DICTB}.o
 
-HDRS            =src/ReadRun.h src/LinkDef.h
+HDRS            =src/PMT.h src/CosmicsBox.h src/FFT_WF.h src/Experimental.h src/ReadRun.h 
 DICTHDRS        =$(HDRS) 
-OBJS            =src/ReadRun.o $(DICTO)
+OBJS            =src/PMT.o src/CosmicsBox.o src/FFT_WF.o src/Experimental.o src/ReadRun.o $(DICTO)
 
 LIBSLIN			=$(shell root-config --glibs)
 
@@ -38,7 +40,7 @@ all:		${OBJS} ${DICTO}
 		$(MAKE) clean-intermediate
 
 ${DICT}:        ${DICTHDRS}
-		rootcint -f ${DICT} -c ${DICTHDRS}
+		rootcint -rml=ReadRun -f ${DICT} -c ${DICTHDRS} -I. misc/LinkDef.h
 
 clean-intermediate:
 		@rm ${OBJS} ${DICTB}.cc

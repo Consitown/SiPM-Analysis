@@ -10,60 +10,20 @@
 
 using namespace std;
 
-void read_sipm_cal_pcb(int which) // main
+void read_sipm_cal_pcb_server(int which) // main
 {
 	string path;
 
 	// edit for your work-directory
-	path = "/mnt/d/Work_SHK_Bachelor/analysis_programm/measurements/";
+	path = "/users/eel/lab/SHiP/AnneWCData/";
 
 	switch (which) { //specify folders to run below, ALL bin files in this folder will be used.
 	case(0): {
-		path += "6sipm_cal_pcbj_vb43_tune8270_part/"; // vb = Voltage bias (applied voltage); note: the power supply actually outputs 891 mV less
+		path += "1_calibration_pcb-b_57V_83.2/"; // vb = Voltage bias (applied voltage); note: the power supply actually outputs 891 mV less
 		break;
 	}
 	case(1): {
-		path += "7sipm_cal_pcbj_vb43_tune8230_part/"; // tune = laser tune
-		break;
-	}
-	case(2): {
-		path += "8sipm_cal_pcbj_vb41_tune8200_part/"; // part stands for partial events option in WaveCatcher enabled
-		break;
-	}
-	case(3): {
-		path += "9sipm_cal_pcbb_vb55_tune8200_part/"; // placeholder
-		break;
-	}
-	case(4): {
-		path += "13sipm_cal_pcba_vb551_tune8200_part/"; // placeholder
-		break;
-	}
-	case(5): {
-		path += "15sipm_cal_pcbc_vb56_tune8120_part/"; // placeholder
-		break;
-	}
-	case(6): {
-		path += "16sipm_cal_pcbc_vb56_tune8080_part/"; // placeholder
-		break;
-	}
-	case(7): {
-		path += "17sipm_cal_pcbd_vb57_tune8060_part/"; // placeholder
-		break;
-	}
-	case(8): {
-		path += "18sipm_cal_pcbd_vb571_tune8020_part/"; // placeholder
-		break;
-	}
-	case(9): {
-		path += "20sipm_cal_pcbb_vb565_tune8380_part/"; // placeholder
-		break;
-	}
-	case(10): {
-		path += "21sipm_cal_pcbb_vb566_tune8360_part/"; // placeholder
-		break;
-	}
-	default: {
-		cout << "\nerror: path to data not specified" << endl; // default
+		path += "2_calibration_pcb-b_58.9_83.7/";
 		break;
 	}
 	}
@@ -79,10 +39,10 @@ void read_sipm_cal_pcb(int which) // main
 	mymeas.plot_active_channels={0,1,2,3,4,5,6,7};
 
 	//apply baseline correction to ALL waveforms <- NEEDED but slow when not compiled
-	//mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
+	mymeas.CorrectBaseline(0., 50.);	// use mean from 0 ns to 50 ns
 
 	//mymeas.CorrectBaselineMinSlopeRMS(int nIntegrationWindow, bool doaverage, double sigma, int max_bin_for_baseline, int start_at, bool search_min, bool convolution, int skip_channel)
-	mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
+	//mymeas.CorrectBaselineMinSlopeRMS(100, true, 10, 0, 0, false, false, 8);
 
 	// print events above a threshold to identify interesting events
 	// mymeas.FractionEventsAboveThreshold(4, true, true, 100, 150);
@@ -98,19 +58,20 @@ void read_sipm_cal_pcb(int which) // main
 	// investigate charge spectrum. For the integration values, look at the plots from PlotChannelSums. --> you can determine findmaxfrom and findmaxto
 	float intwindowminus = 1.;	// lower integration window in ns rel. to max
 	float intwindowplus = 1.;	// upper integration window in ns rel. to max
-	float findmaxfrom = 100.;	// assume pulse after trigger arrives between here ...
-	float findmaxto = 130.;		// ... and here (depends on trigger delay setting etc., for dark counts the signal is random so we look at the whole recorded time range)
+	float findmaxfrom = 90.;	// assume pulse after trigger arrives between here ...
+	float findmaxto = 140.;		// ... and here (depends on trigger delay setting etc., for dark counts the signal is random so we look at the whole recorded time range)
 	float plotrangestart = 0; // decide on the
-	float plotrangeend = 35;	// plotrange of x-axis
-	float fitstart = 0;			// start of the fit (x-axis)
-	float fitend = 35;			// end of the fit
-	int channels_to_fit = 1; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
+	float plotrangeend = 60;	// plotrange of x-axis
+	float fitstart = 10;			// start of the fit (x-axis)
+	float fitend = 120;			// end of the fit
+	int channels_to_fit = 8; 	// numbers of channels to apply the fit to (counts like this: i=0;i<channels_to_fit;i++); thats why one should use the first channels for data and the later channels for triggering
 	int which_fit = 3;			// decide on which fit-function you want; options: default (no value besides 1-6) - default SiPM fit function
 								// 1 - landau gauss convolution for large number of photons
 								// 2 - biased: if pedestal is biased because of peak finder algorithm
 								// 3 - SiPM fit function with exponential delayed afterpulsing
 								// 4 - ideal PMT fit function (5 is similar)
 								// 6 - PMT fit function with biased pedestal
+								// 0 - no fit
 
 	// plot all pseudo charge spectrum of channels (real charge spectrum would be gained by multiplying every integrated value [x-axis] with 1/resistance_of_sipms)
 	// Syntax: ...(float windowlow, float windowhi, float start, float end, float rangestart, float rangeend, int nbins, float fitrangestart, float fitrangeend, int max_channel_nr_to_fit, int which_fitf)
