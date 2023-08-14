@@ -19,12 +19,11 @@ void Experimental::RebinAll(int ngroup, float noise_level, unsigned long seed) {
 	binNumber /= ngroup;
 	float norm = 1. / static_cast<float>(ngroup);
 	cout	<< "\nRebinning the data to a new sampling rate of " << 1. / SP 
-			<< " GS/s which corresponds to a bin size of " << SP << " ns and the data now has " << binNumber << " bins\n";
+		<< " GS/s which corresponds to a bin size of " << SP << " ns and the data now has " << binNumber << " bins" << endl;
 
 	for (int j = 0; j < nwf; j++) {
 		TH1F* his = Getwf(j);
 		his->Rebin(ngroup);
-		
 		his->Scale(norm);
 
 		if (noise_level != 0.) {
@@ -32,21 +31,21 @@ void Experimental::RebinAll(int ngroup, float noise_level, unsigned long seed) {
 			noise->SetSeed(seed);
 			for (int i = 1; i <= his->GetNbinsX(); i++) his->SetBinContent(i, his->GetBinContent(i) + noise->Gaus(0, noise_level));
 		}
+		PrintProgressBar(j, nwf);
 	}
 }
 /// @example timing_example_rebin.cc
 
-/// @brief derivative of all waveforms (for measurements w/o pole-zero cancellation)
-///
-/// Experimental!
+/// @brief Derivative of all waveforms
+///	
+/// Calculates the forward differences. For testing purposes.
 void Experimental::DerivativeAll() {
-	// just for testing
-	cout << "\nderivative of wfs";
+	cout << "\nForward derivative of all waveforms:" << endl;
 	for (int j = 0; j < nwf; j++) {
 		TH1F* his = Getwf(j);
 		double* yvals = gety(his);
 		for (int i = 1; i <= his->GetNbinsX() - 1; i++) his->SetBinContent(i, yvals[i + 1] - yvals[i]);
 		delete[] yvals;
-		if ((j + 1) % (nwf / 10) == 0) cout << " " << 100. * static_cast<float>(j + 1) / static_cast<float>(nwf) << "% -" << flush;
+		PrintProgressBar(j, nwf);
 	}
 }

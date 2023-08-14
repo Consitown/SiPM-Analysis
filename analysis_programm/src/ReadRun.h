@@ -125,9 +125,9 @@ public:
 	void CorrectBaseline(float, float = -999);
 	void CorrectBaseline_function(TH1F*, float, float, int);
 
-	void CorrectBaselineMinSlopeRMS(int = 100, bool = false, double = 0.5, int = 0, int = 0, bool = false, int = 2, int = 8);
+	void CorrectBaselineMinSlopeRMS(int = 100, bool = false, double = 0.5, int = 0, int = 0, int = 2);
 
-	void CorrectBaselineMin(int = 100, double = 0.5, int = 0, int = 0, int = 2, int = 8);
+	void CorrectBaselineMin(int = 100, double = 0.5, int = 0, int = 0, int = 2);
 
 	// get timing of peaks
 	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0., bool = true, int = 2, bool = false);
@@ -136,12 +136,12 @@ public:
 	void FractionEventsAboveThreshold(float = 4, bool = true, bool = true, double = 0., double = 0., bool = false);
 
 	// average all waveforms to simplify peak ID
-	void SmoothAll(double = 5, int = 2);
+	void SmoothAll(double = 1., int = 2);
 	void FilterAll(double = .3, double = .9, double = .2);
 	void ShiftAllToAverageCF();
 
 	// functions for charge spectrum
-	int* GetIntWindow(TH1F*, float, float, float, float, int);
+	int* GetIntWindow(TH1F*, float, float, float, float, int = 0);
 	float GetPeakIntegral(TH1F*, float, float, float, float, int = 0);
 	void PrintChargeSpectrumWF(float, float, float = 0, float = 300, int = 1, float = 0., float = 0., float = 0., float = 0.);
 	TH1F* ChargeSpectrum(int, float, float, float = 0, float = 300, float = -50, float = 600, int = 750);
@@ -179,7 +179,8 @@ public:
 	double* gety(TH1F*);						// y values for histogram
 	double* gety(TH1F*, int, int);				// y values for dedicated y range of a histogram 
 
-	static int rcolor(unsigned int);			// useful root colors
+	static void PrintProgressBar(int, int);			// progress bar
+	static int rcolor(unsigned int);			// use in loop, skips some poorly visible root colors (like white on white)
 	static float LinearInterpolation(float, float, float, float, float); // linear interpolation
 	
 	int GetEventIndex(int);			// get index of a triggered event (finds the correct event if files are not read sequentially)
@@ -190,8 +191,8 @@ public:
 	void SplitCanvas(TCanvas*&);	// split canvas into pads to display all active channels on one canvas
 	static void SetRangeCanvas(TCanvas*&, double, double, double = -999, double = -999);			// set consistent ranges
 	static void Convolute(double*&, double*, double*, int);											// convolution for filtering waveforms
-	static void SmoothArray(double*&, int, double = 1., int = 0, double = .3125);					// smoothing
-	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = -1.);	// filtering
+	static void SmoothArray(double*&, int, double = .625, int = 2, double = .3125);					// smoothing
+	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = .3125);	// filtering
 
 	/// @brief Constructor of the class
 	/// @param no_of_bin_files_to_read Set to >1 in order to constrain the number of .bin files read from the target folder. 

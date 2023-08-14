@@ -42,6 +42,14 @@ all:		${OBJS} ${DICTO}
 ${DICT}:        ${DICTHDRS}
 		rootcint -rml=ReadRun -f ${DICT} -c ${DICTHDRS} -I. misc/LinkDef.h
 
+test_rr:
+		root examples/read_exampledata.cc -b -q > tst_read_exampledata.txt 
+		root examples/use_functions_wo_measurement.cc -b -q > tst_use_functions_wo_measurement.txt
+		root examples/timing_example.cc -b -q > tst_timing_example.txt
+		root examples/timing_example_rebin.cc -b -q > tst_timing_example_rebin.txt
+		python examples/read_exampledata.py 0 1 > tst_read_exampledata.py.txt 
+		
+
 clean-intermediate:
 		@rm ${OBJS} ${DICTB}.cc
 

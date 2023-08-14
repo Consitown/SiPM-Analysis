@@ -50,7 +50,7 @@ void CosmicsBox::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<i
 	for (int i = 0; i < sipmnum; i++) cout << "Correction factor for channel " << SiPMchannels[i] << ":" << ly_corr[i] << endl;
 
 	// initialize canvas + histograms
-	gStyle->SetOptStat("nemr"); gStyle->SetOptFit(1111); //draws a box with some histogram parameters
+	gStyle->SetOptStat("emr"); gStyle->SetOptFit(1111); //draws a box with some histogram parameters
 	TString his_name(Form("#phi_ew-spectrum_from_ch%d_to_ch%d", SiPMchannels.front(), SiPMchannels.back()));
 	TCanvas* hisc = new TCanvas(his_name, his_name, 600, 400);
 
@@ -80,7 +80,7 @@ void CosmicsBox::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<i
 	}
 
 	//make histogram fancy + printing
-	his->GetXaxis()->SetTitle("#phi_ew (deg.)"); his->GetYaxis()->SetTitle("#Entries"); //titling of axes
+	his->GetXaxis()->SetTitle("#phi_{ew} (°)"); his->GetYaxis()->SetTitle("#Entries"); //titling of axes
 	his->Draw();
 
 	if (periodic) {
