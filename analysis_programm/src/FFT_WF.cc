@@ -12,11 +12,11 @@ void FFT_WF::PrintFFTWF(int eventnr, float xmin, float xmax, int multiplier) {
 	// plot waveforms of all channels for a given event number eventnr and add the determined integration windows to the plot
 	TString name(Form("fft_waveforms_event__%04d", eventnr));
 	TCanvas* fftc = new TCanvas(name.Data(), name.Data(), 600, 400);
-	SplitCanvas(fftc);
+	Helpers::SplitCanvas(fftc, active_channels, plot_active_channels);
 
 	TString imname(Form("fft_im_waveforms_event__%04d", eventnr));
 	TCanvas* imfftc = new TCanvas(imname.Data(), imname.Data(), 600, 400);
-	SplitCanvas(imfftc);
+	Helpers::SplitCanvas(imfftc, active_channels, plot_active_channels);
 
 	int size = binNumber * multiplier;
 	double* xvals = new double[size];

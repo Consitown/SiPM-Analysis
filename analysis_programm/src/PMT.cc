@@ -12,12 +12,12 @@ void PMT::PrintChargeSpectrumPMT(float windowlow, float windowhi, float start, f
 
 	string ctitle("charge spectra PMT" + to_string(PrintChargeSpectrumPMT_cnt));
 	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 600, 400);
-	SplitCanvas(chargec);
+	Helpers::SplitCanvas(chargec, active_channels, plot_active_channels);
 
 	int current_canvas = 0;
 
 	for (int i = 0; i < nchannels; i++) {
-		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
+		if (PlotChannel(i)) {
 			current_canvas++;
 
 			TH1F* his;
@@ -107,13 +107,13 @@ void PMT::PrintChargeSpectrumPMTthreshold(float windowlow, float windowhi, float
 	}
 	string ctitle("charge spectra PMT threshold" + to_string(PrintChargeSpectrumPMTthreshold_cnt));
 	TCanvas* chargec = new TCanvas(ctitle.c_str(), ctitle.c_str(), 600, 400);
-	SplitCanvas(chargec);
+	Helpers::SplitCanvas(chargec, active_channels, plot_active_channels);
 
 	int current_canvas = 0;
 	double threshold_bin_center = 0;
 
 	for (int i = 0; i < nchannels; i++) {
-		if (plot_active_channels.empty() || find(plot_active_channels.begin(), plot_active_channels.end(), active_channels[i]) != plot_active_channels.end()) {
+		if (PlotChannel(i)) {
 
 			if (use_fit_result_for_threshold) threshold = fit_results[current_canvas]->Parameter(6) + fit_results[current_canvas]->Parameter(5) / 2.;
 

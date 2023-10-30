@@ -31,7 +31,7 @@ void Experimental::RebinAll(int ngroup, float noise_level, unsigned long seed) {
 			noise->SetSeed(seed);
 			for (int i = 1; i <= his->GetNbinsX(); i++) his->SetBinContent(i, his->GetBinContent(i) + noise->Gaus(0, noise_level));
 		}
-		PrintProgressBar(j, nwf);
+		Helpers::PrintProgressBar(j, nwf);
 	}
 }
 /// @example timing_example_rebin.cc
@@ -43,9 +43,9 @@ void Experimental::DerivativeAll() {
 	cout << "\nForward derivative of all waveforms:" << endl;
 	for (int j = 0; j < nwf; j++) {
 		TH1F* his = Getwf(j);
-		double* yvals = gety(his);
+		double* yvals = Helpers::gety(his);
 		for (int i = 1; i <= his->GetNbinsX() - 1; i++) his->SetBinContent(i, yvals[i + 1] - yvals[i]);
 		delete[] yvals;
-		PrintProgressBar(j, nwf);
+		Helpers::PrintProgressBar(j, nwf);
 	}
 }

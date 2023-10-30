@@ -80,7 +80,7 @@ void CosmicsBox::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<i
 	}
 
 	//make histogram fancy + printing
-	his->GetXaxis()->SetTitle("#phi_{ew} (°)"); his->GetYaxis()->SetTitle("#Entries"); //titling of axes
+	his->GetXaxis()->SetTitle("#phi_{ew} [#circ]"); his->GetYaxis()->SetTitle("#Entries"); //titling of axes
 	his->Draw();
 
 	if (periodic) {
@@ -95,7 +95,7 @@ void CosmicsBox::Print_Phi_ew(vector<int> phi_chx, vector<float> ly_C0, vector<i
 		his->GetXaxis()->SetRangeUser(0, 0); //reset scale
 
 		f->SetParName(0, "A");				f->SetParameter(0, max - min);		f->SetParLimits(0, 1, 1e9);
-		f->SetParName(1, "#Phi_{ew}");		f->SetParameter(1, phi_est);		f->SetParLimits(1, -180, 180);
+		f->SetParName(1, "#bar{#phi_{ew}}");		f->SetParameter(1, phi_est);		f->SetParLimits(1, -180, 180);
 		f->SetParName(2, "#sigma");			f->SetParameter(2, 40);				f->SetParLimits(2, 5, 360);
 		f->SetParName(3, "offset");			f->SetParameter(3, min);			f->SetParLimits(3, TMath::Min(min - 1, 0.1), 1e9);
 

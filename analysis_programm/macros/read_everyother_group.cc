@@ -119,7 +119,7 @@ void read_everyother_group(int which) // main
 	float cfd_x = .3;
 	// Syntax: ...(float cf_r, float start_at_t, float end_at_t, double sigma, bool find_CF_from_start, int smooth_method, bool use_spline) --> fifth argument is selecting inverse/normal cfd: true results in normal cfd
 	// for high slope of the flank of the waveforms peak, suggested settings: smooth_method = 2, sigma = 0.3 (this is the sigma of the gauss, that will be used for smoothing --> small number)
-	mymeas.GetTimingCFD(cfd_x, 110, 150, 3, true, 0, false); // this creates the timing_results matrix
+	mymeas.GetTimingCFD(cfd_x, 110, 150, 1500, 0, true, 0, false); // this creates the timing_results matrix
 
 	// apply cut for time difference between two channels
 	mymeas.SkipEventsTimeDiffCut(10, 11, -1, 1, false); //skip all events which time diff is not of interest to us

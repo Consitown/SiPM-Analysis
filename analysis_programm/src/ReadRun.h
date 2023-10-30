@@ -8,11 +8,7 @@
 #include <Math/Factory.h>
 #include <Math/Functor.h>
 #include <TClonesArray.h>
-#include <TSystemDirectory.h>
-#include <TSystemFile.h>
-#include <TComplex.h>
 #include <TObjString.h>
-#include <TVirtualFFT.h>
 #include <TLine.h>
 #include <TGraph.h>
 #include <TGraph2D.h>
@@ -45,12 +41,15 @@
 #include <stdio.h>
 #include <assert.h>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
 #include <sstream>
 
-#include "../misc/FitFunctions.h"
+#include "utils/FitFunctions.h"
+#include "utils/Helpers.h"
+#include "utils/Filters.h"
 
 using namespace std;
 
@@ -66,14 +65,14 @@ private:
 	int PrintChargeSpectrum_cnt;
 	/// @brief Index for multiple executions of the same plotting function
 	int PlotChannelAverages_cnt;
+	/// @brief Index for multiple executions of the same plotting function
+	int PrintWFProjection_cnt;
 
 
-#pragma pack(1) // padding suppression
-	// struct copied from
+#pragma pack(1) // byte padding suppression for WaveCatcher data format
+	// structs copied from
 	// WaveCatcher binary -> root converter
 	// by manu chauveau@cenbg.in2p3.fr
-	// see https://owncloud.lal.in2p3.fr/public.php?service=files&t=56e4a2c53a991cb08f73d03f1ce58ba2
-
 	struct event_data
 	{
 		int EventNumber;
@@ -110,7 +109,7 @@ private:
 		float	RawTriggerRate;
 		short waveform[1024];
 	};
-#pragma pack() // padding suppression
+#pragma pack() // byte padding suppression for WaveCatcher data format
 
 public:
 	/// @brief Stores data
@@ -125,18 +124,28 @@ public:
 	void CorrectBaseline(float, float = -999);
 	void CorrectBaseline_function(TH1F*, float, float, int);
 
+	void CorrectBaselineMinSlopeRMS(vector<float>, double = 0, int = 2, int = 3);
 	void CorrectBaselineMinSlopeRMS(int = 100, bool = false, double = 0.5, int = 0, int = 0, int = 2);
 
+	void CorrectBaselineMin(vector<float>, double = 0, int = 2, int = 2);
 	void CorrectBaselineMin(int = 100, double = 0.5, int = 0, int = 0, int = 2);
 
+	// functions to check baseline correction results
+	TH1F* WFProjectionChannel(int, int = 0, int = 1024, float = -50, float = 50, int = 200);
+	void PrintWFProjection(float = 0, float = 320, float = -50, float = 50, int = 200);
+
+	TH1F* BaselineCorrectionResults(int, int, float = -5, float = 5, int = 200);
+	void PrintBaselineCorrectionResults(float = -5, float = 5, int = 200);
+
 	// get timing of peaks
-	void GetTimingCFD(float = .3, float = 100, float = 140, double = 0., bool = true, int = 2, bool = false);
+	void GetTimingCFD(float = .3, float = 100, float = 140, float = 1500, double = 0., bool = true, int = 2, bool = false);
 	void SkipEventsTimeDiffCut(int, int, double, double, bool = false);
 
 	void FractionEventsAboveThreshold(float = 4, bool = true, bool = true, double = 0., double = 0., bool = false);
 
 	// average all waveforms to simplify peak ID
-	void SmoothAll(double = 1., int = 2);
+	void SmoothAll(double, int);
+	void SmoothAll(double, string = "Gaus");
 	void FilterAll(double = .3, double = .9, double = .2);
 	void ShiftAllToAverageCF();
 
@@ -170,17 +179,12 @@ public:
 
 	
 	// helper functions
-	string ListFiles(const char*, const char*);	// find data files
 	TH1F* Getwf(int);							// waveform number
 	TH1F* Getwf(int, int, int = 1);				// channel, eventnr, color
 	double* getx(double = 0.);					// x values
 	double* gety(int);							// y values for waveform index
 	double* gety(int, int);						// y values for waveform(channel, event)
-	double* gety(TH1F*);						// y values for histogram
-	double* gety(TH1F*, int, int);				// y values for dedicated y range of a histogram 
 
-	static void PrintProgressBar(int, int);			// progress bar
-	static int rcolor(unsigned int);			// use in loop, skips some poorly visible root colors (like white on white)
 	static float LinearInterpolation(float, float, float, float, float); // linear interpolation
 	
 	int GetEventIndex(int);			// get index of a triggered event (finds the correct event if files are not read sequentially)
@@ -188,11 +192,8 @@ public:
 	int GetCurrentChannel(int);		// get index of channel for a certain waveform
 	int GetCurrentEvent(int);		// get index of event for a certain waveform
 	
-	void SplitCanvas(TCanvas*&);	// split canvas into pads to display all active channels on one canvas
-	static void SetRangeCanvas(TCanvas*&, double, double, double = -999, double = -999);			// set consistent ranges
-	static void Convolute(double*&, double*, double*, int);											// convolution for filtering waveforms
-	static void SmoothArray(double*&, int, double = .625, int = 2, double = .3125);					// smoothing
-	static void FilterArray(double*&, int, double = .4, double = 1.2, double = .25, double = .3125);	// filtering
+	bool PlotChannel(int);			// check if channel should be plotted
+	
 
 	/// @brief Constructor of the class
 	/// @param no_of_bin_files_to_read Set to >1 in order to constrain the number of .bin files read from the target folder. 
@@ -224,7 +225,8 @@ public:
 	/// 
 	/// For large datasets with many channels and many events \n
 	/// Only read and analyze channels from ReadRun::start_read_at_channel to ReadRun::end_read_at_channel. \n
-	/// The recorded channel with the lowest wavecatcher channel number is 0 (e.g. recorded channels 3 and 4, so start would be 0 and end 1). \n 
+	/// The recorded channel with the lowest wavecatcher channel number is 0 (e.g. recorded channels 3 and 4,
+	///  so start would be 0 and end 1). \n 
 	/// If set to -1 (default) all channels will be read in one go. \n
 	/// Else channels from "start_read_at_channel" to "end_read_at_channel" will be read. \n 
 	/// If "end_read_at_channel" is not defined will only read channel specified in "start_read_at_channel".
@@ -277,8 +279,8 @@ public:
 	vector<bool> skip_event;
 	int Nevents_good();
 
-	void SkipEventsPerChannel(vector<double>, double = 0, double = 0, bool = false);  // in case you want to have indiviual thresholds in individual channels
-	void IntegralFilter(vector<double>, vector<bool>, float, float, float = 50, float = 250, bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
+	void SkipEventsPerChannel(vector<float>, float = 0, float = 0, bool = false);  // in case you want to have indiviual thresholds in individual channels
+	void IntegralFilter(vector<float>, vector<bool>, float, float, float = 50, float = 250, bool = false, bool = false); // Same as SkipEventsPerChannel() but filtering all events with integrals <(>) threshold
 	void PrintSkippedEvents();
 	void UnskipAll();
 
